@@ -22,6 +22,4 @@
 bin/
 obj/
 build/
-
-..svnbridge/
-Thumbs.db
+/SRC
