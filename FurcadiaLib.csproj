@@ -127,7 +127,10 @@
     <Compile Include="FurcMap\Map.cs" />
     <Compile Include="FurcMap\MapPosition.cs" />
     <Compile Include="FurcMap\MapTile.cs" />
+    <Compile Include="IO\FurcadiaIOException.cs" />
+    <Compile Include="IO\FurcadiaNotFoundException.cs" />
     <Compile Include="Net\NetConnection.cs" />
+    <Compile Include="Net\NetProxyException.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

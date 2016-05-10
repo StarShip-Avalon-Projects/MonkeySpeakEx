@@ -52,7 +52,7 @@ namespace Furcadia.IO
         /// <returns>true on success.</returns>
         public static void SetUserSetting(string WhichSetting, string WhichValue, string[] SettingFile)
         {
-            Regex regexkey = new Regex("^\\s*([^=\\s]*)[^=]*=(.*)", (RegexOptions.Singleline | RegexOptions.IgnoreCase));
+            Regex regexkey = new Regex("^\\s*([^=\\s]*)[^=]*=(.*)", (RegexOptions.Singleline | RegexOptions.IgnoreCase| RegexOptions.CultureInvariant));
                    
             for (int WiDx = 1; WiDx < SettingFile.Length; WiDx++)
             {
@@ -73,7 +73,7 @@ namespace Furcadia.IO
         /// <returns>Value</returns>
         public static string GetUserSetting(string WhichSetting, string[] SettingFile)
         {
-            Regex regexkey = new Regex("^\\s*([^=\\s]*)[^=]*=(.*)", (RegexOptions.Singleline | RegexOptions.IgnoreCase));
+            Regex regexkey = new Regex("^\\s*([^=\\s]*)[^=]*=(.*)", (RegexOptions.Singleline | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant));
         
             for (long WiDx = 0; WiDx < SettingFile.Length; WiDx++)
             {

@@ -21,14 +21,25 @@ namespace Furcadia.IO
 	/// </summary>
 	public class Paths
 	{
+		
+		
+#region Constructors
+/// <summary>
+/// Calls FurPaths With Default Path determined by the System
+/// </summary>
         public Paths()
         {
             _installpath = null;
         }
+        /// <summary>
+        /// Defines the base path for the Furcadia Directory
+        /// </summary>
+        /// <param name="path"></param>
         public Paths(string path)
         {
             _installpath = path;
         }
+#endregion
 
         private string _FurcadiaCharactersPath = null;
 
@@ -50,7 +61,7 @@ namespace Furcadia.IO
                 _FurcadiaCharactersPath = path;
                 return _FurcadiaCharactersPath;
             }
-            throw new DirectoryNotFoundException("Furcadia Characters path not found.\n" + path);
+            throw new FurcadiaNotFoundException("Furcadia Characters path not found.\n" + path);
         }
 
 
@@ -74,7 +85,7 @@ namespace Furcadia.IO
 				_FurcadiaDocpath = path;
 				return _FurcadiaDocpath;
 			}
-			throw new DirectoryNotFoundException("Furcadia documents path not found.\n" + path);
+			throw new FurcadiaNotFoundException("Furcadia documents path not found.\n" + path);
 		}
 
 		/// <summary>
@@ -96,6 +107,10 @@ namespace Furcadia.IO
 			}
 		}
 
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <returns></returns>
 		public string ProgramFilesx86()
 		{
             if (OSBitness.Is64BitOperatingSystem())
@@ -161,7 +176,7 @@ namespace Furcadia.IO
 				return _installpath; // Path found
 			}
 			// All options were exhausted - assume Furcadia not installed.
-			throw new DirectoryNotFoundException("Furcadia Install path not found." + "\n" + path);
+			throw new FurcadiaNotFoundException("Furcadia Install path not found." + "\n" + path);
 		}
 
 		private  string _defaultpatchpath;

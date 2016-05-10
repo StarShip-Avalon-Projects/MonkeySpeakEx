@@ -29,10 +29,21 @@ namespace Furcadia.Net
 	{
 
 		#region Event Handling
+		/// <summary>
+		/// 
+		/// </summary>
 		public delegate void ActionDelegate();
+		/// <summary>
+		/// 
+		/// </summary>
 		public delegate string DataEventHandler(string data);
+		/// <summary>
+		/// 
+		/// </summary>
 		public delegate void DataEventHandler2(string data);
-
+/// <summary>
+/// 
+/// </summary>
         public delegate void ErrorEventHandler(Exception e, Object o, String n);
         //public delegate void ErrorEventHandler(Exception e);
 		/// <summary>
@@ -101,6 +112,9 @@ namespace Furcadia.Net
 		private byte[] clientBuffer = new byte[BUFFER_CAP], serverBuffer = new byte[BUFFER_CAP];
 		private string _ServerLeftOvers;
 		private string clientBuild, serverBuild;
+		/// <summary>
+		/// 
+		/// </summary>
 		public static int _lport = 6700;
 		private int _procID;
 		private static System.Timers.Timer NewsTimer;
@@ -352,7 +366,7 @@ namespace Furcadia.Net
                             listen.BeginAcceptTcpClient(new AsyncCallback(AsyncListener), listen);
                             }
 					}
-					else throw new Exception("Port " + _lport.ToString() + " is being used.");
+					else throw new NetProxyException("Port " + _lport.ToString() + " is being used.");
 
 				}
 								string proxyIni = "localhost " + _lport.ToString();
@@ -367,17 +381,17 @@ namespace Furcadia.Net
 				if (File.Exists(proxyIni))
 					File.Delete(proxyIni);
 				UseProxyIni = false;
-				BackupSettings = Settings.InitializeFurcadiaSettings(_procpath);
+				BackupSettings = Settings.InitializeFurcadiaSettings(FurcPath.GetLocalSettingsPath());
 				//Run         
 				if (string.IsNullOrEmpty(ProcessPath)) ProcessPath = FurcPath.GetInstallPath();
 				//check ProcessPath is not a directory
-				if (!Directory.Exists(ProcessPath)) throw new DirectoryNotFoundException("Process path not found.");
-				if (!File.Exists(Path.Combine(ProcessPath,Process))) throw new Exception("Client executable '"+Process+"' not found.");
+				if (!Directory.Exists(_procpath)) throw new NetProxyException("Process path not found.");
+				if (!File.Exists(Path.Combine(_procpath,Process))) throw new NetProxyException("Client executable '"+Process+"' not found.");
                 System.Diagnostics.Process proc = new System.Diagnostics.Process(); //= System.Diagnostics.Process.Start(Process,ProcessCMD );
 				proc.EnableRaisingEvents = true;
                 proc.StartInfo.FileName = Process;
                 proc.StartInfo.Arguments = ProcessCMD;
-                proc.StartInfo.WorkingDirectory = ProcessPath;
+                proc.StartInfo.WorkingDirectory = _procpath;
                 proc.Start();
 				proc.Exited += delegate
 				{
@@ -390,7 +404,12 @@ namespace Furcadia.Net
 				ProcID = proc.Id;
 				CConnected = true;
 			}
-			catch (Exception e) { if (Error != null) Error(e, this, "Connect()"); } //else throw e;
+			catch (NetProxyException e)
+			{
+				throw e;
+
+			}
+			catch (Exception e) { if (Error != null) Error(e, this, "Connect()"); else throw e; } 
 		}
 
 
