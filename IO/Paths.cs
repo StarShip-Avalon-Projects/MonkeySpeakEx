@@ -22,8 +22,10 @@ namespace Furcadia.IO
 	public class Paths
 	{
 		
-		
-#region Constructors
+		private const string RegPathx64 = @"SOFTWARE\Wow6432Node\Dragon's Eye Productions\Furcadia\";
+		private const string RegPathx32 = @"SOFTWARE\Dragon's Eye Productions\Furcadia\";
+			
+			#region Constructors
 /// <summary>
 /// Calls FurPaths With Default Path determined by the System
 /// </summary>
@@ -95,38 +97,29 @@ namespace Furcadia.IO
 		/// <returns>
 		/// A path to the Furcadia registry folder or NullReferenceException.
 		/// </returns>
+		public  string ProgramFilesX86()
+		{
+			if (Environment.Is64BitOperatingSystem){
+				return Environment.GetEnvironmentVariable("ProgramFiles(x86)");
+			}
+			return Environment.GetEnvironmentVariable("ProgramFiles");
+		}
+		
+				/// <summary>
+		/// Determines the registry path by platform. (x32/x64)
+		/// Thanks to Ioka for this one.
+		/// </summary>
+		/// <returns>
+		/// A path to the Furcadia registry folder or NullReferenceException.
+		/// </returns>
 		public  string GetRegistryPath()
 		{
-			if (Environment.Is64BitOperatingSystem)
+			if(Environment.Is64BitOperatingSystem)
 			{
 				return @"SOFTWARE\Wow6432Node\Dragon's Eye Productions\Furcadia\";
 			}
-			else
-			{
-				return @"SOFTWARE\Dragon's Eye Productions\Furcadia\";
-			}
+			return @"SOFTWARE\Dragon's Eye Productions\Furcadia\";
 		}
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <returns></returns>
-		public string ProgramFilesx86()
-		{
-            if (Environment.Is64BitOperatingSystem)
-			{
-				return Environment.GetEnvironmentVariable("ProgramFiles(x86)");
-			}
-
-			return Environment.GetEnvironmentVariable("ProgramFiles");
-		}
-
-        //public  string InstallPath
-        //{
-        //    set { _installpath = value; }
-        //}
-
-
 
 		private  string _installpath;
 		/// <summary>
@@ -144,7 +137,7 @@ namespace Furcadia.IO
 			if (Environment.OSVersion.Platform == PlatformID.Win32Windows ||
 				Environment.OSVersion.Platform == PlatformID.Win32NT)
 			{
-				RegistryKey regkey = Registry.LocalMachine;
+				RegistryKey regkey = Registry.CurrentUser;
 				try
 				{
 					regkey = regkey.OpenSubKey(GetRegistryPath() + "Programs", false);
@@ -158,12 +151,27 @@ namespace Furcadia.IO
 				}
 				catch
 				{
+					regkey = Registry.LocalMachine;
+					try
+					{
+						regkey = regkey.OpenSubKey(GetRegistryPath() + "Programs", false);
+						path = regkey.GetValue("path").ToString();
+						regkey.Close();
+						if (System.IO.Directory.Exists(path))
+						{
+							_installpath = path;
+							return _installpath; // Path found
+						}
+					}
+					catch
+					{
+						
+					}
 				}
 
 				// Making a guess from the FurcadiaDefaultPath property.
-				path = Path.Combine(ProgramFilesx86(), "Furcadia");
+				path = Path.Combine(ProgramFilesX86(), "Furcadia");
 			}
-
 			// Scanning registry for a path (NON-WINDOWS ONLY)
 			else
 			{
@@ -181,7 +189,7 @@ namespace Furcadia.IO
 		}
 
 		private  string _defaultpatchpath;
-		/// <summary>
+			/// <summary>
 		/// Find the path to the default patch folder on the current machine.
 		/// </summary>
 		/// <returns>Path to the default patch folder or null if not found.</returns>
@@ -195,7 +203,7 @@ namespace Furcadia.IO
 			if (Environment.OSVersion.Platform == PlatformID.Win32Windows ||
 				Environment.OSVersion.Platform == PlatformID.Win32NT)
 			{
-				RegistryKey regkey = Registry.LocalMachine;
+				RegistryKey regkey = Registry.CurrentUser;
 				try
 				{
 					regkey = regkey.OpenSubKey(GetRegistryPath() + "Patches", false);
@@ -209,12 +217,28 @@ namespace Furcadia.IO
 				}
 				catch
 				{ //NullReference Exception = regkey not found.
+					regkey = Registry.LocalMachine;
+					try
+					{
+						regkey = regkey.OpenSubKey(GetRegistryPath() + "Patches", false);
+						path = regkey.GetValue("default").ToString();
+						regkey.Close();
+						if (System.IO.Directory.Exists(path))
+						{
+							_defaultpatchpath = path;
+							return _defaultpatchpath; // Path found
+						}
+					}
+					catch
+					{
+						
+					}
 				}
 
 				// Making a guess from the FurcadiaPath or FurcadiaDefaultPath property.
 				path = GetInstallPath();
 				if (path == string.Empty)
-					path = Path.Combine(ProgramFilesx86(), "Furcadia");
+					path = Path.Combine(ProgramFilesX86(), "Furcadia");
 
 				path = Path.Combine(path, "/patches/default");
 			}
