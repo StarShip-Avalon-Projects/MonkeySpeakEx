@@ -88,6 +88,18 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Mono.Cecil">
+      <HintPath>..\packages\Mono.Cecil.0.9.6.1\lib\net45\Mono.Cecil.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Cecil.Mdb">
+      <HintPath>..\packages\Mono.Cecil.0.9.6.1\lib\net45\Mono.Cecil.Mdb.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Cecil.Pdb">
+      <HintPath>..\packages\Mono.Cecil.0.9.6.1\lib\net45\Mono.Cecil.Pdb.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Cecil.Rocks">
+      <HintPath>..\packages\Mono.Cecil.0.9.6.1\lib\net45\Mono.Cecil.Rocks.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -107,21 +119,6 @@
     <Compile Include="Badges.cs" />
     <Compile Include="Base220.cs" />
     <Compile Include="Base95.cs" />
-    <Compile Include="Compression\BZip2\BZip2.cs" />
-    <Compile Include="Compression\BZip2\BZip2Constants.cs" />
-    <Compile Include="Compression\BZip2\BZip2Exception.cs" />
-    <Compile Include="Compression\BZip2\BZip2InputStream.cs" />
-    <Compile Include="Compression\BZip2\BZip2OutputStream.cs" />
-    <Compile Include="Compression\BZip2\SharpZipBaseException.cs" />
-    <Compile Include="Compression\Checksums\CRC32.cs" />
-    <Compile Include="Compression\Checksums\CRCTool.cs" />
-    <Compile Include="Compression\Checksums\IChecksum.cs" />
-    <Compile Include="Compression\Checksums\StrangeCRC.cs" />
-    <Compile Include="Compression\Lzw\LzwDecoder.cs" />
-    <Compile Include="Compression\Lzw\LzwEncoder.cs" />
-    <Compile Include="Compression\Lzw\LzwTests.cs" />
-    <Compile Include="Compression\Rch\RchDecoder.cs" />
-    <Compile Include="Compression\Rch\RchEncoder.cs" />
     <Compile Include="FurcMap\Map.cs" />
     <Compile Include="FurcMap\MapPosition.cs" />
     <Compile Include="FurcMap\MapTile.cs" />
@@ -188,6 +185,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
