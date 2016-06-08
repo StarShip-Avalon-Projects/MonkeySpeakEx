@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Furcadia</RootNamespace>
     <AssemblyName>FurcadiaLib</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
@@ -198,9 +198,7 @@
     <EmbeddedResource Include="Resources\SpeciesTable.csv" />
     <EmbeddedResource Include="Resources\badges.csv" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="FurcMap" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
