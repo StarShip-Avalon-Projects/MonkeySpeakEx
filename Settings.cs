@@ -29,8 +29,8 @@ namespace Furcadia
         /// setting fields
         /// 
 
-
-        static Paths FurcPath = new Paths();
+        private static Paths FurcPath = new Paths();
+        //static Paths FurcPath = new Paths();
         static string sPath = FurcPath.GetLocalSettingsPath();
         static string sFile = "/settings.ini";
 
@@ -40,7 +40,7 @@ namespace Furcadia
           /// Load and Store settings.ini with backup
         public static string[] InitializeFurcadiaSettings(string path = null)
         {
-            FurcPath = new Paths(path);
+            
            string[] FurcSettings = FurcIni.LoadFurcadiaSettings(sPath, sFile);
            string[] Backup = FurcIni.LoadFurcadiaSettings(sPath, sFile);
            for (int Key = 0; Key < Keys.Length; Key++)
