@@ -9,8 +9,8 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Furcadia</RootNamespace>
-    <AssemblyName>FurcadiaLib</AssemblyName>
-    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <AssemblyName>Furcadialib</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
@@ -53,21 +53,22 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>Full</DebugType>
     <Optimize>False</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>..\Net40\Debug\</OutputPath>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile>bin\Debug\FurcadiaLib.XML</DocumentationFile>
+    <DefineConstants>TRACE;DEBUG;Net40=True</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>None</DebugType>
     <Optimize>True</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
+    <OutputPath>..\Net40\Release\</OutputPath>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
     <PlatformTarget>AnyCPU</PlatformTarget>
+    <DefineConstants>Net40=True</DefineConstants>
   </PropertyGroup>
   <PropertyGroup>
     <RunPostBuildEvent>OnOutputUpdated</RunPostBuildEvent>
@@ -87,26 +88,8 @@
     <CodeAnalysisIgnoreBuiltInRules>true</CodeAnalysisIgnoreBuiltInRules>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-  <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
-  </PropertyGroup>
-  <PropertyGroup>
-    <AssemblyOriginatorKeyFile>FurcadiaFrameWork.pfx</AssemblyOriginatorKeyFile>
-  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="Mono.Cecil">
-      <HintPath>..\packages\Mono.Cecil.0.9.6.1\lib\net45\Mono.Cecil.dll</HintPath>
-    </Reference>
-    <Reference Include="Mono.Cecil.Mdb">
-      <HintPath>..\packages\Mono.Cecil.0.9.6.1\lib\net45\Mono.Cecil.Mdb.dll</HintPath>
-    </Reference>
-    <Reference Include="Mono.Cecil.Pdb">
-      <HintPath>..\packages\Mono.Cecil.0.9.6.1\lib\net45\Mono.Cecil.Pdb.dll</HintPath>
-    </Reference>
-    <Reference Include="Mono.Cecil.Rocks">
-      <HintPath>..\packages\Mono.Cecil.0.9.6.1\lib\net45\Mono.Cecil.Rocks.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -122,31 +105,17 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AssemblyFileVersion.cs" />
     <Compile Include="Avatar.cs" />
     <Compile Include="Badges.cs" />
     <Compile Include="Base220.cs" />
     <Compile Include="Base95.cs" />
-    <Compile Include="Drawing\FurrePosition.cs" />
-    <Compile Include="Drawing\ViewArea.cs" />
-    <Compile Include="EventArgs\NetServerArgs.cs" />
     <Compile Include="FurcMap\Map.cs" />
     <Compile Include="FurcMap\MapPosition.cs" />
     <Compile Include="FurcMap\MapTile.cs" />
     <Compile Include="IO\FurcadiaIOException.cs" />
     <Compile Include="IO\FurcadiaNotFoundException.cs" />
-    <Compile Include="IO\ParseClient.cs" />
-    <Compile Include="IO\ParseServer.cs" />
-    <Compile Include="IO\ServerQue.cs" />
-    <Compile Include="IO\SubSystem\PhoenixSpeakParser.cs" />
-    <Compile Include="Net\Dream\DREAM.cs" />
-    <Compile Include="Net\Dream\FURRE.cs" />
-    <Compile Include="Net\Dream\FURREList.cs" />
-    <Compile Include="Net\NetClient.cs" />
     <Compile Include="Net\NetConnection.cs" />
     <Compile Include="Net\NetProxyException.cs" />
-    <Compile Include="Net\NetServer.cs" />
-    <Compile Include="Net\ProxySession.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -160,7 +129,7 @@
     <Compile Include="IO\IniParser.cs" />
     <Compile Include="IO\Paths.cs" />
     <Compile Include="IO\RegistryExplorer.cs" />
-    <Compile Include="Net\Dream\BotFurre.cs" />
+    <Compile Include="Net\ClientStructure.cs" />
     <Compile Include="Net\INetMessage.cs" />
     <Compile Include="Net\Movement.cs" />
     <Compile Include="Net\NetProxy.cs" />
@@ -201,13 +170,11 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <None Include="AssemblyFileVersion.tt" />
     <Content Include="Changes.txt" />
     <Content Include="ToDo.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <None Include="FurcadiaFrameWork.pfx" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -220,9 +187,7 @@
     <EmbeddedResource Include="Resources\SpeciesTable.csv" />
     <EmbeddedResource Include="Resources\badges.csv" />
   </ItemGroup>
-  <ItemGroup>
-    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
@@ -267,9 +232,5 @@
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <CheckForOverflowUnderflow>False</CheckForOverflowUnderflow>
     <BaseIntermediateOutputPath>obj\</BaseIntermediateOutputPath>
-  </PropertyGroup>
-  <PropertyGroup>
-    <PreBuildEvent>
-    </PreBuildEvent>
   </PropertyGroup>
 </Project>
