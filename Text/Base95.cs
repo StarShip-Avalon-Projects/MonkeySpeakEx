@@ -7,15 +7,21 @@
 using System;
 using System.Text;
 
-namespace Furcadia
+namespace Furcadia.Text
 {
     public class Base95 : IComparable<uint>, IEquatable<uint>
     {
-        public const byte CHAR_OFFSET = (byte)' ';
+        #region Public Fields
+
         public const byte BASE = 95;
+        public const byte CHAR_OFFSET = (byte)' ';
         public uint Value;
 
+        #endregion Public Fields
+
         /*** Constructor ***/
+
+        #region Public Constructors
 
         public Base95() : this(0)
         {
@@ -31,7 +37,14 @@ namespace Furcadia
             FromString(s);
         }
 
+        #endregion Public Constructors
+
         #region Conversion Operators
+
+        public static explicit operator ushort(Base95 b95n)
+        {
+            return (ushort)b95n.Value;
+        }
 
         public static implicit operator Base95(uint n)
         {
@@ -48,14 +61,9 @@ namespace Furcadia
             return new Base95(s);
         }
 
-        public static implicit operator uint(Base95 b95n)
+        public static implicit operator byte[] (Base95 b95n)
         {
-            return b95n.Value;
-        }
-
-        public static explicit operator ushort(Base95 b95n)
-        {
-            return (ushort)b95n.Value;
+            return b95n.ToByteArray();
         }
 
         public static implicit operator string(Base95 b95n)
@@ -63,23 +71,28 @@ namespace Furcadia
             return b95n.ToString();
         }
 
-        public static implicit operator byte[] (Base95 b95n)
+        public static implicit operator uint(Base95 b95n)
         {
-            return b95n.ToByteArray();
+            return b95n.Value;
         }
 
         #endregion Conversion Operators
 
         #region Other Operators
 
-        public static Base95 operator +(Base95 n1, Base95 n2)
-        {
-            return new Base95(n1.Value + n2.Value);
-        }
-
         public static Base95 operator -(Base95 n1, Base95 n2)
         {
             return new Base95(n1.Value - n2.Value);
+        }
+
+        public static bool operator !=(Base95 n1, Base95 n2)
+        {
+            return !(n1 == n2);
+        }
+
+        public static Base95 operator %(Base95 n1, Base95 n2)
+        {
+            return new Base95(n1.Value % n2.Value);
         }
 
         public static Base95 operator *(Base95 n1, Base95 n2)
@@ -92,24 +105,19 @@ namespace Furcadia
             return new Base95(n1.Value / n2.Value);
         }
 
-        public static Base95 operator %(Base95 n1, Base95 n2)
+        public static Base95 operator +(Base95 n1, Base95 n2)
         {
-            return new Base95(n1.Value % n2.Value);
-        }
-
-        public static bool operator ==(Base95 n1, Base95 n2)
-        {
-            return n1.Equals(n2);
-        }
-
-        public static bool operator !=(Base95 n1, Base95 n2)
-        {
-            return !(n1 == n2);
+            return new Base95(n1.Value + n2.Value);
         }
 
         public static bool operator <(Base95 n1, Base95 n2)
         {
             return n1.Value < n2.Value;
+        }
+
+        public static bool operator ==(Base95 n1, Base95 n2)
+        {
+            return n1.Equals(n2);
         }
 
         public static bool operator >(Base95 n1, Base95 n2)
@@ -120,6 +128,23 @@ namespace Furcadia
         #endregion Other Operators
 
         /*** Static Functions ***/
+
+        #region Public Methods
+
+        public static uint ConvertFromBase95(string b95str)
+        {
+            uint num = 0;
+            uint mod = 1;
+
+            // Conversion
+            for (int i = b95str.Length - 1; i >= 0; i--)
+            {
+                num += (uint)(((int)b95str[i] - CHAR_OFFSET) * mod);
+                mod *= 95;
+            }
+
+            return num;
+        }
 
         public static string ConvertToBase95(uint num)
         {
@@ -150,31 +175,23 @@ namespace Furcadia
             return b95str.ToString();
         }
 
-        public static uint ConvertFromBase95(string b95str)
-        {
-            uint num = 0;
-            uint mod = 1;
-
-            // Conversion
-            for (int i = b95str.Length - 1; i >= 0; i--)
-            {
-                num += (uint)(((int)b95str[i] - CHAR_OFFSET) * mod);
-                mod *= 95;
-            }
-
-            return num;
-        }
-
         /*** Methods ***/
 
-        public override string ToString()
+        public override bool Equals(object obj)
         {
-            return ConvertToBase95(Value);
+            if (!(obj is Base95))
+                return false;
+            return this.Value == ((Base95)obj).Value;
         }
 
-        public string ToString(int nDigits)
+        public uint FromString(string s)
         {
-            return ConvertToBase95(Value, nDigits);
+            return Value = ConvertFromBase95(s);
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
         }
 
         public byte[] ToByteArray()
@@ -188,22 +205,17 @@ namespace Furcadia
             return enc.GetBytes(ToString(nDigits));
         }
 
-        public uint FromString(string s)
+        public override string ToString()
         {
-            return Value = ConvertFromBase95(s);
+            return ConvertToBase95(Value);
         }
 
-        public override bool Equals(object obj)
+        public string ToString(int nDigits)
         {
-            if (!(obj is Base95))
-                return false;
-            return this.Value == ((Base95)obj).Value;
+            return ConvertToBase95(Value, nDigits);
         }
 
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
+        #endregion Public Methods
 
         #region Interface Implementation
 

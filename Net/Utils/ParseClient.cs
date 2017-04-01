@@ -1,4 +1,4 @@
-﻿namespace Furcadia.IO
+﻿namespace Furcadia.Net.Utils
 {
     /// <summary>
     /// Parse Client Data

@@ -3,32 +3,42 @@ using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace Furcadia.IO
+namespace Furcadia.Text
 {
     /// <summary>
-    /// Furcadia configuration class to backup/set firewall setting and restore them after we have
-    /// connected to the game server
+    /// Furcadia configuration class to backup/set Proxy/firewall settings and restore them after we
+    /// have connected to the game server.
     /// <para>
     /// Author Gerolkae
     /// </para>
     /// <para>
-    /// Courtesy to Dream Dancer for helping me with this
+    /// Courtesy to Dream Dancer for helping me with this.
     /// </para>
     /// </summary>
     public class FurcIni
     {
+        #region Private Fields
+
         /// <summary>
-        /// Retrieves a feild setting in the FurcSettings array
+        /// RegEx for Setting.ini Key=Value pairs
         /// </summary>
-        /// <param name="file">
+        private static Regex regexkey = new Regex("^\\s*([^=\\s]*)[^=]*=(.*)", (RegexOptions.Singleline | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant));
+
+        #endregion Private Fields
+
+        #region Public Methods
+
+        /// <summary>
+        /// Retrieves a field setting in the FurcSettings array
+        /// </summary>
+        /// <param name="SettingFile">
+        /// </param>
+        /// <param name="WhichSetting">
         /// </param>
         /// <returns>
-        /// Value
         /// </returns>
         public static string GetUserSetting(string WhichSetting, string[] SettingFile)
         {
-            Regex regexkey = new Regex("^\\s*([^=\\s]*)[^=]*=(.*)", (RegexOptions.Singleline | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant));
-
             for (long WiDx = 0; WiDx < SettingFile.Length; WiDx++)
             {
                 Match m = regexkey.Match(SettingFile[WiDx]);
@@ -75,8 +85,6 @@ namespace Furcadia.IO
         /// </param>
         public static void SaveFurcadiaSettings(string path, string file, string[] SettingFile)
         {
-            /// long FileIn, WiDx;
-
             try
             {
                 File.WriteAllLines(Path.Combine(path, file), SettingFile, Encoding.UTF8);
@@ -90,15 +98,14 @@ namespace Furcadia.IO
         /// <summary>
         /// sets feilds in the FurcSettings array
         /// </summary>
-        /// <param name="file">
+        /// <param name="WhichSetting">
         /// </param>
-        /// <returns>
-        /// true on success.
-        /// </returns>
+        /// <param name="WhichValue">
+        /// </param>
+        /// <param name="SettingFile">
+        /// </param>
         public static void SetUserSetting(string WhichSetting, string WhichValue, string[] SettingFile)
         {
-            Regex regexkey = new Regex("^\\s*([^=\\s]*)[^=]*=(.*)", (RegexOptions.Singleline | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant));
-
             for (int WiDx = 1; WiDx < SettingFile.Length; WiDx++)
             {
                 Match m = regexkey.Match(SettingFile[WiDx]);
@@ -110,5 +117,7 @@ namespace Furcadia.IO
             }
             throw new Exception("++ ERROR: Couldn't find " + WhichSetting + " to change.");
         }
+
+        #endregion Public Methods
     }
 }

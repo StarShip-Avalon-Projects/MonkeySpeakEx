@@ -8,17 +8,23 @@ using Furcadia.Net;
 using System;
 using System.Text;
 
-namespace Furcadia
+namespace Furcadia.Text
 {
     /// <summary>
     /// </summary>
     public class Base220 : IComparable<int>, IEquatable<int>
     {
+        #region Private Fields
+
         private const byte BASE = 220;
         private const byte CHAR_OFFSET = (byte)'#';
         private int Value;
 
+        #endregion Private Fields
+
         /*** Constructor ***/
+
+        #region Public Constructors
 
         public Base220() : this(0)
         {
@@ -33,6 +39,8 @@ namespace Furcadia
         {
             FromString(s);
         }
+
+        #endregion Public Constructors
 
         #region Conversion Operators
 
@@ -124,6 +132,8 @@ namespace Furcadia
 
         /*** Static Functions ***/
 
+        #region Public Methods
+
         public static int ConvertFromBase220(string b220str)
         {
             int num = 0;
@@ -196,7 +206,7 @@ namespace Furcadia
         {
             // System.Text.Encoding.GetEncoding(EncoderPage).GetBytes
 
-            return System.Text.Encoding.GetEncoding(NetProxy.EncoderPage).GetBytes(ToString(nDigits));
+            return System.Text.Encoding.GetEncoding(BaseProxy.EncoderPage).GetBytes(ToString(nDigits));
         }
 
         public override string ToString()
@@ -208,6 +218,8 @@ namespace Furcadia
         {
             return ConvertToBase220(Value, nDigits);
         }
+
+        #endregion Public Methods
 
         #region Interface Implementation
 
