@@ -1,13 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using Monkeyspeak.lexical;
+﻿using System.Collections.Generic;
 
 namespace Monkeyspeak
 {
-	internal interface ILexer
-	{
-		void AddDefinition(TokenDefinition tokenDefinition);
+    internal interface ILexer
+    {
+        #region Public Methods
 
-		IEnumerable<Token> Tokenize(string source);
-	}
+        void AddDefinition(TokenDefinition tokenDefinition);
+
+        IEnumerable<Token> Tokenize(string source);
+
+        #endregion Public Methods
+    }
 }

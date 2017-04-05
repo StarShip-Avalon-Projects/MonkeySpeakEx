@@ -1,20 +1,26 @@
-﻿using System;
-
-namespace Monkeyspeak
+﻿namespace Monkeyspeak
 {
-	internal class TokenPosition
-	{
-		public TokenPosition(int index, int line, int column)
-		{
-			Index = index;
-			Line = line;
-			Column = column;
-		}
+    internal class TokenPosition
+    {
+        #region Public Constructors
 
-		public int Column { get; private set; }
+        public TokenPosition(int index, int line, int column)
+        {
+            Index = index;
+            Line = line;
+            Column = column;
+        }
 
-		public int Index { get; private set; }
+        #endregion Public Constructors
 
-		public int Line { get; private set; }
-	}
+        #region Public Properties
+
+        public int Column { get; private set; }
+
+        public int Index { get; private set; }
+
+        public int Line { get; private set; }
+
+        #endregion Public Properties
+    }
 }

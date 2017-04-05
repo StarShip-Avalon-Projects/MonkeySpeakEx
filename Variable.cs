@@ -1,157 +1,197 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Monkeyspeak
 {
-	[Serializable]
-	public class VariableIsConstantException : Exception
-	{
-		public VariableIsConstantException() { }
-
-		public VariableIsConstantException(string message) : base(message) { }
-
-		public VariableIsConstantException(string message, Exception inner) : base(message, inner) { }
-
-		protected VariableIsConstantException(
-		  System.Runtime.Serialization.SerializationInfo info,
-		  System.Runtime.Serialization.StreamingContext context)
-			: base(info, context) { }
-	}
-
-	[Serializable]
+    [Serializable]
     [CLSCompliant(true)]
-	public struct Variable
-	{
-		public static readonly Variable NoValue = new Variable("%none", "", false);
+    public class Variable
+    {
+        #region Public Fields
 
-		private bool isConstant;
+        public static readonly Variable NoValue = new Variable("%none", "", false);
 
-		public bool IsConstant
-		{
-			get
-			{
-				return isConstant;
-			}
-			set
-			{
-				isConstant = value;
-			}
-		}
+        #endregion Public Fields
 
-        private object value ;
+        #region Private Fields
 
-		public object Value
-		{
-			get
-			{
-				return value;
-			}
-			  set
-			{
-                 // removed Value = as it interfered with page.setVariable - Gerolkae
+        private bool isConstant;
+
+        private string name;
+
+        private object value;
+
+        #endregion Private Fields
+
+        #region Internal Constructors
+
+        internal Variable(string Name, object value, bool constant = false)
+        {
+            isConstant = constant;
+            name = Name;
+            this.value = value;
+        }
+
+        #endregion Internal Constructors
+
+        #region Public Properties
+
+        public bool IsConstant
+        {
+            get
+            {
+                return isConstant;
+            }
+            set
+            {
+                isConstant = value;
+            }
+        }
+
+        public string Name
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(name))
+                    name = "%none";
+                return name;
+            }
+            internal set
+            {
+                name = value;
+            }
+        }
+
+        public object Value
+        {
+            get
+            {
+                return value;
+            }
+            set
+            {
+                // removed Value = as it interfered with page.setVariable - Gerolkae
                 if (CheckType(value) == false) throw new TypeNotSupportedException(value.GetType().Name +
     " is not a supported type. Expecting string or double.");
 
                 if (IsConstant == false)
                     this.value = value;
                 else throw new VariableIsConstantException("Attempt to assign a _value to constant \"" + Name + "\"");
-			}
-		}
+            }
+        }
 
-		private string name;
+        #endregion Public Properties
 
-		public string Name
-		{
-			get
-			{
-				if(string.IsNullOrEmpty(name))
-					name = "%none";
-				return name;
-			}
-			internal set
-			{
-				name = value;
-			}
-		}
-
-        // Variable var = new variable(); 
-        // Preset reader.readvariable with default data
-        // Needed for Conditions  checking Variables that haven't been defined yet.
+        // Variable var = new variable(); Preset reader.readvariable with default data Needed for
+        // Conditions checking Variables that haven't been defined yet.
         // -Gerolkae
-       /* private Variable()
+        /* private Variable()
+         {
+             isConstant = false;
+             name = "%none";
+             value = null;
+         }*/
+
+        #region Public Methods
+
+        public static bool operator !=(Variable varA, Variable varB)
         {
-            isConstant = false;
-            name = "%none";
-            value = null;
-        }*/
-
-		internal Variable(string Name, object value, bool constant = false)
-		{
-			isConstant = constant;
-			name = Name;
-			this.value = value;
-		}
-
-		public void ForceAssignValue(object _value)
-		{
-			if (CheckType(_value) == false) throw new TypeNotSupportedException(_value.GetType().Name +
-" is not a supported type. Expecting string or double.");
-			value = _value;
-		}
-
-		private bool CheckType(object _value)
-		{
-			if (_value == null) return true;
-
-			return _value is string ||
-			       _value is double;
-		}
-
-		/// <summary>
-		/// Returns a const identifier if the variable is constant followed by name,
-		/// <para>otherwise just the name is returned.</para>
-		/// </summary>
-		/// <returns></returns>
-		public override string ToString()
-		{
-			return ((IsConstant) ? "const " : "") + Name + " = " + ((Value == null) ? "null" : Value.ToString());
-		}
-
-		/// <summary>
-		///
-		/// </summary>
-		/// <param name="asConstant">Clone as Constant</param>
-		/// <returns></returns>
-		public Variable Clone(bool asConstant = false)
-		{
-			return new Variable(Name, Value, asConstant);
-		}
-
-		public static bool operator ==(Variable varA, Variable varB)
-		{
-			return varA.Value == varB.Value;
-		}
-
-		public static bool operator !=(Variable varA, Variable varB)
-		{
             return varA.Value != varB.Value;
-		}
+        }
 
-		public override bool Equals(object obj)
-		{
+        public static bool operator ==(Variable varA, Variable varB)
+        {
+            return varA.Value == varB.Value;
+        }
+
+        /// <summary>
+        /// </summary>
+        /// <param name="asConstant">
+        /// Clone as Constant
+        /// </param>
+        /// <returns>
+        /// </returns>
+        public Variable Clone(bool asConstant = false)
+        {
+            return new Variable(Name, Value, asConstant);
+        }
+
+        public override bool Equals(object obj)
+        {
             return ((Variable)obj).Name.Equals(Name) && ((Variable)obj).Value.Equals(Value);
-		}
-		public override int GetHashCode()
-		{
-			int n = 0;
-			if (value is int)
-			{ 
-				n = int.Parse(value.ToString());
-				return value.ToString().GetHashCode() ^ name.GetHashCode();
-			}
-			return n ^ name.GetHashCode();
-		}
-	}
+        }
+
+        public void ForceAssignValue(object _value)
+        {
+            if (CheckType(_value) == false) throw new TypeNotSupportedException(_value.GetType().Name +
+" is not a supported type. Expecting string or double.");
+            value = _value;
+        }
+
+        public override int GetHashCode()
+        {
+            int n = 0;
+            if (value is int)
+            {
+                n = int.Parse(value.ToString());
+                return value.ToString().GetHashCode() ^ name.GetHashCode();
+            }
+            return n ^ name.GetHashCode();
+        }
+
+        /// <summary>
+        /// Returns a const identifier if the variable is constant followed by name,
+        /// <para>
+        /// otherwise just the name is returned.
+        /// </para>
+        /// </summary>
+        /// <returns>
+        /// </returns>
+        public override string ToString()
+        {
+            return ((IsConstant) ? "const " : "") + Name + " = " + ((Value == null) ? "null" : Value.ToString());
+        }
+
+        #endregion Public Methods
+
+        #region Private Methods
+
+        private bool CheckType(object _value)
+        {
+            if (_value == null) return true;
+
+            return _value is string ||
+                   _value is double;
+        }
+
+        #endregion Private Methods
+    }
+
+    [Serializable]
+    public class VariableIsConstantException : Exception
+    {
+        #region Public Constructors
+
+        public VariableIsConstantException()
+        {
+        }
+
+        public VariableIsConstantException(string message) : base(message)
+        {
+        }
+
+        public VariableIsConstantException(string message, Exception inner) : base(message, inner)
+        {
+        }
+
+        #endregion Public Constructors
+
+        #region Protected Constructors
+
+        protected VariableIsConstantException(
+          System.Runtime.Serialization.SerializationInfo info,
+          System.Runtime.Serialization.StreamingContext context)
+            : base(info, context) { }
+
+        #endregion Protected Constructors
+    }
 }
