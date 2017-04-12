@@ -31,6 +31,13 @@ namespace Monkeyspeak
             this.value = value;
         }
 
+        protected Variable()
+        {
+            this.isConstant = NoValue.isConstant;
+            this.name = NoValue.name;
+            this.value = NoValue.value;
+        }
+
         #endregion Internal Constructors
 
         #region Public Properties
@@ -81,8 +88,9 @@ namespace Monkeyspeak
 
         #endregion Public Properties
 
-        // Variable var = new variable(); Preset reader.readvariable with default data Needed for
-        // Conditions checking Variables that haven't been defined yet.
+        // Variable var = new variable(); Preset reader.readvariable with
+        // default data Needed for Conditions checking Variables that
+        // haven't been defined yet.
         // -Gerolkae
         /* private Variable()
          {
@@ -139,7 +147,8 @@ namespace Monkeyspeak
         }
 
         /// <summary>
-        /// Returns a const identifier if the variable is constant followed by name,
+        /// Returns a const identifier if the variable is constant followed
+        /// by name,
         /// <para>
         /// otherwise just the name is returned.
         /// </para>

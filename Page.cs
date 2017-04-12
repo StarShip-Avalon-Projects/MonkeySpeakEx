@@ -25,7 +25,8 @@ namespace Monkeyspeak
     public delegate bool TriggerHandler(TriggerReader reader);
 
     /// <summary>
-    /// Event for any errors that occur during execution If not assigned Exceptions will be thrown.
+    /// Event for any errors that occur during execution If not assigned
+    /// Exceptions will be thrown.
     /// </summary>
     /// <param name="trigger">
     /// </param>
@@ -34,7 +35,7 @@ namespace Monkeyspeak
     public delegate void TriggerHandlerErrorEvent(Trigger trigger, Exception ex);
 
     [Serializable]
-    public sealed class Page
+    public class Page
     {
         #region Public Fields
 
@@ -53,9 +54,13 @@ namespace Monkeyspeak
 
         #endregion Private Fields
 
-        #region Internal Constructors
+        #region Public Constructors
 
-        internal Page(MonkeyspeakEngine engine)
+        /// <summary>
+        /// </summary>
+        /// <param name="engine">
+        /// </param>
+        public Page(MonkeyspeakEngine engine)
         {
             this.engine = engine;
             triggerBlocks = new List<TriggerList>();
@@ -63,19 +68,19 @@ namespace Monkeyspeak
             scope.Add(Variable.NoValue.Clone());
         }
 
-        #endregion Internal Constructors
+        #endregion Public Constructors
 
         #region Public Events
 
         /// <summary>
-        /// Called after the Trigger's TriggerHandler is called. If there is no TriggerHandler for
-        /// that Trigger then this event is not raised.
+        /// Called after the Trigger's TriggerHandler is called. If there is
+        /// no TriggerHandler for that Trigger then this event is not raised.
         /// </summary>
         public event TriggerHandledEventHandler AfterTriggerHandled;
 
         /// <summary>
-        /// Called before the Trigger's TriggerHandler is called. If there is no TriggerHandler for
-        /// that Trigger then this event is not raised.
+        /// Called before the Trigger's TriggerHandler is called. If there
+        /// is no TriggerHandler for that Trigger then this event is not raised.
         /// </summary>
         public event TriggerHandledEventHandler BeforeTriggerHandled;
 
@@ -180,10 +185,11 @@ namespace Monkeyspeak
         }
 
         /// <summary>
-        /// Executes a trigger block containing TriggerCategory.Cause with ID equal to <param name="id"/>
+        /// Executes a trigger block containing TriggerCategory.Cause with
+        /// ID equal to <param name="id"/>
         /// </summary>
-        // Changed id to Params fo multiple Trigger processing. This Compensates for a Design Flaw
-        // Lothus Marque spotted - Gerolkae
+        // Changed id to Params fo multiple Trigger processing. This
+        // Compensates for a Design Flaw Lothus Marque spotted - Gerolkae
         public bool Execute(params int[] id)
         {
             bool Executed = false;
@@ -221,14 +227,15 @@ namespace Monkeyspeak
         }
 
         /// <summary>
-        /// Gets a Variable with Name set to <paramref name="name"/><b>Throws Exception if Variable
-        /// not found.</b>
+        /// Gets a Variable with Name set to
+        /// <paramref name="name"/><b>Throws Exception if Variable not found.</b>
         /// </summary>
         /// <param name="name">
         /// The name of the Variable to retrieve
         /// </param>
         /// <returns>
-        /// The variable found with the specified <paramref name="name"/> or throws Exception
+        /// The variable found with the specified <paramref name="name"/> or
+        /// throws Exception
         /// </returns>
         public Variable GetVariable(string name)
         {
@@ -313,7 +320,8 @@ namespace Monkeyspeak
         }
 
         /// <summary>
-        /// Loads a <see cref="Monkeyspeak.Libraries.AbstractBaseLibrary"/> into this Page
+        /// Loads a <see cref="Monkeyspeak.Libraries.AbstractBaseLibrary"/>
+        /// into this Page
         /// </summary>
         /// <param name="lib">
         /// </param>
@@ -380,7 +388,8 @@ namespace Monkeyspeak
         /// <summary>
         /// Loads Monkeyspeak Sys Library into this Page
         /// <para>
-        /// Used for System operations involving the Environment or Operating System
+        /// Used for System operations involving the Environment or
+        /// Operating System
         /// </para>
         /// </summary>
         public void LoadSysLibrary()
@@ -415,7 +424,8 @@ namespace Monkeyspeak
         }
 
         /// <summary>
-        /// Clears all Variables and optionally clears all TriggerHandlers from this Page.
+        /// Clears all Variables and optionally clears all TriggerHandlers
+        /// from this Page.
         /// </summary>
         public void Reset(bool resetTriggerHandlers = false)
         {
@@ -426,7 +436,8 @@ namespace Monkeyspeak
         }
 
         /// <summary>
-        /// Assigns the TriggerHandler to a trigger with <paramref name="category"/> and <paramref name="id"/>
+        /// Assigns the TriggerHandler to a trigger with
+        /// <paramref name="category"/> and <paramref name="id"/>
         /// </summary>
         /// <param name="category">
         /// </param>
@@ -451,7 +462,8 @@ namespace Monkeyspeak
         /// <see cref="Monkeyspeak.TriggerHandler"/>
         /// </param>
         /// <param name="description">
-        /// optional description of the trigger, normally the human readable form of the trigger
+        /// optional description of the trigger, normally the human readable
+        /// form of the trigger
         /// <para>
         /// Example: "(0:1) when someone says something,"
         /// </para>
@@ -536,8 +548,8 @@ namespace Monkeyspeak
 
         #endregion Internal Methods
 
-        // Changed id to Params fo multiple Trigger processing. This Compensates for a Design Flaw
-        // Lothus Marque spotted - Gerolkae
+        // Changed id to Params fo multiple Trigger processing. This
+        // Compensates for a Design Flaw Lothus Marque spotted - Gerolkae
 
         /*
          * [1/7/2013 9:26:22 PM] Lothus Marque: Okay. Said feeling doesn't explain why 48 is
@@ -563,7 +575,8 @@ namespace Monkeyspeak
                 bool pass = false;
                 var current = triggerBlock[j];
 
-                // using id.contains checks params against current block to properly fire the triggers
+                // using id.contains checks params against current block to
+                // properly fire the triggers
 
                 if (handlers.ContainsKey(current))
                 {

@@ -154,8 +154,8 @@ namespace Monkeyspeak
         }
 
         /// <summary>
-        /// Loads a Monkeyspeak script from a string into <paramref name="existingPage"/>. and clears
-        /// the old page
+        /// Loads a Monkeyspeak script from a string into
+        /// <paramref name="existingPage"/>. and clears the old page
         /// </summary>
         /// <param name="existingPage">
         /// Reference to an existing Page
@@ -237,7 +237,7 @@ namespace Monkeyspeak
     }
 
     [Serializable]
-    public sealed class MonkeyspeakException : Exception
+    public class MonkeyspeakException : Exception
     {
         #region Public Constructors
 
