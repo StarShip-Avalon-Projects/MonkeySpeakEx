@@ -18,7 +18,8 @@ namespace Monkeyspeak.Libraries
         #region Public Constructors
 
         /// <summary>
-        /// Default Timer Library. Call static method Timers.DestroyTimers() when your application closes.
+        /// Default Timer Library. Call static method Timers.DestroyTimers()
+        /// when your application closes.
         /// </summary>
         public Timers()
         {
@@ -197,7 +198,8 @@ namespace Monkeyspeak.Libraries
             {
                 if (timers.ContainsKey(num) == false)
                 {
-                    // Don't add a timer to the Dictionary if it don't exist. Just return a blank timer
+                    // Don't add a timer to the Dictionary if it don't
+                    // exist. Just return a blank timer
                     // - Gerolkae
                     timerInfo = new TimerInfo();
                     return false;
@@ -238,7 +240,8 @@ namespace Monkeyspeak.Libraries
     }
 
     /// <summary>
-    /// A TimerInfo object contains Timer and Page Owner. Timer is not started from a TimerInfo constructor.
+    /// A TimerInfo object contains Timer and Page Owner. Timer is not
+    /// started from a TimerInfo constructor.
     /// </summary>
     internal class TimerInfo
     {
@@ -266,6 +269,18 @@ namespace Monkeyspeak.Libraries
             timer = new Timer(timer_Elapsed);
         }
 
+        /// <summary>
+        /// T
+        /// </summary>
+        /// <param name="owner">
+        /// Page owner
+        /// </param>
+        /// <param name="interval">
+        /// Sycle time in seconds
+        /// </param>
+        /// <param name="Id">
+        /// MonkeySpeak ID if the timer
+        /// </param>
         public TimerInfo(Page owner, double interval, double Id)
         {
             this.ID = Id;
@@ -306,6 +321,10 @@ namespace Monkeyspeak.Libraries
 
         #region Private Methods
 
+        /// <summary>
+        /// </summary>
+        /// <param name="sender">
+        /// </param>
         private void timer_Elapsed(object sender)
         {
             // Lets Capture the Current Triggering Timer ~Gerolkae
