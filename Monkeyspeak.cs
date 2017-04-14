@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace Monkeyspeak
@@ -49,6 +50,7 @@ namespace Monkeyspeak
 
         #region Public Properties
 
+        [CLSCompliant(false)]
         public Options Options
         {
             get { return options; }
@@ -181,6 +183,58 @@ namespace Monkeyspeak
         #endregion Public Methods
 
         #region Internal Methods
+
+        /// <summary>
+        /// Loads a Monkeyspeak script from a Stream into a <see cref="Monkeyspeak.Page"/>.
+        /// </summary>
+        /// <param name="stream">
+        /// Stream that contains the Monkeyspeak script. Closes the stream.
+        /// </param>
+        /// <returns>
+        /// <see cref="Monkeyspeak.Page"/>
+        /// </returns>
+        public Page LoadFromStream(Stream stream)
+        {
+            try
+            {
+                Page page;
+                using (var reader = new StreamReader(stream, Encoding.Unicode, true, 1024, true))
+                {
+                    page = LoadFromString(reader.ReadToEnd());
+                }
+                return page;
+            }
+            catch (Exception ex)
+            {
+                throw new MonkeyspeakException(String.Format("Could not load script from stream.  Reason:{0}", ex.Message), ex);
+            }
+        }
+
+        /// <summary>
+        /// Loads a Monkeyspeak script from a Stream into <paramref name="existingPage"/>.
+        /// </summary>
+        /// <param name="existingPage">
+        /// Reference to an existing Page
+        /// </param>
+        /// <param name="stream">
+        /// Stream that contains the Monkeyspeak script. Closes the stream.
+        /// </param>
+        public Page LoadFromStream(ref Page existingPage, Stream stream)
+        {
+            try
+            {
+                Page page = null;
+                using (var reader = new StreamReader(stream, Encoding.Unicode, true, 1024, true))
+                {
+                    page = LoadFromString(ref existingPage, reader.ReadToEnd());
+                }
+                return page;
+            }
+            catch (Exception ex)
+            {
+                throw new MonkeyspeakException(String.Format("Could not load script from stream.  Reason:{0}", ex.Message), ex);
+            }
+        }
 
         internal void CreateDefaultLexer()
         {

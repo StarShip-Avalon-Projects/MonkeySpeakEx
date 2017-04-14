@@ -90,6 +90,9 @@
     <AssemblyOriginatorKeyFile>MonkeyTalkEx.pfx</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="ExpectedObjects, Version=1.2.3.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\ExpectedObjects.1.2.3\lib\net40\ExpectedObjects.dll</HintPath>
+    </Reference>
     <Reference Include="Mono.Cecil">
       <HintPath>..\packages\Mono.Cecil.0.9.6.1\lib\net45\Mono.Cecil.dll</HintPath>
     </Reference>
@@ -102,6 +105,9 @@
     <Reference Include="Mono.Cecil.Rocks">
       <HintPath>..\packages\Mono.Cecil.0.9.6.1\lib\net45\Mono.Cecil.Rocks.dll</HintPath>
     </Reference>
+    <Reference Include="nunit.framework, Version=3.6.1.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
+      <HintPath>..\packages\NUnit.3.6.1\lib\net45\nunit.framework.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -109,6 +115,12 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="Testing.Commons, Version=1.7.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Testing.Commons.1.7.0\lib\net40\Testing.Commons.dll</HintPath>
+    </Reference>
+    <Reference Include="Testing.Commons.NUnit, Version=3.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Testing.Commons.NUnit.3.1.0\lib\net40\Testing.Commons.NUnit.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="lexical\Compiler.cs" />
@@ -165,6 +177,7 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="MonkeySpeak ChangeLog.txt" />
     <None Include="MonkeyTalkEx.pfx" />
     <None Include="packages.config" />
