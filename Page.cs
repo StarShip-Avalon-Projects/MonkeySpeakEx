@@ -141,6 +141,8 @@ namespace Monkeyspeak
 
         public void CompileToFile(string filePath)
         {
+            if (string.IsNullOrEmpty(filePath))
+                throw new ArgumentException("filePath cannot bw null or empty");
             try
             {
                 Compiler compiler = new Compiler(engine);
