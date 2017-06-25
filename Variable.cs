@@ -2,6 +2,8 @@
 
 namespace Monkeyspeak
 {
+    /// <summary> MonkeySpeak Variable oblect. <para>This obkect acepts <see
+    /// cref="String"/> and <see cref="Double"> types</para> </summary>
     [Serializable]
     [CLSCompliant(true)]
     public class Variable
