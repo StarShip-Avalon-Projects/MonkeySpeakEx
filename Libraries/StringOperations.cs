@@ -2,6 +2,9 @@
 
 namespace Monkeyspeak.Libraries
 {
+    /// <summary>
+    /// Monkey Speak String Operations Library
+    /// </summary>
     internal class StringOperations : AbstractBaseLibrary
     {
         #region Public Constructors

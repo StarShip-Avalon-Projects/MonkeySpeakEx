@@ -2,6 +2,9 @@
 
 namespace Monkeyspeak.Libraries
 {
+    /// <summary>
+    /// Monkey Speak Sys library
+    /// </summary>
     internal class Sys : AbstractBaseLibrary
     {
         #region Public Constructors
@@ -52,7 +55,8 @@ namespace Monkeyspeak.Libraries
             Add(new Trigger(TriggerCategory.Effect, 102), PrintToConsole,
                 "(5:102) print {...} to the console.");
 
-            // (5:103) get the environment variable named {...} and put it into #,
+            // (5:103) get the environment variable named {...} and put it
+            // into #,
             Add(new Trigger(TriggerCategory.Effect, 103), GetEnvVariable,
                 "(5:103) get the environment variable named {...} and put it into %, (ex: PATH)");
 
@@ -94,7 +98,8 @@ namespace Monkeyspeak.Libraries
             double optNum = 0;
             if (reader.TryReadVariable(out optVar))
             {
-                // var can be undefined or Single Digit number Compensate for it. -Gerolkae
+                // var can be undefined or Single Digit number Compensate
+                // for it. -Gerolkae
                 try
                 {
                     if (Double.TryParse(var.Value.ToString(), out num) && Double.TryParse(optVar.Value.ToString(), out optNum))
@@ -147,7 +152,8 @@ namespace Monkeyspeak.Libraries
             double optNum = 0;
             if (reader.TryReadVariable(out optVar))
             {
-                // var can be undefined or Single Digit number Compensate for it. -Gerolkae
+                // var can be undefined or Single Digit number Compensate
+                // for it. -Gerolkae
                 try
                 {
                     if (Double.TryParse(var.Value.ToString(), out num) && Double.TryParse(optVar.Value.ToString(), out optNum))

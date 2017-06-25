@@ -5,7 +5,9 @@ using System.Threading;
 
 namespace Monkeyspeak.Libraries
 {
-    // Changed from Internal to public in order to expose DestroyTimers() - Gerolkae
+    /// <summary>
+    /// Reciporcating Timers for Monkey Speak
+    /// </summary>
     public class Timers : AbstractBaseLibrary
     {
         #region Private Fields
@@ -61,15 +63,15 @@ namespace Monkeyspeak.Libraries
                 foreach (double key in keys)
                 {
                     /*
-					 * MSDN A Dictionary<TKey, TValue> can support multiple readers
-					 * concurrently, as long as the collection is not modified. Even
-					 * so, enumerating through a collection is intrinsically not a
-					 * thread-safe procedure. In the rare case where an enumeration
-					 * contends with write accesses, the collection must be locked
-					 * during the entire enumeration. To allow the collection to be
-					 * accessed by multiple threads for reading and writing, you must
-					 * implement your own synchronization.
-					 */
+                     * MSDN A Dictionary<TKey, TValue> can support multiple readers
+                     * concurrently, as long as the collection is not modified. Even
+                     * so, enumerating through a collection is intrinsically not a
+                     * thread-safe procedure. In the rare case where an enumeration
+                     * contends with write accesses, the collection must be locked
+                     * during the entire enumeration. To allow the collection to be
+                     * accessed by multiple threads for reading and writing, you must
+                     * implement your own synchronization.
+                     */
 
                     if (timers[key].Timer != null)
                         timers[key].Timer.Dispose();
@@ -214,11 +216,29 @@ namespace Monkeyspeak.Libraries
             return false;
         }
 
+        /// <summary>
+        /// (0:301) When any timer goes off,
+        /// </summary>
+        /// <param name="reader">
+        /// <see cref="TriggerReader"/>
+        /// </param>
+        /// <returns>
+        /// when any timer goes off
+        /// </returns>
         private bool WhenAnyTimerGoesOff(TriggerReader reader)
         {
             return true;
         }
 
+        /// <summary>
+        /// (0:300) When timer # goes off,
+        /// </summary>
+        /// <param name="reader">
+        /// <see cref="TriggerReader"/>
+        /// </param>
+        /// <returns>
+        /// when timer # goes off
+        /// </returns>
         private bool WhenTimerGoesOff(TriggerReader reader)
         {
             TimerInfo timerInfo;

@@ -2,6 +2,9 @@
 
 namespace Monkeyspeak.Libraries
 {
+    /// <summary>
+    /// Monkey Speak Math Library
+    /// </summary>
     internal class Math : AbstractBaseLibrary
     {
         #region Public Constructors
