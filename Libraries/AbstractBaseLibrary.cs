@@ -5,6 +5,9 @@ using System.Text;
 
 namespace Monkeyspeak.Libraries
 {
+    /// <summary>
+    /// Base Library to build Monkey Speak Libraries on
+    /// </summary>
     public abstract class AbstractBaseLibrary
     {
         #region Internal Fields
