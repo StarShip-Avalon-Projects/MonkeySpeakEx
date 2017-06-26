@@ -84,12 +84,26 @@ namespace Monkeyspeak.Libraries
 
         #region Private Methods
 
+        /// <summary>
+        /// (1:301) and timer # is not running,
+        /// </summary>
+        /// <param name="reader">
+        /// </param>
+        /// <returns>
+        /// </returns>
         private bool AndTimerIsNotRunning(TriggerReader reader)
         {
             bool test = AndTimerIsRunning(reader) == false;
             return test;
         }
 
+        /// <summary>
+        /// (1:300) and timer # is running,"
+        /// </summary>
+        /// <param name="reader">
+        /// </param>
+        /// <returns>
+        /// </returns>
         private bool AndTimerIsRunning(TriggerReader reader)
         {
             TimerInfo timerInfo;
@@ -100,6 +114,13 @@ namespace Monkeyspeak.Libraries
             return test;
         }
 
+        /// <summary>
+        /// (5:300) create timer # to go off every # second(s).
+        /// </summary>
+        /// <param name="reader">
+        /// </param>
+        /// <returns>
+        /// </returns>
         private bool CreateTimer(TriggerReader reader)
         {
             TimerInfo timerInfo = new TimerInfo();
@@ -136,7 +157,7 @@ namespace Monkeyspeak.Libraries
                 timerInfo.Timer.InitializeLifetimeService();
                 if (timers.Keys.Contains(idx) == true)
                 {
-                    System.Diagnostics.Debug.Print("New Timer Disposing old timer " + idx.ToString());
+                    Console.WriteLine("New Timer Disposing old timer " + idx.ToString());
                     timers[idx].Timer.Dispose();
                     timers[idx] = timerInfo;
                 }
@@ -147,6 +168,13 @@ namespace Monkeyspeak.Libraries
             return true;
         }
 
+        /// <summary>
+        /// (5:301) stop timer #.
+        /// </summary>
+        /// <param name="reader">
+        /// </param>
+        /// <returns>
+        /// </returns>
         private bool StopTimer(TriggerReader reader)
         {
             // Does NOT destroy the Timer.

@@ -39,7 +39,7 @@ namespace Monkeyspeak.Libraries
                 "(5:152) take variable %Variable and multiply it by #.");
 
             // (5:153) take variable %Variable and divide it by #.
-            Add(new Trigger(TriggerCategory.Effect, 153), MultiplyByVariable,
+            Add(new Trigger(TriggerCategory.Effect, 153), DivideByVariable,
                 "(5:153) take variable %Variable and divide it by #.");
         }
 
@@ -47,6 +47,14 @@ namespace Monkeyspeak.Libraries
 
         #region Private Methods
 
+        /// <summary>
+        /// (5:150) take variable %Variable and add # to it.
+        /// </summary>
+        /// <param name="reader">
+        /// <see cref="TriggerReader"/>
+        /// </param>
+        /// <returns>
+        /// </returns>
         private bool AddToVariable(TriggerReader reader)
         {
             Variable var = reader.ReadVariable(true);
@@ -66,6 +74,14 @@ namespace Monkeyspeak.Libraries
             return true;
         }
 
+        /// <summary>
+        /// (5:153) take variable %Variable and divide it by #.
+        /// </summary>
+        /// <param name="reader">
+        /// <see cref="TriggerReader"/>
+        /// </param>
+        /// <returns>
+        /// </returns>
         private bool DivideByVariable(TriggerReader reader)
         {
             Variable var = reader.ReadVariable(true);
@@ -84,6 +100,14 @@ namespace Monkeyspeak.Libraries
             return true;
         }
 
+        /// <summary>
+        /// "(5:152) take variable %Variable and multiply it by #.
+        /// </summary>
+        /// <param name="reader">
+        /// <see cref="TriggerReader"/>
+        /// </param>
+        /// <returns>
+        /// </returns>
         private bool MultiplyByVariable(TriggerReader reader)
         {
             Variable var = reader.ReadVariable(true);
@@ -102,6 +126,14 @@ namespace Monkeyspeak.Libraries
             return true;
         }
 
+        /// <summary>
+        /// (5:151) take variable %Variable and subtract # from it.
+        /// </summary>
+        /// <param name="reader">
+        /// <see cref="TriggerReader"/>
+        /// </param>
+        /// <returns>
+        /// </returns>
         private bool SubtractFromVariable(TriggerReader reader)
         {
             Variable var = reader.ReadVariable(true);
@@ -120,6 +152,14 @@ namespace Monkeyspeak.Libraries
             return true;
         }
 
+        /// <summary>
+        /// (1:150) and variable %Variable is greater than #,
+        /// </summary>
+        /// <param name="reader">
+        /// <see cref="TriggerReader"/>
+        /// </param>
+        /// <returns>
+        /// </returns>
         private bool VariableGreaterThan(TriggerReader reader)
         {
             Variable mainVar = reader.ReadVariable();
@@ -144,6 +184,14 @@ namespace Monkeyspeak.Libraries
             return false;
         }
 
+        /// <summary>
+        /// (1:151) and variable %Variable is greater than or equal to #,
+        /// </summary>
+        /// <param name="reader">
+        /// <see cref="TriggerReader"/>
+        /// </param>
+        /// <returns>
+        /// </returns>
         private bool VariableGreaterThanOrEqual(TriggerReader reader)
         {
             Variable mainVar = reader.ReadVariable();
@@ -170,6 +218,14 @@ namespace Monkeyspeak.Libraries
             return false;
         }
 
+        /// <summary>
+        /// (1:152) and variable %Variable is less than #,
+        /// </summary>
+        /// <param name="reader">
+        /// <see cref="TriggerReader"/>
+        /// </param>
+        /// <returns>
+        /// </returns>
         private bool VariableLessThan(TriggerReader reader)
         {
             Variable mainVar = reader.ReadVariable();
@@ -196,6 +252,14 @@ namespace Monkeyspeak.Libraries
             return false;
         }
 
+        /// <summary>
+        /// (1:153) and variable %Variable is less than or equal to #,
+        /// </summary>
+        /// <param name="reader">
+        /// <see cref="TriggerReader"/>
+        /// </param>
+        /// <returns>
+        /// </returns>
         private bool VariableLessThanOrEqual(TriggerReader reader)
         {
             Variable mainVar = reader.ReadVariable();

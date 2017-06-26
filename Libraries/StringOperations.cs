@@ -29,6 +29,14 @@ namespace Monkeyspeak.Libraries
 
         #region Private Methods
 
+        /// <summary>
+        /// (5:404) with string {...} add it to string variable %Variable.
+        /// </summary>
+        /// <param name="reader">
+        /// <see cref="TriggerReader"/>
+        /// </param>
+        /// <returns>
+        /// </returns>
         private bool AddStringToVar(TriggerReader reader)
         {
             string str = reader.ReadString();
@@ -37,6 +45,15 @@ namespace Monkeyspeak.Libraries
             return true;
         }
 
+        /// <summary>
+        /// (5:403) with string {...} get word count and put it into
+        /// variable %Variable.
+        /// </summary>
+        /// <param name="reader">
+        /// <see cref="TriggerReader"/>
+        /// </param>
+        /// <returns>
+        /// </returns>
         private bool GetWordCountIntoVariable(TriggerReader reader)
         {
             string[] words = reader.ReadString().Split(' ');
@@ -45,6 +62,15 @@ namespace Monkeyspeak.Libraries
             return true;
         }
 
+        /// <summary>
+        /// (5:400) use string {...} as an array and copy entry # of it into
+        /// variable %Variable.
+        /// </summary>
+        /// <param name="reader">
+        /// <see cref="TriggerReader"/>
+        /// </param>
+        /// <returns>
+        /// </returns>
         private bool StringArrayEntryCopy(TriggerReader reader)
         {
             string[] words = reader.ReadString().Split(' ');
@@ -68,6 +94,15 @@ namespace Monkeyspeak.Libraries
             return true;
         }
 
+        /// <summary>
+        /// (5:402) use string variable %Variable as an array and remove
+        /// entry # of it.
+        /// </summary>
+        /// <param name="reader">
+        /// <see cref="TriggerReader"/>
+        /// </param>
+        /// <returns>
+        /// </returns>
         private bool StringArrayEntryRemove(TriggerReader reader)
         {
             Variable sentence = reader.ReadVariable();
@@ -92,6 +127,9 @@ namespace Monkeyspeak.Libraries
             return true;
         }
 
+        /// <summary> (5:401) use string variable %Variable as an array and
+        /// set entry # of it to {...}. <param name="reader"> <see
+        /// cref="TriggerReader"/> </param> <returns> </returns>
         private bool StringArrayEntrySet(TriggerReader reader)
         {
             Variable sentence = reader.ReadVariable();
@@ -117,6 +155,15 @@ namespace Monkeyspeak.Libraries
             return true;
         }
 
+        /// <summary>
+        /// (5:405) take string {...} and put its character length in
+        /// variable %Variable.
+        /// </summary>
+        /// <param name="reader">
+        /// <see cref="TriggerReader"/>
+        /// </param>
+        /// <returns>
+        /// </returns>
         private bool StringLength(TriggerReader reader)
         {
             string str = reader.ReadString();

@@ -75,6 +75,14 @@ namespace Monkeyspeak.Libraries
 
         #region Private Methods
 
+        /// <summary>
+        /// (5:103) get the environment variable named {...} and put it into
+        /// %, (ex: PATH)
+        /// </summary>
+        /// <param name="reader">
+        /// </param>
+        /// <returns>
+        /// </returns>
         private bool GetEnvVariable(TriggerReader reader)
         {
             string envVar = Environment.GetEnvironmentVariable(reader.ReadString());
@@ -83,12 +91,26 @@ namespace Monkeyspeak.Libraries
             return true;
         }
 
+        /// <summary>
+        /// (1:100) and variable % is defined,
+        /// </summary>
+        /// <param name="reader">
+        /// </param>
+        /// <returns>
+        /// </returns>
         private bool IsVariableDefined(TriggerReader reader)
         {
             Variable var = reader.ReadVariable(false);
             return reader.Page.HasVariable(var.Name) && var.Value != null;
         }
 
+        /// <summary>
+        /// (1:102) and variable % equals #,
+        /// </summary>
+        /// <param name="reader">
+        /// </param>
+        /// <returns>
+        /// </returns>
         private bool IsVariableEqualToNumberOrVar(TriggerReader reader)
         {
             Variable var = reader.ReadVariable(false);
@@ -131,6 +153,13 @@ namespace Monkeyspeak.Libraries
             return false;
         }
 
+        /// <summary>
+        /// (1:104) and variable % equals {...},
+        /// </summary>
+        /// <param name="reader">
+        /// </param>
+        /// <returns>
+        /// </returns>
         private bool IsVariableEqualToString(TriggerReader reader)
         {
             Variable var = reader.ReadVariable(false);
@@ -138,11 +167,25 @@ namespace Monkeyspeak.Libraries
             return str.Equals(var.Value.ToString());
         }
 
+        /// <summary>
+        /// (1:101) and variable % is not defined,
+        /// </summary>
+        /// <param name="reader">
+        /// </param>
+        /// <returns>
+        /// </returns>
         private bool IsVariableNotDefined(TriggerReader reader)
         {
             return IsVariableDefined(reader) == false;
         }
 
+        /// <summary>
+        /// (1:103) and variable % does not equal #,
+        /// </summary>
+        /// <param name="reader">
+        /// </param>
+        /// <returns>
+        /// </returns>
         private bool IsVariableNotEqualToNumberOrVar(TriggerReader reader)
         {
             Variable var = reader.ReadVariable(false);
@@ -185,6 +228,13 @@ namespace Monkeyspeak.Libraries
             return false;
         }
 
+        /// <summary>
+        /// (1:105) and variable % does not equal {...},
+        /// </summary>
+        /// <param name="reader">
+        /// </param>
+        /// <returns>
+        /// </returns>
         private bool IsVariableNotEqualToString(TriggerReader reader)
         {
             //bool test = IsVariableEqualToString(reader);
@@ -197,6 +247,13 @@ namespace Monkeyspeak.Libraries
                 return true;
         }
 
+        /// <summary>
+        /// (5:110) load library from file {...}. (example Monkeyspeak.dll)
+        /// </summary>
+        /// <param name="reader">
+        /// </param>
+        /// <returns>
+        /// </returns>
         private bool LoadLibraryFromFile(TriggerReader reader)
         {
             if (reader.PeekString() == false) return false;
@@ -204,6 +261,13 @@ namespace Monkeyspeak.Libraries
             return true;
         }
 
+        /// <summary>
+        /// (5:102) print {...} to the console.
+        /// </summary>
+        /// <param name="reader">
+        /// </param>
+        /// <returns>
+        /// </returns>
         private bool PrintToConsole(TriggerReader reader)
         {
             string output = reader.ReadString();
@@ -211,6 +275,13 @@ namespace Monkeyspeak.Libraries
             return true;
         }
 
+        /// <summary>
+        /// (5:105) raise an error.
+        /// </summary>
+        /// <param name="reader">
+        /// </param>
+        /// <returns>
+        /// </returns>
         private bool RaiseAnError(TriggerReader reader)
         {
             string errorMsg = "";
@@ -219,6 +290,13 @@ namespace Monkeyspeak.Libraries
             return false;
         }
 
+        /// <summary>
+        /// (5:104) create random number and put it into variable %.
+        /// </summary>
+        /// <param name="reader">
+        /// </param>
+        /// <returns>
+        /// </returns>
         private bool RandomValueToVar(TriggerReader reader)
         {
             Variable var = reader.ReadVariable(true);
@@ -226,6 +304,13 @@ namespace Monkeyspeak.Libraries
             return true;
         }
 
+        /// <summary>
+        /// (5:101) set variable % to #.
+        /// </summary>
+        /// <param name="reader">
+        /// </param>
+        /// <returns>
+        /// </returns>
         private bool SetVariableToNumberOrVariable(TriggerReader reader)
         {
             if (reader.PeekVariable() == false) return false;
@@ -244,6 +329,13 @@ namespace Monkeyspeak.Libraries
             return true;
         }
 
+        /// <summary>
+        /// (5:100) set variable % to {...}.
+        /// </summary>
+        /// <param name="reader">
+        /// </param>
+        /// <returns>
+        /// </returns>
         private bool SetVariableToString(TriggerReader reader)
         {
             if (reader.PeekVariable() == false) return false;
@@ -253,11 +345,25 @@ namespace Monkeyspeak.Libraries
             return true;
         }
 
+        /// <summary>
+        /// (1:106) and variable % is constant,
+        /// </summary>
+        /// <param name="reader">
+        /// </param>
+        /// <returns>
+        /// </returns>
         private bool VariableIsConstant(TriggerReader reader)
         {
             return reader.ReadVariable().IsConstant;
         }
 
+        /// <summary>
+        /// (1:107) and variable % is not constant,
+        /// </summary>
+        /// <param name="reader">
+        /// </param>
+        /// <returns>
+        /// </returns>
         private bool VariableIsNotConstant(TriggerReader reader)
         {
             return VariableIsConstant(reader) == false;
