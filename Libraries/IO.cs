@@ -2,6 +2,9 @@
 
 namespace Monkeyspeak.Libraries
 {
+    /// <summary>
+    /// IO Monkey Speak Library
+    /// </summary>
     internal class IO : AbstractBaseLibrary
     {
         #region Public Constructors

@@ -1,5 +1,8 @@
 ﻿namespace Monkeyspeak.Libraries
 {
+    /// <summary>
+    /// Provides IDE Debug MonkeySpeak Lines
+    /// </summary>
     internal class Debug : AbstractBaseLibrary
     {
         #region Public Constructors
