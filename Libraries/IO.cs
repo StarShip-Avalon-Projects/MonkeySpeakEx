@@ -48,6 +48,14 @@ namespace Monkeyspeak.Libraries
 
         #region Private Methods
 
+        /// <summary>
+        /// (5:200) append {...} to file {...}.
+        /// </summary>
+        /// <param name="reader">
+        /// <see cref="TriggerReader"/>
+        /// </param>
+        /// <returns>
+        /// </returns>
         private bool AppendToFile(TriggerReader reader)
         {
             string data = reader.ReadString();
@@ -61,6 +69,14 @@ namespace Monkeyspeak.Libraries
             return true;
         }
 
+        /// <summary>
+        /// (1:202) and the file {...} can be read from,
+        /// </summary>
+        /// <param name="reader">
+        /// <see cref="TriggerReader"/>
+        /// </param>
+        /// <returns>
+        /// </returns>
         private bool CanReadFile(TriggerReader reader)
         {
             string file = reader.ReadString();
@@ -77,6 +93,14 @@ namespace Monkeyspeak.Libraries
             }
         }
 
+        /// <summary>
+        /// (1:203) and the file {...} can be written to,"
+        /// </summary>
+        /// <param name="reader">
+        /// <see cref="TriggerReader"/>
+        /// </param>
+        /// <returns>
+        /// </returns>
         private bool CanWriteFile(TriggerReader reader)
         {
             string file = reader.ReadString();
@@ -93,6 +117,14 @@ namespace Monkeyspeak.Libraries
             }
         }
 
+        /// <summary>
+        /// (5:203) create file {...}.
+        /// </summary>
+        /// <param name="reader">
+        /// <see cref="TriggerReader"/>
+        /// </param>
+        /// <returns>
+        /// </returns>
         private bool CreateFile(TriggerReader reader)
         {
             if (reader.PeekString() == false) return false;
@@ -101,6 +133,14 @@ namespace Monkeyspeak.Libraries
             return true;
         }
 
+        /// <summary>
+        /// (5:202) delete file {...}.
+        /// </summary>
+        /// <param name="reader">
+        /// <see cref="TriggerReader"/>
+        /// </param>
+        /// <returns>
+        /// </returns>
         private bool DeleteFile(TriggerReader reader)
         {
             if (reader.PeekString() == false) return false;
@@ -109,17 +149,41 @@ namespace Monkeyspeak.Libraries
             return true;
         }
 
+        /// <summary>
+        /// (1:200) and the file {...} exists,
+        /// </summary>
+        /// <param name="reader">
+        /// <see cref="TriggerReader"/>
+        /// </param>
+        /// <returns>
+        /// </returns>
         private bool FileExists(TriggerReader reader)
         {
             string file = (reader.PeekString()) ? reader.ReadString() : "";
             return System.IO.File.Exists(file);
         }
 
+        /// <summary>
+        /// (1:201) and the file {...} does not exist,
+        /// </summary>
+        /// <param name="reader">
+        /// <see cref="TriggerReader"/>
+        /// </param>
+        /// <returns>
+        /// </returns>
         private bool FileNotExists(TriggerReader reader)
         {
             return FileExists(reader) == false;
         }
 
+        /// <summary>
+        /// (5:201) read from file {...} and put it into variable %Variable.
+        /// </summary>
+        /// <param name="reader">
+        /// <see cref="TriggerReader"/>
+        /// </param>
+        /// <returns>
+        /// </returns>
         private bool ReadFileIntoVariable(TriggerReader reader)
         {
             string file = reader.ReadString();

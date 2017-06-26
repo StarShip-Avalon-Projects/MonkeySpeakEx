@@ -9,7 +9,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Monkeyspeak</RootNamespace>
-    <AssemblyName>Monkeyspeak</AssemblyName>
+    <AssemblyName>MonkeySpeakEx</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile>
@@ -42,7 +42,7 @@
     <WarningLevel>4</WarningLevel>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
-    <DocumentationFile>bin\Debug\Monkeyspeak.xml</DocumentationFile>
+    <DocumentationFile>bin\Debug\MonkeySpeakEx.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>none</DebugType>
@@ -127,7 +127,7 @@
     <Compile Include="Variable.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="license.txt">
+    <Content Include="MonkeySpeakEx.Lisence.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
