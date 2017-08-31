@@ -146,6 +146,10 @@ namespace Monkeyspeak
             return ((int)this.category ^ this.id);
         }
 
+        /// <summary>
+        /// Display the line id format (#:#)
+        /// </summary>
+        /// <returns></returns>
         public override string ToString()
         {
             return String.Format("({0}:{1})", (int)category, id);
