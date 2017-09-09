@@ -100,6 +100,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AssemblyFileVersion1.cs">
+      <DependentUpon>AssemblyFileVersion.tt</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
     <Compile Include="lexical\Compiler.cs" />
     <Compile Include="lexical\AbstractParser.cs" />
     <Compile Include="Libraries\AbstractBaseLibrary.cs" />
@@ -127,6 +132,10 @@
     <Compile Include="Variable.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="AssemblyFileVersion.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>AssemblyFileVersion1.cs</LastGenOutput>
+    </None>
     <Content Include="MonkeySpeakEx.Lisence.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -159,6 +168,9 @@
     <None Include="MonkeyTalkEx.pfx" />
     <None Include="packages.config" />
     <None Include="README.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="BeforeBuild">

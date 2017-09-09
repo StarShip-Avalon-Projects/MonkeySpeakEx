@@ -34,6 +34,12 @@ namespace Monkeyspeak
     /// </param>
     public delegate void TriggerHandlerErrorEvent(Trigger trigger, Exception ex);
 
+    /// <summary>
+    /// the core system of Monkey Speak
+    /// <para>
+    /// This is where the triggers happen for the monkey speak lines
+    /// </para>
+    /// </summary>
     [Serializable]
     public class Page
     {
@@ -139,10 +145,17 @@ namespace Monkeyspeak
 
         #region Public Methods
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="filePath">output file path</param>
+        /// <exception cref="ArgumentException">
+        /// Thrown when no file path is supplied
+        /// </exception>
         public void CompileToFile(string filePath)
         {
             if (string.IsNullOrEmpty(filePath))
-                throw new ArgumentException("filePath cannot bw null or empty");
+                throw new ArgumentException("filePath cannot be null or empty");
             try
             {
                 Compiler compiler = new Compiler(engine);
@@ -180,6 +193,11 @@ namespace Monkeyspeak
             }
         }
 
+        /// <summary>
+        /// old style way to execute monkey speak causes
+        /// </summary>
+        /// <param name="cat"></param>
+        /// <param name="id"></param>
         [Obsolete("Use Execute(params int[]) instead.", true)]
         public void Execute(TriggerCategory cat, int id)
         {
@@ -280,6 +298,12 @@ namespace Monkeyspeak
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="var"></param>
+        /// <returns></returns>
         public bool HasVariable(string name, out Variable var)
         {
             if (name.StartsWith(engine.Options.VariableDeclarationSymbol.ToString()) == false) name = engine.Options.VariableDeclarationSymbol + name;
@@ -407,6 +431,11 @@ namespace Monkeyspeak
             LoadLibrary(new Monkeyspeak.Libraries.Timers());
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="cat"></param>
+        /// <param name="id"></param>
         public void RemoveTriggerHandler(TriggerCategory cat, int id)
         {
             lock (syncObj)
@@ -415,7 +444,10 @@ namespace Monkeyspeak
                 sizeChanged = true;
             }
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="trigger"></param>
         public void RemoveTriggerHandler(Trigger trigger)
         {
             lock (syncObj)
@@ -480,7 +512,7 @@ namespace Monkeyspeak
                 {
                     handlers.Add(trigger, handler);
                     sizeChanged = true;
-                    if (TriggerAdded != null) TriggerAdded(trigger, handler);
+                    TriggerAdded?.Invoke(trigger, handler);
                 }
                 else
                     if (engine.Options.CanOverrideTriggerHandlers)
@@ -491,6 +523,13 @@ namespace Monkeyspeak
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="value"></param>
+        /// <param name="isConstant"></param>
+        /// <returns></returns>
         public Variable SetVariable(string name, object value, bool isConstant)
         {
             if (!CheckType(value)) throw new TypeNotSupportedException(String.Format("{0} is not a supported type. Expecting string or double.", value.GetType().Name));
@@ -561,7 +600,12 @@ namespace Monkeyspeak
          */
 
         #region Private Methods
-
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <param name="id"></param>
+            /// <param name="triggerBlock"></param>
+            /// <returns></returns>
         private bool ExecuteBlock(int[] id, TriggerList triggerBlock)
         {
             TriggerReader reader = new TriggerReader(this);
@@ -616,7 +660,7 @@ namespace Monkeyspeak
                         {
                             if (current.Category == TriggerCategory.Condition)
                             {
-                                if (BeforeTriggerHandled != null) BeforeTriggerHandled(current);
+                                BeforeTriggerHandled?.Invoke(current);
                                 bool conditiontest = handlers[current](reader);
                                 if (!conditiontest)
                                 {
@@ -627,7 +671,7 @@ namespace Monkeyspeak
                                 }
                                 else
                                 {
-                                    if (AfterTriggerHandled != null) AfterTriggerHandled(current);
+                                    AfterTriggerHandled?.Invoke(current);
                                 }
                             }
                             else if ((current.Category == TriggerCategory.Effect) || (current.Category == TriggerCategory.Cause))
@@ -674,7 +718,9 @@ namespace Monkeyspeak
 
         #endregion Private Methods
     }
-
+    /// <summary>
+    /// 
+    /// </summary>
     [Serializable]
     public class TypeNotSupportedException : Exception
     {
