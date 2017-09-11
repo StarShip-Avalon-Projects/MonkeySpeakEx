@@ -2,9 +2,6 @@
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
-// Removed by Gerolkae Looking for threads
-//using System.Threading;
-
 namespace Monkeyspeak
 {
     /// <summary>
@@ -24,11 +21,14 @@ namespace Monkeyspeak
         #region Public Constructors
 
         /// <summary>
-        /// A Reader that is used to get Variables, Strings, and Numbers from Triggers
+        /// A Reader that is used to get Variables, Strings, and Numbers
+        /// from Triggers
         /// </summary>
         /// <param name="page">
+        /// <see cref="Monkeyspeak.Page"/>
         /// </param>
         /// <param name="trigger">
+        /// <see cref="Monkeyspeak.Trigger"/>
         /// </param>
         public TriggerReader(Page page, Trigger trigger)
         {
@@ -50,6 +50,8 @@ namespace Monkeyspeak
 
         #region Public Properties
 
+        /// <summary>
+        /// </summary>
         public Page Page
         {
             get { return page; }
@@ -65,11 +67,15 @@ namespace Monkeyspeak
             }
         }
 
+        /// <summary>
+        /// </summary>
         public TriggerCategory TriggerCategory
         {
             get { return cloneTrigger.Category; }
         }
 
+        /// <summary>
+        /// </summary>
         public int TriggerId
         {
             get { return cloneTrigger.Id; }
@@ -105,6 +111,7 @@ namespace Monkeyspeak
         /// Peeks at the next value
         /// </summary>
         /// <returns>
+        /// the current peek <see cref="Monkeyspeak.Variable"/>
         /// </returns>
         public bool PeekVariable()
         {
@@ -114,10 +121,11 @@ namespace Monkeyspeak
         }
 
         /// <summary>
-        /// Reads the next Double available, throws TriggerReaderException on failure
+        /// Reads the next Double available, throws TriggerReaderException
+        /// on failure
         /// </summary>
         /// <returns>
-        /// Double
+        /// <see cref="System.Double"/>
         /// </returns>
         public double ReadNumber()
         {
@@ -137,6 +145,7 @@ namespace Monkeyspeak
         /// Reads the next String, throws TriggerReaderException on failure
         /// </summary>
         /// <returns>
+        /// <see cref="System.String"/>
         /// </returns>
         public string ReadString(bool processVariables = true)
         {
@@ -166,7 +175,8 @@ namespace Monkeyspeak
         }
 
         /// <summary>
-        /// Reads the next Variable available, throws TriggerReaderException on failure
+        /// Reads the next Variable available, throws TriggerReaderException
+        /// on failure
         /// </summary>
         /// <returns>
         /// Variable
@@ -177,10 +187,12 @@ namespace Monkeyspeak
         }
 
         /// <summary>
-        /// Reads the next Variable available, throws TriggerReaderException on failure
+        /// Reads the next Variable available, throws TriggerReaderException
+        /// on failure
         /// </summary>
         /// <param name="addIfNotExist">
-        /// Add the Variable if it doesn't exist and return that Variable with a Value equal to null.
+        /// Add the Variable if it doesn't exist and return that Variable
+        /// with a Value equal to null.
         /// </param>
         /// <returns>
         /// Variable
@@ -216,6 +228,14 @@ namespace Monkeyspeak
             }
         }
 
+        /// <summary>
+        /// </summary>
+        /// <param name="number">
+        /// <see cref="Double"/>
+        /// </param>
+        /// <returns>
+        /// True on sucess
+        /// </returns>
         public bool TryReadNumber(out double number)
         {
             if (PeekNumber() == false)
@@ -223,10 +243,15 @@ namespace Monkeyspeak
                 number = double.NaN;
                 return false;
             }
-            number = Convert.ToDouble(cloneTrigger.contents.Dequeue());
-            return true;
+            return Double.TryParse(cloneTrigger.contents.Dequeue().ToString(), out number);
         }
 
+        /// <summary>
+        /// </summary>
+        /// <param name="str">
+        /// </param>
+        /// <returns>
+        /// </returns>
         public bool TryReadString(out string str)
         {
             if (PeekString() == false)
@@ -263,6 +288,8 @@ namespace Monkeyspeak
         #endregion Public Methods
     }
 
+    /// <summary>
+    /// </summary>
     [Serializable]
     public class TriggerReaderException : Exception
     {

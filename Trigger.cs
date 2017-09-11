@@ -3,6 +3,9 @@ using System.Collections.Generic;
 
 namespace Monkeyspeak
 {
+    /// <summary>
+    /// Monkey Speak Trigger Catagories
+    /// </summary>
     [Serializable]
     public enum TriggerCategory : int
     {
@@ -31,12 +34,18 @@ namespace Monkeyspeak
         Effect = 5,
 
         /// <summary>
-        /// A trigger that was not defined. You should never encounter this if you do then something
-        /// isn't quite right.
+        /// A trigger that was not defined. You should never encounter this
+        /// if you do then something isn't quite right.
         /// </summary>
         Undefined = -1
     }
 
+    /// <summary>
+    /// Monkey Speak Trigger
+    /// <para>
+    /// ( <see cref="TriggerCategory"/>, <see cref="int">Id</see>
+    /// </para>
+    /// </summary>
     [Serializable]
     public sealed class Trigger : IEquatable<Trigger>
     {
@@ -56,6 +65,15 @@ namespace Monkeyspeak
 
         #region Public Constructors
 
+        /// <summary>
+        /// Establish a new trigger
+        /// </summary>
+        /// <param name="cat">
+        /// <see cref="TriggerCategory"/>
+        /// </param>
+        /// <param name="id">
+        /// Line ID
+        /// </param>
         public Trigger(TriggerCategory cat, int id)
         {
             category = cat;
@@ -128,6 +146,10 @@ namespace Monkeyspeak
             return ((int)this.category ^ this.id);
         }
 
+        /// <summary>
+        /// Display the line id format (#:#)
+        /// </summary>
+        /// <returns></returns>
         public override string ToString()
         {
             return String.Format("({0}:{1})", (int)category, id);
