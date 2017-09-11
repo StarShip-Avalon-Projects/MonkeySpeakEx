@@ -5,5 +5,5 @@
 // 
 using System.Reflection;
 
-[assembly: AssemblyInformationalVersion("1.1.PreAlpha 0")]
+[assembly: AssemblyInformationalVersion("1.0.PreAlpha 0")]
 
