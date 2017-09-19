@@ -216,8 +216,9 @@ namespace Monkeyspeak.Libraries
             if (reader.PeekVariable())
             {
                 Variable var = reader.ReadVariable();
-                if (var.Value != null && var.Value is double)
-                    num = (double)var.Value;
+                num = 0;
+                double.TryParse(var.Value.ToString(), out num);
+
             }
             else if (reader.PeekNumber())
             {
@@ -226,6 +227,7 @@ namespace Monkeyspeak.Libraries
 
             if (double.IsNaN(num) == false)
             {
+                
                 if (timers.ContainsKey(num) == false)
                 {
                     // Don't add a timer to the Dictionary if it don't
@@ -269,7 +271,7 @@ namespace Monkeyspeak.Libraries
         /// </returns>
         private bool WhenTimerGoesOff(TriggerReader reader)
         {
-            TimerInfo timerInfo;
+            TimerInfo timerInfo = null;
             lock (lck)
             {
                 if (TryGetTimerFrom(reader, out timerInfo) == true)
@@ -295,7 +297,7 @@ namespace Monkeyspeak.Libraries
     {
         #region Public Fields
 
-        public static object CurrentTimer = null;
+        public static TimerInfo CurrentTimer;
 
         #endregion Public Fields
 
@@ -314,7 +316,7 @@ namespace Monkeyspeak.Libraries
 
         public TimerInfo()
         {
-            timer = new Timer(timer_Elapsed);
+            timer = new Timer(Timer_Elapsed);
         }
 
         /// <summary>
@@ -324,17 +326,17 @@ namespace Monkeyspeak.Libraries
         /// Page owner
         /// </param>
         /// <param name="interval">
-        /// Sycle time in seconds
+        /// cycle time in seconds
         /// </param>
         /// <param name="Id">
         /// MonkeySpeak ID if the timer
         /// </param>
         public TimerInfo(Page owner, double interval, double Id)
         {
-            this.ID = Id;
+            id = Id;
             this.owner = owner;
             this.interval = interval;
-            timer = new Timer(timer_Elapsed, this, TimeSpan.Zero, TimeSpan.FromSeconds(interval));
+            timer = new Timer(Timer_Elapsed, this, TimeSpan.FromSeconds(interval), TimeSpan.FromSeconds(interval));
         }
 
         #endregion Public Constructors
@@ -373,7 +375,7 @@ namespace Monkeyspeak.Libraries
         /// </summary>
         /// <param name="sender">
         /// </param>
-        private void timer_Elapsed(object sender)
+        private void Timer_Elapsed(object sender)
         {
             // Lets Capture the Current Triggering Timer ~Gerolkae
             if (!Monitor.TryEnter(_timerLock))
@@ -398,5 +400,38 @@ namespace Monkeyspeak.Libraries
         }
 
         #endregion Private Methods
+
+        public static bool operator ==(TimerInfo timer1, TimerInfo timer2)
+        {
+            if (ReferenceEquals(timer1, null))
+            {
+                return ReferenceEquals(timer2, null);
+            }
+
+            return timer1.id == timer2.id;
+        }
+
+        public static bool operator !=(TimerInfo timer1, TimerInfo timer2)
+        {
+            if (!ReferenceEquals(timer1, null))
+            {
+                return !ReferenceEquals(timer2, null);
+            }
+
+             return timer1.id != timer2.id;
+        }
+
+        public override bool Equals(Object obj)
+        {
+            // Check for null values and compare run-time types.
+            if (obj == null || GetType() != obj.GetType())
+                return false;
+            TimerInfo o = (TimerInfo)obj;
+            return ID == o.id;
+        }
+        public override int GetHashCode()
+        {
+            return (int)id;
+        }
     }
 }

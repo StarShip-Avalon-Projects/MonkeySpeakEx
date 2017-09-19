@@ -99,7 +99,7 @@ namespace Monkeyspeak.Libraries
             if (description != null) trigger.Description = description;
             if (handlers.ContainsKey(trigger) == false)
                 handlers.Add(trigger, handler);
-            else throw new UnauthorizedAccessException("Attempt to override existing Trigger handler.");
+            else throw new UnauthorizedAccessException("Attempt to override existing Trigger handler." + trigger.ToString());
         }
 
         /// <summary>
@@ -119,7 +119,7 @@ namespace Monkeyspeak.Libraries
             if (description != null) trigger.Description = description;
             if (handlers.ContainsKey(trigger) == false)
                 handlers.Add(trigger, handler);
-            else throw new UnauthorizedAccessException("Attempt to override existing Trigger handler.");
+            else throw new UnauthorizedAccessException("Attempt to override existing Trigger handler." + trigger.ToString());
         }
 
         #endregion Protected Methods

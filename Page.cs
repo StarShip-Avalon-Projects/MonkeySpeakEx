@@ -45,7 +45,7 @@ namespace Monkeyspeak
     {
         #region Public Fields
 
-        public object syncObj = new Object();
+        internal object syncObj = new Object();
 
         #endregion Public Fields
 
@@ -70,8 +70,10 @@ namespace Monkeyspeak
         {
             this.engine = engine;
             triggerBlocks = new List<TriggerList>();
-            scope = new List<Variable>();
-            scope.Add(Variable.NoValue.Clone());
+            scope = new List<Variable>
+            {
+                Variable.NoValue.Clone()
+            };
         }
 
         #endregion Public Constructors
@@ -103,7 +105,9 @@ namespace Monkeyspeak
         #endregion Public Events
 
         #region Public Properties
-
+        /// <summary>
+        /// 
+        /// </summary>
         public ReadOnlyCollection<Variable> Scope
         {
             get { return scope.AsReadOnly(); }
@@ -222,11 +226,11 @@ namespace Monkeyspeak
                     {
                         //if (ExecuteBlock(id, triggerBlocks[i]) == true)
                         //break; - Break isn't needed for a Full replace system - Gerolkae
-                        // lock (syncObj)
-                        //{
-                        if (ExecuteBlock(id, triggerBlocks[i]))
-                            Executed = true;
-                        //}
+                        lock (syncObj)
+                        {
+                            if (ExecuteBlock(id, triggerBlocks[i]))
+                                Executed = true;
+                        }
                     }
                 }
                 return Executed;
@@ -528,7 +532,7 @@ namespace Monkeyspeak
                 {
                     handlers[trigger] = handler;
                 }
-                else throw new UnauthorizedAccessException("Attempt to override existing Trigger handler.");
+                else throw new UnauthorizedAccessException("Attempt to override existing Trigger handler." + trigger.ToString());
             }
         }
 
@@ -643,11 +647,11 @@ namespace Monkeyspeak
                         {
                             if (current.Category == TriggerCategory.Cause && id.Contains(current.Id))
                             {
-                                if (BeforeTriggerHandled != null) BeforeTriggerHandled(current);
+                                BeforeTriggerHandled?.Invoke(current);
                                 bool conditiontest = handlers[current](reader);
                                 if (!conditiontest)
                                 {
-                                    if (AfterTriggerHandled != null) AfterTriggerHandled(current);
+                                    AfterTriggerHandled?.Invoke(current);
                                     //Do nothing, keep scanning.
                                 }
                                 else
@@ -655,7 +659,7 @@ namespace Monkeyspeak
                                     mode = 1;
                                     pass = true;
 
-                                    if (AfterTriggerHandled != null) AfterTriggerHandled(current);
+                                    AfterTriggerHandled?.Invoke(current);
                                     //System.Diagnostics.Debug.WriteLine("Cause found at: " + j);
                                 }
                             }
@@ -675,7 +679,7 @@ namespace Monkeyspeak
                                 if (!conditiontest)
                                 {
                                     //System.Diagnostics.Debug.WriteLine("Failed test, back to Cause mode: " + j);
-                                    if (AfterTriggerHandled != null) AfterTriggerHandled(current);
+                                    AfterTriggerHandled?.Invoke(current);
                                     conditiontest = false;
                                     mode = 0; //Back to Cause mode.
                                 }
@@ -701,10 +705,10 @@ namespace Monkeyspeak
                             if (current.Category == TriggerCategory.Effect)
                             {
                                 //System.Diagnostics.Debug.WriteLine("Attempted to execute " + j);
-                                if (BeforeTriggerHandled != null) BeforeTriggerHandled(current);
+                                BeforeTriggerHandled?.Invoke(current);
                                 if (handlers[current](reader) == false)
                                     return foundExecutableTrigger;
-                                if (AfterTriggerHandled != null) AfterTriggerHandled(current);
+                                AfterTriggerHandled?.Invoke(current);
                             }
                         }
                     }
@@ -714,8 +718,7 @@ namespace Monkeyspeak
                                 handlers[current].Target.GetType().Name,
                                 handlers[current].Method.Name,
                                 current.ToString()), e);
-                            Error?.Invoke (current, ex);
-
+                        Error?.Invoke(current, ex);
 
                         break;
                     }

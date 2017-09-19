@@ -133,10 +133,9 @@ namespace Monkeyspeak
 
         public override bool Equals(object obj)
         {
-            if (obj is Trigger)
+            if (obj is Trigger other)
             {
-                var other = (Trigger)obj;
-                return other.category == this.category && other.id == this.id;
+                return other.category == category && other.id == id;
             }
             return false;
         }
