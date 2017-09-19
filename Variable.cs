@@ -25,15 +25,34 @@ namespace Monkeyspeak
         #endregion Private Fields
 
         #region Internal Constructors
-
-        internal Variable(string Name, object value, bool constant = false)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="Name"></param>
+        /// <param name="value"></param>
+        /// <param name="constant"></param>
+        public Variable(string Name, object value, bool constant)
         {
             isConstant = constant;
             name = Name;
             this.value = value;
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="Name"></param>
+        /// <param name="value"></param>
+        public Variable(string Name, object value)
+        {
+            isConstant = false;
+            name = Name;
+            this.value = value;
+        }
 
-        protected Variable()
+        /// <summary>
+        /// 
+        /// </summary>
+        public  Variable()
         {
             this.isConstant = NoValue.isConstant;
             this.name = NoValue.name;

@@ -146,7 +146,7 @@ namespace Monkeyspeak
         #region Public Methods
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="filePath">output file path</param>
         /// <exception cref="ArgumentException">
@@ -212,22 +212,30 @@ namespace Monkeyspeak
         // Compensates for a Design Flaw Lothus Marque spotted - Gerolkae
         public bool Execute(params int[] id)
         {
-            bool Executed = false;
-            //var trigger = new Trigger(TriggerCategory.Cause, id);
-            if (triggerBlocks.Count > 0)
+            try
             {
-                for (int i = 0; i <= triggerBlocks.Count - 1; i++)
+                bool Executed = false;
+                //var trigger = new Trigger(TriggerCategory.Cause, id);
+                if (triggerBlocks.Count > 0)
                 {
-                    //if (ExecuteBlock(id, triggerBlocks[i]) == true)
-                    //break; - Break isn't needed for a Full replace system - Gerolkae
-                    // lock (syncObj)
-                    //{
-                    if (ExecuteBlock(id, triggerBlocks[i]))
-                        Executed = true;
-                    //}
+                    for (int i = 0; i <= triggerBlocks.Count - 1; i++)
+                    {
+                        //if (ExecuteBlock(id, triggerBlocks[i]) == true)
+                        //break; - Break isn't needed for a Full replace system - Gerolkae
+                        // lock (syncObj)
+                        //{
+                        if (ExecuteBlock(id, triggerBlocks[i]))
+                            Executed = true;
+                        //}
+                    }
                 }
+                return Executed;
             }
-            return Executed;
+            catch (Exception ex)
+            {
+                Error?.Invoke(null, ex);
+            }
+            return false;
         }
 
         /// <summary>
@@ -299,7 +307,7 @@ namespace Monkeyspeak
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="name"></param>
         /// <param name="var"></param>
@@ -432,7 +440,7 @@ namespace Monkeyspeak
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="cat"></param>
         /// <param name="id"></param>
@@ -444,8 +452,9 @@ namespace Monkeyspeak
                 sizeChanged = true;
             }
         }
+
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="trigger"></param>
         public void RemoveTriggerHandler(Trigger trigger)
@@ -524,7 +533,7 @@ namespace Monkeyspeak
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="name"></param>
         /// <param name="value"></param>
@@ -600,12 +609,13 @@ namespace Monkeyspeak
          */
 
         #region Private Methods
-            /// <summary>
-            /// 
-            /// </summary>
-            /// <param name="id"></param>
-            /// <param name="triggerBlock"></param>
-            /// <returns></returns>
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="triggerBlock"></param>
+        /// <returns></returns>
         private bool ExecuteBlock(int[] id, TriggerList triggerBlock)
         {
             TriggerReader reader = new TriggerReader(this);
@@ -704,9 +714,8 @@ namespace Monkeyspeak
                                 handlers[current].Target.GetType().Name,
                                 handlers[current].Method.Name,
                                 current.ToString()), e);
-                        if (Error != null)
-                            Error(current, ex);
-                        else throw ex;
+                            Error?.Invoke (current, ex);
+
 
                         break;
                     }
@@ -718,8 +727,9 @@ namespace Monkeyspeak
 
         #endregion Private Methods
     }
+
     /// <summary>
-    /// 
+    ///
     /// </summary>
     [Serializable]
     public class TypeNotSupportedException : Exception
