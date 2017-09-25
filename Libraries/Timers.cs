@@ -57,7 +57,7 @@ namespace Monkeyspeak.Libraries
         /// </summary>
         public static void DestroyTimers()
         {
-            List<double> keys = new List<double>(timers.Keys);
+            var keys = new List<double>(timers.Keys);
             lock (lck)
             {
                 foreach (double key in keys)
@@ -74,7 +74,7 @@ namespace Monkeyspeak.Libraries
                      */
 
                     if (timers[key].Timer != null)
-                        timers[key].Timer.Dispose();
+                        timers[key].Dispose();
                     timers.Remove(key);
                 }
             }
@@ -85,55 +85,25 @@ namespace Monkeyspeak.Libraries
         #region Private Methods
 
         /// <summary>
-        /// (1:301) and timer # is not running,
-        /// </summary>
-        /// <param name="reader">
-        /// </param>
-        /// <returns>
-        /// </returns>
-        private bool AndTimerIsNotRunning(TriggerReader reader)
-        {
-            bool test = AndTimerIsRunning(reader) == false;
-            return test;
-        }
-
-        /// <summary>
-        /// (1:300) and timer # is running,"
-        /// </summary>
-        /// <param name="reader">
-        /// </param>
-        /// <returns>
-        /// </returns>
-        private bool AndTimerIsRunning(TriggerReader reader)
-        {
-            TimerInfo timerInfo;
-            if (TryGetTimerFrom(reader, out timerInfo) == false)
-                return false;
-            bool test = timerInfo.Timer != null;
-
-            return test;
-        }
-
-        /// <summary>
         /// (5:300) create timer # to go off every # second(s).
         /// </summary>
         /// <param name="reader">
         /// </param>
         /// <returns>
         /// </returns>
-        private bool CreateTimer(TriggerReader reader)
+        private static bool CreateTimer(TriggerReader reader)
         {
-            TimerInfo timerInfo = new TimerInfo();
-            double idx = new double();
+            TimerInfo timerInfo = null;
+            double TimerId = new double();
             if (reader.PeekVariable())
             {
                 Variable var = reader.ReadVariable();
                 if (var.Value != null && var.Value is double)
-                    idx = (double)var.Value;
+                    TimerId = (double)var.Value;
             }
             else if (reader.PeekNumber())
             {
-                idx = reader.ReadNumber();
+                TimerId = reader.ReadNumber();
             }
 
             double num = double.NaN;
@@ -152,22 +122,49 @@ namespace Monkeyspeak.Libraries
 
             lock (lck)
             {
-                if (timerInfo.Timer != null) timerInfo.Timer.Dispose();
-                timerInfo = new TimerInfo(reader.Page, num, idx);
-                timerInfo.Timer.InitializeLifetimeService();
-                if (timers.Keys.Contains(idx) == true)
+                timerInfo = new TimerInfo(reader.Page, num, TimerId);
+
+                if (timers.Keys.Contains(TimerId) && !timers[TimerId].IsDisposed)
                 {
-                    Console.WriteLine("New Timer Disposing old timer " + idx.ToString());
-                    timers[idx].Timer.Dispose();
-                    timers[idx] = timerInfo;
+                    Console.WriteLine("New Timer Disposing old timer " + TimerId.ToString());
+                    timers[TimerId].Dispose();
+                    timers.Remove(TimerId);
                 }
-                else
-                    timers.Add(idx, timerInfo);
+
+                timers.Add(TimerId, timerInfo);
             }
 
             return true;
         }
 
+        /// <summary>
+        /// (1:301) and timer # is not running,
+        /// </summary>
+        /// <param name="reader">
+        /// </param>
+        /// <returns>
+        /// </returns>
+        private static bool AndTimerIsNotRunning(TriggerReader reader)
+        {
+            bool test = AndTimerIsRunning(reader) == false;
+            return test;
+        }
+
+        /// <summary>
+        /// (1:300) and timer # is running,"
+        /// </summary>
+        /// <param name="reader">
+        /// </param>
+        /// <returns>
+        /// </returns>
+        private static bool AndTimerIsRunning(TriggerReader reader)
+        {
+            if (TryGetTimerFrom(reader, out TimerInfo timerInfo) == false)
+                return false;
+            bool test = timerInfo.Timer != null;
+
+            return test;
+        }
         /// <summary>
         /// (5:301) stop timer #.
         /// </summary>
@@ -175,11 +172,11 @@ namespace Monkeyspeak.Libraries
         /// </param>
         /// <returns>
         /// </returns>
-        private bool StopTimer(TriggerReader reader)
+        private static bool StopTimer(TriggerReader reader)
         {
             // Does NOT destroy the Timer.
             //Now it Does! TryGetTimerFrom(reader) uses Dictionary.ContainsKey
-            TimerInfo timerInfo = new TimerInfo();
+     
             double num = 0;
             if (reader.PeekVariable())
             {
@@ -191,8 +188,7 @@ namespace Monkeyspeak.Libraries
             {
                 num = reader.ReadNumber();
             }
-            try
-            {
+
                 lock (lck)
                 {
                     if (timers.ContainsKey(num))
@@ -202,23 +198,24 @@ namespace Monkeyspeak.Libraries
                         timers.Remove(num);
                     }
                 }
-            }
-            catch (Exception x)
-            {
-                Console.WriteLine(x.Message);
-            }
+
             return true;
         }
 
-        private bool TryGetTimerFrom(TriggerReader reader, out TimerInfo timerInfo)
+        /// <summary>
+        /// Tried to get a timer by <see cref="Monkeyspeak.Variable"/> or by double
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <param name="timerInfo"></param>
+        /// <returns></returns>
+        private static bool TryGetTimerFrom(TriggerReader reader, out TimerInfo timerInfo)
         {
             double num = double.NaN;
             if (reader.PeekVariable())
             {
                 Variable var = reader.ReadVariable();
-                num = 0;
-                double.TryParse(var.Value.ToString(), out num);
-
+                if (var.Value != null && var.Value is double)
+                    num = (double)var.Value;
             }
             else if (reader.PeekNumber())
             {
@@ -227,7 +224,6 @@ namespace Monkeyspeak.Libraries
 
             if (double.IsNaN(num) == false)
             {
-                
                 if (timers.ContainsKey(num) == false)
                 {
                     // Don't add a timer to the Dictionary if it don't
@@ -255,7 +251,7 @@ namespace Monkeyspeak.Libraries
         /// <returns>
         /// when any timer goes off
         /// </returns>
-        private bool WhenAnyTimerGoesOff(TriggerReader reader)
+        private static bool WhenAnyTimerGoesOff(TriggerReader reader)
         {
             return true;
         }
@@ -269,7 +265,7 @@ namespace Monkeyspeak.Libraries
         /// <returns>
         /// when timer # goes off
         /// </returns>
-        private bool WhenTimerGoesOff(TriggerReader reader)
+        private static bool WhenTimerGoesOff(TriggerReader reader)
         {
             TimerInfo timerInfo = null;
             lock (lck)
@@ -293,11 +289,13 @@ namespace Monkeyspeak.Libraries
     /// A TimerInfo object contains Timer and Page Owner. Timer is not
     /// started from a TimerInfo constructor.
     /// </summary>
-    internal class TimerInfo
+    internal class TimerInfo : IDisposable
     {
         #region Public Fields
-
-        public static TimerInfo CurrentTimer;
+        /// <summary>
+        /// Current Triggering timer
+        /// </summary>
+        public static TimerInfo CurrentTimer { get; set; }
 
         #endregion Public Fields
 
@@ -309,7 +307,7 @@ namespace Monkeyspeak.Libraries
         private object lck = new object();
         private Page owner;
         private Timer timer;
-
+        public bool IsDisposed { get; internal set; }
         #endregion Private Fields
 
         #region Public Constructors
@@ -346,7 +344,6 @@ namespace Monkeyspeak.Libraries
         public double ID
         {
             get { return id; }
-            set { id = value; }
         }
 
         public double Interval
@@ -377,29 +374,28 @@ namespace Monkeyspeak.Libraries
         /// </param>
         private void Timer_Elapsed(object sender)
         {
-            // Lets Capture the Current Triggering Timer ~Gerolkae
-            if (!Monitor.TryEnter(_timerLock))
-            {
-                // something has the lock. Probably shutting down.
-                return;
-            }
-            try
+
+            lock (lck)
             {
                 CurrentTimer = (TimerInfo)sender;
                 owner.Execute(300, 301);
                 CurrentTimer = null;
             }
-            catch (Exception Ex)
-            {
-                System.Diagnostics.Debug.Print(Ex.Message);
-            }
-            finally
-            {
-                Monitor.Exit(_timerLock);
-            }
+
         }
 
         #endregion Private Methods
+
+        public static bool operator !=(TimerInfo timer1, TimerInfo timer2)
+        {
+            if (timer2 == null || timer2 == null)
+                return false;
+            if (!ReferenceEquals(timer1, null))
+            {
+                return !ReferenceEquals(timer2, null);
+            }
+            return timer1.id != timer2.id;
+        }
 
         public static bool operator ==(TimerInfo timer1, TimerInfo timer2)
         {
@@ -408,17 +404,16 @@ namespace Monkeyspeak.Libraries
                 return ReferenceEquals(timer2, null);
             }
 
-            return timer1.id == timer2.id;
+            return timer1.id == timer2.id ;
         }
-
-        public static bool operator !=(TimerInfo timer1, TimerInfo timer2)
+        public void Dispose()
         {
-            if (!ReferenceEquals(timer1, null))
-            {
-                return !ReferenceEquals(timer2, null);
-            }
+            IsDisposed = true;
+           
+            timer.Dispose();
+            owner = null;
+            GC.WaitForPendingFinalizers();
 
-             return timer1.id != timer2.id;
         }
 
         public override bool Equals(Object obj)
@@ -429,9 +424,10 @@ namespace Monkeyspeak.Libraries
             TimerInfo o = (TimerInfo)obj;
             return ID == o.id;
         }
+
         public override int GetHashCode()
         {
-            return (int)id;
+            return base.GetHashCode();
         }
     }
 }
