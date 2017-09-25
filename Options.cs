@@ -1,13 +1,32 @@
 ﻿using System;
+using System.IO;
+using System.Reflection;
 
 namespace Monkeyspeak
 {
+    /// <summary>
+    /// Monkey Speak Engine options
+    /// </summary>
     public class Options
     {
         #region Public Constructors
 
+        /// <summary>
+        /// default options preloaded
+        /// </summary>
         public Options()
         {
+            CanOverrideTriggerHandlers = false;
+            StringBeginSymbol = '{';
+            StringEndSymbol = '}';
+            VariableDeclarationSymbol = '%';
+            CommentSymbol = "*";
+            TriggerLimit = 6000;
+            VariableCountLimit = 1000;
+            StringLengthLimit = Int32.MaxValue;
+            TimerLimit = 100;
+            Version = Assembly.GetExecutingAssembly().GetName().Version;
+            DefaultExecutePath = Path.GetDirectoryName(Assembly.GetCallingAssembly().Location).ToString();
         }
 
         #endregion Public Constructors
@@ -29,6 +48,12 @@ namespace Monkeyspeak
         /// </para>
         /// </summary>
         public string CommentSymbol { get; set; }
+
+        /// <summary>
+        /// Default File path for executing assemblies such as 
+        /// <see cref="Monkeyspeak.Libraries.IO"/>
+        /// </summary>
+       public string DefaultExecutePath { get; set; }
 
         /// <summary>
         /// Beginning string literal symbol
