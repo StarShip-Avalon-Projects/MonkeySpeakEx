@@ -10,9 +10,17 @@ using System.Reflection;
 
 namespace Monkeyspeak
 {
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'TriggerAddedEventHandler'
+
     public delegate void TriggerAddedEventHandler(Trigger trigger, TriggerHandler handler);
 
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'TriggerAddedEventHandler'
+
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'TriggerHandledEventHandler'
+
     public delegate bool TriggerHandledEventHandler(Trigger trigger);
+
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'TriggerHandledEventHandler'
 
     /// <summary>
     /// Used for handling triggers at runtime.
@@ -105,8 +113,9 @@ namespace Monkeyspeak
         #endregion Public Events
 
         #region Public Properties
+
         /// <summary>
-        /// 
+        ///
         /// </summary>
         public ReadOnlyCollection<Variable> Scope
         {
@@ -181,7 +190,10 @@ namespace Monkeyspeak
             }
         }
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'Page.CompileToStream(Stream)'
+
         public void CompileToStream(Stream stream)
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'Page.CompileToStream(Stream)'
         {
             try
             {
@@ -739,15 +751,24 @@ namespace Monkeyspeak
     {
         #region Public Constructors
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'TypeNotSupportedException.TypeNotSupportedException()'
+
         public TypeNotSupportedException()
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'TypeNotSupportedException.TypeNotSupportedException()'
         {
         }
+
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'TypeNotSupportedException.TypeNotSupportedException(string)'
 
         public TypeNotSupportedException(string message) : base(message)
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'TypeNotSupportedException.TypeNotSupportedException(string)'
         {
         }
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'TypeNotSupportedException.TypeNotSupportedException(string, Exception)'
+
         public TypeNotSupportedException(string message, Exception inner) : base(message, inner)
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'TypeNotSupportedException.TypeNotSupportedException(string, Exception)'
         {
         }
 
@@ -755,7 +776,10 @@ namespace Monkeyspeak
 
         #region Protected Constructors
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'TypeNotSupportedException.TypeNotSupportedException(SerializationInfo, StreamingContext)'
+
         protected TypeNotSupportedException(
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'TypeNotSupportedException.TypeNotSupportedException(SerializationInfo, StreamingContext)'
           System.Runtime.Serialization.SerializationInfo info,
           System.Runtime.Serialization.StreamingContext context)
             : base(info, context) { }

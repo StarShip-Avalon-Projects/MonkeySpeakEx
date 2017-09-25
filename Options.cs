@@ -50,10 +50,10 @@ namespace Monkeyspeak
         public string CommentSymbol { get; set; }
 
         /// <summary>
-        /// Default File path for executing assemblies such as 
+        /// Default File path for executing assemblies such as
         /// <see cref="Monkeyspeak.Libraries.IO"/>
         /// </summary>
-       public string DefaultExecutePath { get; set; }
+        public string DefaultExecutePath { get; set; }
 
         /// <summary>
         /// Beginning string literal symbol

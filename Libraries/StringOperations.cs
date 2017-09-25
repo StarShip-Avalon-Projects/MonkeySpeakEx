@@ -130,7 +130,11 @@ namespace Monkeyspeak.Libraries
         /// <summary> (5:401) use string variable %Variable as an array and
         /// set entry # of it to {...}. <param name="reader"> <see
         /// cref="TriggerReader"/> </param> <returns> </returns>
+
+#pragma warning disable CS1570 // XML comment has badly formed XML -- 'Expected an end tag for element 'summary'.'
+
         private bool StringArrayEntrySet(TriggerReader reader)
+#pragma warning restore CS1570 // XML comment has badly formed XML -- 'Expected an end tag for element 'summary'.'
         {
             Variable sentence = reader.ReadVariable();
             string[] words = ((string)sentence.Value).Split(' ');
