@@ -1,6 +1,8 @@
-﻿using System;
+﻿using Microsoft.Win32.SafeHandles;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading;
 
 namespace Monkeyspeak.Libraries
@@ -124,7 +126,7 @@ namespace Monkeyspeak.Libraries
             {
                 timerInfo = new TimerInfo(reader.Page, num, TimerId);
 
-                if (timers.Keys.Contains(TimerId) && !timers[TimerId].IsDisposed)
+                if (timers.Keys.Contains(TimerId) && !timers[TimerId].Disposed)
                 {
                     Console.WriteLine("New Timer Disposing old timer " + TimerId.ToString());
                     timers[TimerId].Dispose();
@@ -292,6 +294,8 @@ namespace Monkeyspeak.Libraries
     /// </summary>
     internal class TimerInfo : IDisposable
     {
+        SafeHandle handle = new SafeFileHandle(IntPtr.Zero, true);
+
         #region Public Fields
 
         /// <summary>
@@ -309,7 +313,7 @@ namespace Monkeyspeak.Libraries
         private object lck = new object();
         private Page owner;
         private Timer timer;
-        public bool IsDisposed { get; internal set; }
+        public bool Disposed { get; internal set; }
 
         #endregion Private Fields
 
@@ -407,14 +411,33 @@ namespace Monkeyspeak.Libraries
 
             return timer1.id == timer2.id;
         }
-
-        public void Dispose()
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="disposing"></param>
+        protected void Disposing(bool disposing)
         {
-            IsDisposed = true;
+            if (Disposed)
+                return;
 
-            timer.Dispose();
-            owner = null;
-            GC.WaitForPendingFinalizers();
+            if (disposing)
+            {
+                handle.Dispose();
+                timer.Dispose();
+                owner = null;
+            }
+
+            // Free any unmanaged objects here.
+            //
+            Disposed = true;
+        }
+        /// <summary>
+        /// Implement IDisposable
+        /// </summary>
+        public void Dispose() 
+        {
+            Disposing(true);
+            GC.SuppressFinalize(this);
         }
 
         public override bool Equals(Object obj)
