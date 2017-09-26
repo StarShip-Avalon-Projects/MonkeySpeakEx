@@ -165,6 +165,7 @@ namespace Monkeyspeak.Libraries
 
             return test;
         }
+
         /// <summary>
         /// (5:301) stop timer #.
         /// </summary>
@@ -176,7 +177,7 @@ namespace Monkeyspeak.Libraries
         {
             // Does NOT destroy the Timer.
             //Now it Does! TryGetTimerFrom(reader) uses Dictionary.ContainsKey
-     
+
             double num = 0;
             if (reader.PeekVariable())
             {
@@ -189,15 +190,15 @@ namespace Monkeyspeak.Libraries
                 num = reader.ReadNumber();
             }
 
-                lock (lck)
+            lock (lck)
+            {
+                if (timers.ContainsKey(num))
                 {
-                    if (timers.ContainsKey(num))
-                    {
-                        System.Diagnostics.Debug.Print("Stop Timer " + num.ToString());
-                        timers[num].Timer.Dispose();
-                        timers.Remove(num);
-                    }
+                    System.Diagnostics.Debug.Print("Stop Timer " + num.ToString());
+                    timers[num].Timer.Dispose();
+                    timers.Remove(num);
                 }
+            }
 
             return true;
         }
@@ -292,6 +293,7 @@ namespace Monkeyspeak.Libraries
     internal class TimerInfo : IDisposable
     {
         #region Public Fields
+
         /// <summary>
         /// Current Triggering timer
         /// </summary>
@@ -308,6 +310,7 @@ namespace Monkeyspeak.Libraries
         private Page owner;
         private Timer timer;
         public bool IsDisposed { get; internal set; }
+
         #endregion Private Fields
 
         #region Public Constructors
@@ -374,14 +377,12 @@ namespace Monkeyspeak.Libraries
         /// </param>
         private void Timer_Elapsed(object sender)
         {
-
             lock (lck)
             {
                 CurrentTimer = (TimerInfo)sender;
                 owner.Execute(300, 301);
                 CurrentTimer = null;
             }
-
         }
 
         #endregion Private Methods
@@ -404,16 +405,16 @@ namespace Monkeyspeak.Libraries
                 return ReferenceEquals(timer2, null);
             }
 
-            return timer1.id == timer2.id ;
+            return timer1.id == timer2.id;
         }
+
         public void Dispose()
         {
             IsDisposed = true;
-           
+
             timer.Dispose();
             owner = null;
             GC.WaitForPendingFinalizers();
-
         }
 
         public override bool Equals(Object obj)

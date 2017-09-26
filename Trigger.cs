@@ -94,19 +94,28 @@ namespace Monkeyspeak
 
         #region Public Properties
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'Trigger.Category'
+
         public TriggerCategory Category
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'Trigger.Category'
         {
             get { return category; }
             internal set { category = value; }
         }
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'Trigger.Description'
+
         public string Description
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'Trigger.Description'
         {
             get { return description; }
             set { description = value; }
         }
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'Trigger.Id'
+
         public int Id
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'Trigger.Id'
         {
             get { return id; }
             internal set { id = value; }
@@ -126,12 +135,18 @@ namespace Monkeyspeak
 
         #region Public Methods
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'Trigger.Equals(Trigger)'
+
         public bool Equals(Trigger other)
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'Trigger.Equals(Trigger)'
         {
             return other.category == this.category && other.id == this.id;
         }
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'Trigger.Equals(object)'
+
         public override bool Equals(object obj)
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'Trigger.Equals(object)'
         {
             if (obj is Trigger other)
             {
@@ -140,7 +155,10 @@ namespace Monkeyspeak
             return false;
         }
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'Trigger.GetHashCode()'
+
         public override int GetHashCode()
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'Trigger.GetHashCode()'
         {
             return ((int)this.category ^ this.id);
         }

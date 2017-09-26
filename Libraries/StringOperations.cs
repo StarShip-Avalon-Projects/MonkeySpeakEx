@@ -37,7 +37,7 @@ namespace Monkeyspeak.Libraries
         /// </param>
         /// <returns>
         /// </returns>
-        private bool AddStringToVar(TriggerReader reader)
+        private static bool AddStringToVar(TriggerReader reader)
         {
             string str = reader.ReadString();
             Variable var = reader.ReadVariable(true);
@@ -54,7 +54,7 @@ namespace Monkeyspeak.Libraries
         /// </param>
         /// <returns>
         /// </returns>
-        private bool GetWordCountIntoVariable(TriggerReader reader)
+        private static bool GetWordCountIntoVariable(TriggerReader reader)
         {
             string[] words = reader.ReadString().Split(' ');
             Variable var = reader.ReadVariable(true);
@@ -71,7 +71,7 @@ namespace Monkeyspeak.Libraries
         /// </param>
         /// <returns>
         /// </returns>
-        private bool StringArrayEntryCopy(TriggerReader reader)
+        private static bool StringArrayEntryCopy(TriggerReader reader)
         {
             string[] words = reader.ReadString().Split(' ');
             double index = -1;
@@ -103,7 +103,7 @@ namespace Monkeyspeak.Libraries
         /// </param>
         /// <returns>
         /// </returns>
-        private bool StringArrayEntryRemove(TriggerReader reader)
+        private static bool StringArrayEntryRemove(TriggerReader reader)
         {
             Variable sentence = reader.ReadVariable();
             string[] words = ((string)sentence.Value).Split(' ');
@@ -128,9 +128,12 @@ namespace Monkeyspeak.Libraries
         }
 
         /// <summary> (5:401) use string variable %Variable as an array and
-        /// set entry # of it to {...}. <param name="reader"> <see
-        /// cref="TriggerReader"/> </param> <returns> </returns>
-        private bool StringArrayEntrySet(TriggerReader reader)
+        /// set entry # of it to {...}. 
+        /// </summary>
+        /// <param name="reader"> <see cref="TriggerReader"/> </param>
+        /// <returns> </returns>
+        private static bool StringArrayEntrySet(TriggerReader reader)
+
         {
             Variable sentence = reader.ReadVariable();
             string[] words = ((string)sentence.Value).Split(' ');
@@ -164,11 +167,11 @@ namespace Monkeyspeak.Libraries
         /// </param>
         /// <returns>
         /// </returns>
-        private bool StringLength(TriggerReader reader)
+        private static bool StringLength(TriggerReader reader)
         {
             string str = reader.ReadString();
             Variable var = reader.ReadVariable(true);
-            double len = (double)str.Length;
+            double len = str.Length;
             var.Value = len;
             return true;
         }

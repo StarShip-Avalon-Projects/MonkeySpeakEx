@@ -8,7 +8,6 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Starship Avalon Projects")]
 [assembly: AssemblyProduct("Monkey Speak Extended Engine")]
-
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -18,4 +17,3 @@ using System.Runtime.InteropServices;
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
 [assembly: Guid("bedba5f0-e0cf-4ec2-b4bc-bcddcdaaca42")]
-

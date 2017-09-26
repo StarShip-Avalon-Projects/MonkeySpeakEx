@@ -2,15 +2,25 @@
 
 namespace Monkeyspeak
 {
+#pragma warning disable CS1570 // XML comment has badly formed XML -- 'End tag 'summary' does not match the start tag 'para'.'
+#pragma warning disable CS1570 // XML comment has badly formed XML -- 'End tag 'para' does not match the start tag 'see'.'
     /// <summary> MonkeySpeak Variable oblect. <para>This obkect acepts <see
     /// cref="String"/> and <see cref="Double"> types</para> </summary>
+
+#pragma warning disable CS1570 // XML comment has badly formed XML -- 'Expected an end tag for element 'summary'.'
+
     [Serializable]
+#pragma warning restore CS1570 // XML comment has badly formed XML -- 'Expected an end tag for element 'summary'.'
+#pragma warning restore CS1570 // XML comment has badly formed XML -- 'End tag 'para' does not match the start tag 'see'.'
+#pragma warning restore CS1570 // XML comment has badly formed XML -- 'End tag 'summary' does not match the start tag 'para'.'
     [CLSCompliant(true)]
     public class Variable
     {
         #region Public Fields
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'Variable.NoValue'
         public static readonly Variable NoValue = new Variable("%none", "", false);
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'Variable.NoValue'
 
         #endregion Public Fields
 
@@ -25,8 +35,9 @@ namespace Monkeyspeak
         #endregion Private Fields
 
         #region Internal Constructors
+
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="Name"></param>
         /// <param name="value"></param>
@@ -37,8 +48,9 @@ namespace Monkeyspeak
             name = Name;
             this.value = value;
         }
+
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="Name"></param>
         /// <param name="value"></param>
@@ -50,9 +62,9 @@ namespace Monkeyspeak
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
-        public  Variable()
+        public Variable()
         {
             this.isConstant = NoValue.isConstant;
             this.name = NoValue.name;
@@ -63,7 +75,10 @@ namespace Monkeyspeak
 
         #region Public Properties
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'Variable.IsConstant'
+
         public bool IsConstant
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'Variable.IsConstant'
         {
             get
             {
@@ -75,7 +90,10 @@ namespace Monkeyspeak
             }
         }
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'Variable.Name'
+
         public string Name
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'Variable.Name'
         {
             get
             {
@@ -89,7 +107,10 @@ namespace Monkeyspeak
             }
         }
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'Variable.Value'
+
         public object Value
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'Variable.Value'
         {
             get
             {
@@ -122,12 +143,18 @@ namespace Monkeyspeak
 
         #region Public Methods
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'Variable.operator !=(Variable, Variable)'
+
         public static bool operator !=(Variable varA, Variable varB)
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'Variable.operator !=(Variable, Variable)'
         {
             return varA.Value != varB.Value;
         }
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'Variable.operator ==(Variable, Variable)'
+
         public static bool operator ==(Variable varA, Variable varB)
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'Variable.operator ==(Variable, Variable)'
         {
             return varA.Value == varB.Value;
         }
@@ -144,19 +171,28 @@ namespace Monkeyspeak
             return new Variable(Name, Value, asConstant);
         }
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'Variable.Equals(object)'
+
         public override bool Equals(object obj)
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'Variable.Equals(object)'
         {
             return ((Variable)obj).Name.Equals(Name) && ((Variable)obj).Value.Equals(Value);
         }
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'Variable.ForceAssignValue(object)'
+
         public void ForceAssignValue(object _value)
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'Variable.ForceAssignValue(object)'
         {
             if (CheckType(_value) == false) throw new TypeNotSupportedException(_value.GetType().Name +
 " is not a supported type. Expecting string or double.");
             value = _value;
         }
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'Variable.GetHashCode()'
+
         public override int GetHashCode()
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'Variable.GetHashCode()'
         {
             int n = 0;
             if (value is int)
@@ -197,19 +233,30 @@ namespace Monkeyspeak
     }
 
     [Serializable]
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'VariableIsConstantException'
     public class VariableIsConstantException : Exception
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'VariableIsConstantException'
     {
         #region Public Constructors
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'VariableIsConstantException.VariableIsConstantException()'
+
         public VariableIsConstantException()
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'VariableIsConstantException.VariableIsConstantException()'
         {
         }
+
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'VariableIsConstantException.VariableIsConstantException(string)'
 
         public VariableIsConstantException(string message) : base(message)
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'VariableIsConstantException.VariableIsConstantException(string)'
         {
         }
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'VariableIsConstantException.VariableIsConstantException(string, Exception)'
+
         public VariableIsConstantException(string message, Exception inner) : base(message, inner)
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'VariableIsConstantException.VariableIsConstantException(string, Exception)'
         {
         }
 
@@ -217,7 +264,10 @@ namespace Monkeyspeak
 
         #region Protected Constructors
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'VariableIsConstantException.VariableIsConstantException(SerializationInfo, StreamingContext)'
+
         protected VariableIsConstantException(
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'VariableIsConstantException.VariableIsConstantException(SerializationInfo, StreamingContext)'
           System.Runtime.Serialization.SerializationInfo info,
           System.Runtime.Serialization.StreamingContext context)
             : base(info, context) { }

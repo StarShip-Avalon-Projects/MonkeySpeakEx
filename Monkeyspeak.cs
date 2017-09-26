@@ -8,11 +8,16 @@ using System.Text.RegularExpressions;
 
 namespace Monkeyspeak
 {
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'MonkeyspeakEngine'
+
     public class MonkeyspeakEngine
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'MonkeyspeakEngine'
     {
         #region Public Fields
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'MonkeyspeakEngine.options'
         public Options options;
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'MonkeyspeakEngine.options'
 
         #endregion Public Fields
 
@@ -26,7 +31,10 @@ namespace Monkeyspeak
 
         #region Public Constructors
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'MonkeyspeakEngine.MonkeyspeakEngine()'
+
         public MonkeyspeakEngine()
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'MonkeyspeakEngine.MonkeyspeakEngine()'
         {
             pages = new List<Page>();
 
@@ -36,7 +44,10 @@ namespace Monkeyspeak
             parser = new Parser(this, lexer);
         }
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'MonkeyspeakEngine.MonkeyspeakEngine(Options)'
+
         public MonkeyspeakEngine(Options options)
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'MonkeyspeakEngine.MonkeyspeakEngine(Options)'
         {
             pages = new List<Page>();
 
@@ -51,7 +62,9 @@ namespace Monkeyspeak
         #region Public Properties
 
         [CLSCompliant(false)]
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'MonkeyspeakEngine.Options'
         public Options Options
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'MonkeyspeakEngine.Options'
         {
             get { return options; }
             set { options = value; }
@@ -291,23 +304,37 @@ namespace Monkeyspeak
     }
 
     [Serializable]
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'MonkeyspeakException'
     public class MonkeyspeakException : Exception
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'MonkeyspeakException'
     {
         #region Public Constructors
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'MonkeyspeakException.MonkeyspeakException()'
+
         public MonkeyspeakException()
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'MonkeyspeakException.MonkeyspeakException()'
         {
         }
+
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'MonkeyspeakException.MonkeyspeakException(string)'
 
         public MonkeyspeakException(string message) : base(message)
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'MonkeyspeakException.MonkeyspeakException(string)'
         {
         }
+
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'MonkeyspeakException.MonkeyspeakException(string, params object[])'
 
         public MonkeyspeakException(string format, params object[] message) : base(String.Format(format, message))
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'MonkeyspeakException.MonkeyspeakException(string, params object[])'
         {
         }
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'MonkeyspeakException.MonkeyspeakException(string, Exception)'
+
         public MonkeyspeakException(string message, Exception inner) : base(message, inner)
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'MonkeyspeakException.MonkeyspeakException(string, Exception)'
         {
         }
 
@@ -315,7 +342,10 @@ namespace Monkeyspeak
 
         #region Protected Constructors
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'MonkeyspeakException.MonkeyspeakException(SerializationInfo, StreamingContext)'
+
         protected MonkeyspeakException(
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'MonkeyspeakException.MonkeyspeakException(SerializationInfo, StreamingContext)'
           System.Runtime.Serialization.SerializationInfo info,
           System.Runtime.Serialization.StreamingContext context)
             : base(info, context) { }

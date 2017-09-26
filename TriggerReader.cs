@@ -57,7 +57,10 @@ namespace Monkeyspeak
             get { return page; }
         }
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'TriggerReader.Trigger'
+
         public Trigger Trigger
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'TriggerReader.Trigger'
         {
             get { return cloneTrigger; }
             internal set
@@ -295,15 +298,24 @@ namespace Monkeyspeak
     {
         #region Public Constructors
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'TriggerReaderException.TriggerReaderException()'
+
         public TriggerReaderException()
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'TriggerReaderException.TriggerReaderException()'
         {
         }
+
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'TriggerReaderException.TriggerReaderException(string)'
 
         public TriggerReaderException(string message) : base(message)
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'TriggerReaderException.TriggerReaderException(string)'
         {
         }
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'TriggerReaderException.TriggerReaderException(string, Exception)'
+
         public TriggerReaderException(string message, Exception inner) : base(message, inner)
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'TriggerReaderException.TriggerReaderException(string, Exception)'
         {
         }
 
@@ -311,7 +323,10 @@ namespace Monkeyspeak
 
         #region Protected Constructors
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'TriggerReaderException.TriggerReaderException(SerializationInfo, StreamingContext)'
+
         protected TriggerReaderException(
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'TriggerReaderException.TriggerReaderException(SerializationInfo, StreamingContext)'
           System.Runtime.Serialization.SerializationInfo info,
           System.Runtime.Serialization.StreamingContext context)
             : base(info, context) { }
