@@ -1,10 +1,12 @@
-﻿using Monkeyspeak.lexical;
+﻿using Microsoft.Win32.SafeHandles;
+using Monkeyspeak.lexical;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 
 [assembly: CLSCompliant(true)]
 
@@ -49,7 +51,7 @@ namespace Monkeyspeak
     /// </para>
     /// </summary>
     [Serializable]
-    public class Page
+    public class Page :IDisposable
     {
         #region Public Fields
 
@@ -739,6 +741,41 @@ namespace Monkeyspeak
             }
             return foundExecutableTrigger;
         }
+
+        // Flag: Has Dispose already been called?
+        bool disposed = false;
+        // Instantiate a SafeHandle instance.
+        SafeHandle handle = new SafeFileHandle(IntPtr.Zero, true);
+
+        /// <summary>
+        /// Public implementation of Dispose pattern callable by consumers.
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Protected implementation of Dispose pattern.
+        /// </summary>
+        /// <param name="disposing"></param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposed)
+                return;
+
+            if (disposing)
+            {
+                handle.Dispose();
+                Reset(true);
+            }
+
+            // Free any unmanaged objects here.
+            //
+            disposed = true;
+        }
+
 
         #endregion Private Methods
     }
