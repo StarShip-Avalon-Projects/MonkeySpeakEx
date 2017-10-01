@@ -437,7 +437,7 @@ namespace Monkeyspeak.Libraries
         public void Dispose() 
         {
             Disposing(true);
-            GC.SuppressFinalize(this);
+         //   GC.SuppressFinalize(this);
         }
 
         public override bool Equals(Object obj)
@@ -446,7 +446,7 @@ namespace Monkeyspeak.Libraries
             if (obj == null || GetType() != obj.GetType())
                 return false;
             TimerInfo o = (TimerInfo)obj;
-            return ID == o.id;
+            return id == o.id;
         }
 
         public override int GetHashCode()

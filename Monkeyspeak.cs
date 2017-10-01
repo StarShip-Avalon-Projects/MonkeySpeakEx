@@ -15,9 +15,11 @@ namespace Monkeyspeak
     {
         #region Public Fields
 
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'MonkeyspeakEngine.options'
+        /// <summary>
+        /// Monkey Speak Options
+        /// </summary>
         public Options options;
-#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'MonkeyspeakEngine.options'
+
 
         #endregion Public Fields
 
@@ -303,38 +305,45 @@ namespace Monkeyspeak
         #endregion Internal Methods
     }
 
+    /// <summary>
+    /// General Exception for Monkey Speak Libraries
+    /// </summary>
     [Serializable]
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'MonkeyspeakException'
     public class MonkeyspeakException : Exception
-#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'MonkeyspeakException'
+
     {
         #region Public Constructors
 
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'MonkeyspeakException.MonkeyspeakException()'
-
-        public MonkeyspeakException()
-#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'MonkeyspeakException.MonkeyspeakException()'
+        /// <summary>
+        /// General Monkey Speak Exception Constructor
+        /// </summary>
+        public MonkeyspeakException() : base()
         {
         }
 
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'MonkeyspeakException.MonkeyspeakException(string)'
-
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="message"></param>
         public MonkeyspeakException(string message) : base(message)
-#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'MonkeyspeakException.MonkeyspeakException(string)'
         {
         }
 
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'MonkeyspeakException.MonkeyspeakException(string, params object[])'
-
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="format"></param>
+        /// <param name="message"></param>
         public MonkeyspeakException(string format, params object[] message) : base(String.Format(format, message))
-#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'MonkeyspeakException.MonkeyspeakException(string, params object[])'
         {
         }
 
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'MonkeyspeakException.MonkeyspeakException(string, Exception)'
-
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="inner"></param>
         public MonkeyspeakException(string message, Exception inner) : base(message, inner)
-#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'MonkeyspeakException.MonkeyspeakException(string, Exception)'
         {
         }
 
@@ -342,10 +351,12 @@ namespace Monkeyspeak
 
         #region Protected Constructors
 
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'MonkeyspeakException.MonkeyspeakException(SerializationInfo, StreamingContext)'
-
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="info"></param>
+        /// <param name="context"></param>
         protected MonkeyspeakException(
-#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'MonkeyspeakException.MonkeyspeakException(SerializationInfo, StreamingContext)'
           System.Runtime.Serialization.SerializationInfo info,
           System.Runtime.Serialization.StreamingContext context)
             : base(info, context) { }
