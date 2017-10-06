@@ -24,12 +24,7 @@ namespace Monkeyspeak
 
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'TriggerHandledEventHandler'
 
-    /// <summary>
-    /// Triggered when the Page is reset
-    /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="e"></param>
-    public delegate void PageStopEventHandler(object sender, EventArgs e);
+
 
     /// <summary>
     /// Used for handling triggers at runtime.
@@ -113,6 +108,11 @@ namespace Monkeyspeak
         /// Called when an Exception is raised during execution
         /// </summary>
         public event TriggerHandlerErrorEvent Error;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public event Action Resetting;
 
         /// <summary>
         /// Called when a Trigger and TriggerHandler is added to the Page
@@ -497,6 +497,7 @@ namespace Monkeyspeak
         /// </summary>
         public void Reset(bool resetTriggerHandlers = false)
         {
+            Resetting?.Invoke();
             scope.Clear();
             scope.Add(Variable.NoValue.Clone());
 

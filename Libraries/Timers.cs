@@ -54,31 +54,14 @@ namespace Monkeyspeak.Libraries
 
         #region Public Methods
 
-        /// <summary>
-        /// Closes and removes all Timers
-        /// </summary>
-        public static void DestroyTimers()
+       
+        internal static void DestroyTimer(TimerInfo task)
         {
-            var keys = new List<double>(timers.Keys);
             lock (lck)
             {
-                foreach (double key in keys)
-                {
-                    /*
-                     * MSDN A Dictionary<TKey, TValue> can support multiple readers
-                     * concurrently, as long as the collection is not modified. Even
-                     * so, enumerating through a collection is intrinsically not a
-                     * thread-safe procedure. In the rare case where an enumeration
-                     * contends with write accesses, the collection must be locked
-                     * during the entire enumeration. To allow the collection to be
-                     * accessed by multiple threads for reading and writing, you must
-                     * implement your own synchronization.
-                     */
-
-                    if (timers[key].Timer != null)
-                        timers[key].Dispose();
-                    timers.Remove(key);
-                }
+                task.Dispose();
+                timers.Remove(task.ID);
+                task = null;
             }
         }
 
@@ -321,6 +304,11 @@ namespace Monkeyspeak.Libraries
 
         public TimerInfo()
         {
+            owner.Resetting += () =>
+            {
+                Timer.Dispose();
+                Timers.DestroyTimer(this);
+            };
             timer = new Timer(Timer_Elapsed);
         }
 
