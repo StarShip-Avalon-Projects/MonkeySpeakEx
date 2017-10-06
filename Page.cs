@@ -25,6 +25,13 @@ namespace Monkeyspeak
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'TriggerHandledEventHandler'
 
     /// <summary>
+    /// Triggered when the Page is reset
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
+    public delegate void PageStopEventHandler(object sender, EventArgs e);
+
+    /// <summary>
     /// Used for handling triggers at runtime.
     /// </summary>
     /// <param name="reader">
@@ -454,7 +461,7 @@ namespace Monkeyspeak
         /// </summary>
         public void LoadTimerLibrary()
         {
-            LoadLibrary(new Monkeyspeak.Libraries.Timers());
+            LoadLibrary(new Libraries.Timers());
         }
 
         /// <summary>
@@ -557,7 +564,7 @@ namespace Monkeyspeak
         /// <param name="value"></param>
         /// <param name="isConstant"></param>
         /// <returns></returns>
-        public Variable SetVariable(string name, object value, bool isConstant)
+        public Variable SetVariable(string name, object value, bool isConstant = false)
         {
             if (!CheckType(value)) throw new TypeNotSupportedException(String.Format("{0} is not a supported type. Expecting string or double.", value.GetType().Name));
 
