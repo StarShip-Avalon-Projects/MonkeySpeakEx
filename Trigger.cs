@@ -1,188 +1,163 @@
-﻿using System;
+﻿using Monkeyspeak.lexical.Expressions;
+using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 
 namespace Monkeyspeak
 {
-    /// <summary>
-    /// Monkey Speak Trigger Catagories
-    /// </summary>
     [Serializable]
     public enum TriggerCategory : int
     {
         /// <summary>
         /// A trigger defined with a 0
-        /// <para>
-        /// Example: (0:1) when someone says something,
-        /// </para>
+        /// <para>Example: (0:1) when someone says something, </para>
         /// </summary>
         Cause = 0,
 
         /// <summary>
         /// A trigger defined with a 1
-        /// <para>
-        /// Example: (1:2) and they moved # units left,
-        /// </para>
+        /// <para>Example: (1:2) and they moved # units left, </para>
         /// </summary>
         Condition = 1,
 
         /// <summary>
         /// A trigger defined with a 5
-        /// <para>
-        /// Example: (5:1) print {Hello World} to the console.
-        /// </para>
+        /// <para>Example: (5:1) print {Hello World} to the console. </para>
         /// </summary>
         Effect = 5,
 
         /// <summary>
-        /// A trigger that was not defined. You should never encounter this
+        /// A trigger that was not defined.  You should never encounter this
         /// if you do then something isn't quite right.
         /// </summary>
         Undefined = -1
     }
 
-    /// <summary>
-    /// Monkey Speak Trigger
-    /// <para>
-    /// ( <see cref="TriggerCategory"/>, <see cref="int">Id</see>
-    /// </para>
-    /// </summary>
+    [StructLayout(LayoutKind.Auto)]
     [Serializable]
-    public sealed class Trigger : IEquatable<Trigger>
+    public struct Trigger : IEquatable<Trigger>
     {
-        #region Internal Fields
-
-        internal Queue<object> contents = new Queue<object>(16);
-
-        #endregion Internal Fields
-
-        #region Private Fields
-
         private TriggerCategory category;
-        private string description = "";
+
         private int id;
 
-        #endregion Private Fields
+        private string description;
 
-        #region Public Constructors
+        internal List<IExpression> contents;
 
-        /// <summary>
-        /// Establish a new trigger
-        /// </summary>
-        /// <param name="cat">
-        /// <see cref="TriggerCategory"/>
-        /// </param>
-        /// <param name="id">
-        /// Line ID
-        /// </param>
         public Trigger(TriggerCategory cat, int id)
         {
             category = cat;
             this.id = id;
+            description = string.Empty;
+            contents = new List<IExpression>();
         }
 
-        #endregion Public Constructors
-
-        #region Internal Constructors
-
-        internal Trigger()
-        {
-            category = TriggerCategory.Undefined;
-            id = -1;
-        }
-
-        #endregion Internal Constructors
-
-        #region Public Properties
-
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'Trigger.Category'
-
+        /// <summary>
+        /// Gets the category.
+        /// </summary>
+        /// <value>
+        /// The category.
+        /// </value>
         public TriggerCategory Category
-#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'Trigger.Category'
         {
             get { return category; }
             internal set { category = value; }
         }
 
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'Trigger.Description'
-
-        public string Description
-#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'Trigger.Description'
-        {
-            get { return description; }
-            set { description = value; }
-        }
-
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'Trigger.Id'
-
+        /// <summary>
+        /// Gets the identifier.
+        /// </summary>
+        /// <value>
+        /// The identifier.
+        /// </value>
         public int Id
-#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'Trigger.Id'
         {
             get { return id; }
             internal set { id = value; }
         }
 
-        #endregion Public Properties
-
-        #region Internal Properties
-
-        internal Queue<object> Contents
+        internal List<IExpression> Contents
         {
             get { return contents; }
             set { contents = value; }
         }
 
-        #endregion Internal Properties
+        /// <summary>
+        /// Gets the none.
+        /// </summary>
+        /// <value>
+        /// The none.
+        /// </value>
+        public static Trigger None => new Trigger(TriggerCategory.Undefined, -1);
 
-        #region Public Methods
-
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'Trigger.Equals(Trigger)'
-
-        public bool Equals(Trigger other)
-#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'Trigger.Equals(Trigger)'
+        internal Trigger Clone()
         {
-            return other.category == this.category && other.id == this.id;
+            var clone = new Trigger(category, id)
+            {
+                contents = new List<IExpression>(contents)
+            };
+            return clone;
         }
 
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'Trigger.Equals(object)'
-
-        public override bool Equals(object obj)
-#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'Trigger.Equals(object)'
+        public static bool operator ==(Trigger a, Trigger b)
         {
-            if (obj is Trigger other)
+            return a.Equals(b);
+        }
+
+        public static bool operator !=(Trigger a, Trigger b)
+        {
+            return !a.Equals(b);
+        }
+
+        /// <summary>
+        /// Indicates whether the current object is equal to another object of the same type.
+        /// </summary>
+        /// <param name="other">An object to compare with this object.</param>
+        /// <returns>
+        /// true if the current object is equal to the <paramref name="other" /> parameter; otherwise, false.
+        /// </returns>
+        public bool Equals(Trigger other)
+        {
+            if (other == null) return false;
+            return other.category == category && other.id == id;
+        }
+
+        /// <summary>
+        /// Determines whether the specified <see cref="System.Object" />, is equal to this instance.
+        /// </summary>
+        /// <param name="obj">The <see cref="System.Object" /> to compare with this instance.</param>
+        /// <returns>
+        ///   <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
+        /// </returns>
+        public override bool Equals(object obj)
+        {
+            if (obj == null) return false;
+            if (obj is Trigger)
             {
+                var other = (Trigger)obj;
                 return other.category == category && other.id == id;
             }
             return false;
         }
 
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'Trigger.GetHashCode()'
-
+        /// <summary>
+        /// Returns a hash code for this instance.
+        /// </summary>
+        /// <returns>
+        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.
+        /// </returns>
         public override int GetHashCode()
-#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'Trigger.GetHashCode()'
         {
-            return ((int)this.category ^ this.id);
+            return category.GetHashCode() + id.GetHashCode();
         }
 
         /// <summary>
-        /// Display the line id format (#:#)
+        /// Returns a <see cref="System.String" /> that represents this instance.
         /// </summary>
-        /// <returns></returns>
-        public override string ToString()
-        {
-            return String.Format("({0}:{1})", (int)category, id);
-        }
-
-        #endregion Public Methods
-
-        #region Internal Methods
-
-        internal Trigger Clone()
-        {
-            Trigger clone = new Trigger(category, id);
-            clone.contents = new Queue<object>(this.contents);
-            return clone;
-        }
-
-        #endregion Internal Methods
+        /// <returns>
+        /// A <see cref="System.String" /> that represents this instance.
+        /// </returns>
+        public override string ToString() => $"({(int)category}:{id})";
     }
 }

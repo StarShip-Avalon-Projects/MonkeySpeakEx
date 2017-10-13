@@ -1,14 +1,10 @@
-﻿using System;
+﻿using Monkeyspeak.Extensions;
+using System;
 
 namespace Monkeyspeak.Libraries
 {
-    /// <summary>
-    /// Monkey Speak Math Library
-    /// </summary>
-    internal class Math : AbstractBaseLibrary
+    public class Math : BaseLibrary
     {
-        #region Public Constructors
-
         public Math()
         {
             // (1:150) and variable %Variable is greater than #,
@@ -39,253 +35,148 @@ namespace Monkeyspeak.Libraries
                 "(5:152) take variable %Variable and multiply it by #.");
 
             // (5:153) take variable %Variable and divide it by #.
-            Add(new Trigger(TriggerCategory.Effect, 153), DivideByVariable,
+            Add(new Trigger(TriggerCategory.Effect, 153), MultiplyByVariable,
                 "(5:153) take variable %Variable and divide it by #.");
         }
 
-        #endregion Public Constructors
+        public override void Unload(Page page)
+        {
+        }
 
-        #region Private Methods
-
-        /// <summary>
-        /// (5:150) take variable %Variable and add # to it.
-        /// </summary>
-        /// <param name="reader">
-        /// <see cref="TriggerReader"/>
-        /// </param>
-        /// <returns>
-        /// </returns>
         private bool AddToVariable(TriggerReader reader)
         {
-            Variable var = reader.ReadVariable(true);
+            var toAssign = reader.ReadVariable(true);
             double num = 0;
-            double numOut = 0;
-            if (reader.PeekNumber())
+            if (reader.PeekVariable())
+            {
+                var valueVariable = reader.ReadVariable();
+                if (valueVariable.Value is double)
+                    num = (double)valueVariable.Value;
+            }
+            else if (reader.PeekNumber())
             {
                 num = reader.ReadNumber();
             }
 
-            if (Double.TryParse(var.Value.ToString(), out numOut) == true)
-            {
-                var.Value = (numOut + num);
-            }
-            else var.Value = num;
-
+            toAssign.Value = toAssign.Value.As<double>() + num;
             return true;
         }
 
-        /// <summary>
-        /// (5:153) take variable %Variable and divide it by #.
-        /// </summary>
-        /// <param name="reader">
-        /// <see cref="TriggerReader"/>
-        /// </param>
-        /// <returns>
-        /// </returns>
         private bool DivideByVariable(TriggerReader reader)
         {
-            Variable var = reader.ReadVariable(true);
+            var toAssign = reader.ReadVariable(true);
             double num = 0;
-            double numOut = 0;
-            if (reader.PeekNumber())
+            if (reader.PeekVariable())
+            {
+                var valueVariable = reader.ReadVariable();
+                if (valueVariable.Value is double)
+                    num = (double)valueVariable.Value;
+            }
+            else if (reader.PeekNumber())
             {
                 num = reader.ReadNumber();
             }
 
-            if (Double.TryParse(var.Value.ToString(), out numOut) == true)
-            {
-                var.Value = numOut / num;
-            }
-            else var.Value = num;
+            toAssign.Value = toAssign.Value.As<double>() / num;
             return true;
         }
 
-        /// <summary>
-        /// "(5:152) take variable %Variable and multiply it by #.
-        /// </summary>
-        /// <param name="reader">
-        /// <see cref="TriggerReader"/>
-        /// </param>
-        /// <returns>
-        /// </returns>
         private bool MultiplyByVariable(TriggerReader reader)
         {
-            Variable var = reader.ReadVariable(true);
+            var toAssign = reader.ReadVariable(true);
             double num = 0;
-            double numOut = 0;
-            if (reader.PeekNumber())
+            if (reader.PeekVariable())
+            {
+                var valueVariable = reader.ReadVariable();
+                if (valueVariable.Value is double)
+                    num = (double)valueVariable.Value;
+            }
+            else if (reader.PeekNumber())
             {
                 num = reader.ReadNumber();
             }
 
-            if (Double.TryParse(var.Value.ToString(), out numOut) == true)
-            {
-                var.Value = numOut * num;
-            }
-            else var.Value = num;
+            toAssign.Value = toAssign.Value.As<double>() * num;
             return true;
         }
 
-        /// <summary>
-        /// (5:151) take variable %Variable and subtract # from it.
-        /// </summary>
-        /// <param name="reader">
-        /// <see cref="TriggerReader"/>
-        /// </param>
-        /// <returns>
-        /// </returns>
         private bool SubtractFromVariable(TriggerReader reader)
         {
-            Variable var = reader.ReadVariable(true);
+            var toAssign = reader.ReadVariable(true);
             double num = 0;
-            double numOut = 0;
-            if (reader.PeekNumber())
+            if (reader.PeekVariable())
+            {
+                var valueVariable = reader.ReadVariable();
+                if (valueVariable.Value is double)
+                    num = (double)valueVariable.Value;
+            }
+            else if (reader.PeekNumber())
             {
                 num = reader.ReadNumber();
             }
 
-            if (Double.TryParse(var.Value.ToString(), out numOut) == true)
-            {
-                var.Value = numOut - num;
-            }
-            else var.Value = num;
+            toAssign.Value = toAssign.Value.As<double>() - num;
             return true;
         }
 
-        /// <summary>
-        /// (1:150) and variable %Variable is greater than #,
-        /// </summary>
-        /// <param name="reader">
-        /// <see cref="TriggerReader"/>
-        /// </param>
-        /// <returns>
-        /// </returns>
         private bool VariableGreaterThan(TriggerReader reader)
         {
-            Variable mainVar = reader.ReadVariable();
-            Variable var;
+            var mainVar = reader.ReadVariable();
             double num = 0;
-            double mainNum = 0;
-            double Num = 0;
-            if (reader.TryReadVariable(out var))
+            if (reader.TryReadVariable(out IVariable var))
             {
-                if (Double.TryParse(mainVar.Value.ToString(), out mainNum) && Double.TryParse(var.Value.ToString(), out Num))
-                    return mainNum > Num;
-                if (Double.TryParse(mainVar.Value.ToString(), out mainNum) == false && Double.TryParse(var.Value.ToString(), out Num))
-                    return 0.0 > Num;
-                if (Double.TryParse(mainVar.Value.ToString(), out mainNum) && Double.TryParse(var.Value.ToString(), out Num) == false)
-                    return mainNum > 0.0;
+                return mainVar.Value.As<double>() > var.Value.As<double>();
             }
             else if (reader.TryReadNumber(out num))
             {
-                if (Double.TryParse(mainVar.Value.ToString(), out mainNum))
-                    return mainNum > num;
+                return mainVar.Value.As<double>() > num;
             }
             return false;
         }
 
-        /// <summary>
-        /// (1:151) and variable %Variable is greater than or equal to #,
-        /// </summary>
-        /// <param name="reader">
-        /// <see cref="TriggerReader"/>
-        /// </param>
-        /// <returns>
-        /// </returns>
         private bool VariableGreaterThanOrEqual(TriggerReader reader)
         {
-            Variable mainVar = reader.ReadVariable();
-            Variable var;
-            double num;
-            double mainNum;
-            double Num;
-            if (reader.TryReadVariable(out var))
+            var mainVar = reader.ReadVariable();
+            double num = 0;
+            if (reader.TryReadVariable(out IVariable var))
             {
-                if (Double.TryParse(mainVar.Value.ToString(), out mainNum) && Double.TryParse(var.Value.ToString(), out Num))
-                    return mainNum >= Num;
-                if (Double.TryParse(mainVar.Value.ToString(), out mainNum) == false && Double.TryParse(var.Value.ToString(), out Num))
-                    return 0.0 >= Num;
-                if (Double.TryParse(mainVar.Value.ToString(), out mainNum) && Double.TryParse(var.Value.ToString(), out Num) == false)
-                    return mainNum >= 0.0;
-                return false;
+                return mainVar.Value.As<double>() >= var.Value.As<double>();
             }
             else if (reader.TryReadNumber(out num))
             {
-                if (Double.TryParse(mainVar.Value.ToString(), out mainNum))
-                    return mainNum >= num;
-                return false;
+                return mainVar.Value.As<double>() >= num;
             }
             return false;
         }
 
-        /// <summary>
-        /// (1:152) and variable %Variable is less than #,
-        /// </summary>
-        /// <param name="reader">
-        /// <see cref="TriggerReader"/>
-        /// </param>
-        /// <returns>
-        /// </returns>
         private bool VariableLessThan(TriggerReader reader)
         {
-            Variable mainVar = reader.ReadVariable();
-            Variable var;
-            double num;
-            double mainNum;
-            double Num;
-            if (reader.TryReadVariable(out var))
+            var mainVar = reader.ReadVariable();
+            double num = 0;
+            if (reader.TryReadVariable(out IVariable var))
             {
-                if (Double.TryParse(mainVar.Value.ToString(), out mainNum) && Double.TryParse(var.Value.ToString(), out Num))
-                    return mainNum < Num;
-                if (Double.TryParse(mainVar.Value.ToString(), out mainNum) == false && Double.TryParse(var.Value.ToString(), out Num))
-                    return 0.0 < Num;
-                if (Double.TryParse(mainVar.Value.ToString(), out mainNum) && Double.TryParse(var.Value.ToString(), out Num) == false)
-                    return mainNum < 0.0;
-                return false;
+                return mainVar.Value.As<double>() < var.Value.As<double>();
             }
             else if (reader.TryReadNumber(out num))
             {
-                if (Double.TryParse(mainVar.Value.ToString(), out mainNum))
-                    return mainNum < num;
-                return false;
+                return mainVar.Value.As<double>() < num;
             }
             return false;
         }
 
-        /// <summary>
-        /// (1:153) and variable %Variable is less than or equal to #,
-        /// </summary>
-        /// <param name="reader">
-        /// <see cref="TriggerReader"/>
-        /// </param>
-        /// <returns>
-        /// </returns>
         private bool VariableLessThanOrEqual(TriggerReader reader)
         {
-            Variable mainVar = reader.ReadVariable();
-            Variable var;
-            double num;
-            double mainNum;
-            double Num;
-            if (reader.TryReadVariable(out var))
+            var mainVar = reader.ReadVariable();
+            double num = 0;
+            if (reader.TryReadVariable(out IVariable var))
             {
-                if (Double.TryParse(mainVar.Value.ToString(), out mainNum) && Double.TryParse(var.Value.ToString(), out Num))
-                    return mainNum <= Num;
-                if (Double.TryParse(mainVar.Value.ToString(), out mainNum) == false && Double.TryParse(var.Value.ToString(), out Num))
-                    return 0.0 <= Num;
-                if (Double.TryParse(mainVar.Value.ToString(), out mainNum) && Double.TryParse(var.Value.ToString(), out Num) == false)
-                    return mainNum <= 0.0;
-                return false;
+                return mainVar.Value.As<double>() <= var.Value.As<double>();
             }
             else if (reader.TryReadNumber(out num))
             {
-                if (Double.TryParse(mainVar.Value.ToString(), out mainNum))
-                    return mainNum <= num;
-                return false;
+                return mainVar.Value.As<double>() <= num;
             }
             return false;
         }
-
-        #endregion Private Methods
     }
 }

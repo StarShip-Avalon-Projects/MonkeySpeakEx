@@ -1,127 +1,147 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 
 namespace Monkeyspeak.Libraries
 {
-    /// <summary>
-    /// Base Library to build Monkey Speak Libraries on
-    /// </summary>
-    public abstract class AbstractBaseLibrary
+    public abstract class BaseLibrary
     {
-        #region Internal Fields
-
-        internal List<string> descriptions;
         internal Dictionary<Trigger, TriggerHandler> handlers;
-
-        #endregion Internal Fields
-
-        #region Protected Constructors
+        internal Dictionary<Trigger, string> descriptions;
 
         /// <summary>
         /// Base abstract class for Monkeyspeak Libraries
         /// </summary>
-        protected AbstractBaseLibrary()
+        protected BaseLibrary()
         {
             handlers = new Dictionary<Trigger, TriggerHandler>();
-            descriptions = new List<string>();
+            descriptions = new Dictionary<Trigger, string>();
         }
-
-        #endregion Protected Constructors
-
-        #region Public Methods
 
         /// <summary>
         /// Raises a MonkeyspeakException
         /// </summary>
-        /// <param name="reason">
-        /// Reason for the error
-        /// </param>
-        public void RaiseError(string reason)
+        /// <param name="reason">Reason for the error</param>
+        public virtual void RaiseError(string reason)
         {
             throw new MonkeyspeakException(reason);
         }
 
         /// <summary>
-        /// Builds a string representation of the descriptions of each trigger.
-        /// </summary>
-        /// <returns>
-        /// </returns>
-        public override string ToString()
-        {
-            StringBuilder builder = new StringBuilder();
-            for (int i = 0; i <= descriptions.Count - 1; i++)
-            {
-                builder.Append(descriptions[i]).Append(Environment.NewLine);
-            }
-            return builder.ToString();
-        }
-
-        #endregion Public Methods
-
-        #region Internal Methods
-
-        /// <summary>
-        /// Registers this library to a Page
-        /// </summary>
-        /// <param name="page">
-        /// </param>
-        internal void Register(Page page)
-        {
-            lock (page.syncObj)
-            {
-                for (int i = 0; i <= handlers.Count - 1; i++)
-                {
-                    var kv = handlers.ElementAt(i);
-                    page.SetTriggerHandler(kv.Key, kv.Value);
-                }
-                // Ensure that this library can only be loaded once.
-                handlers.Clear();
-            }
-        }
-
-        #endregion Internal Methods
-
-        #region Protected Methods
-
-        /// <summary>
         /// Registers a Trigger to the TriggerHandler with optional description
         /// </summary>
-        /// <param name="trigger">
-        /// </param>
-        /// <param name="handler">
-        /// </param>
-        /// <param name="description">
-        /// </param>
-        protected void Add(Trigger trigger, TriggerHandler handler, string description = null)
+        /// <param name="trigger"></param>
+        /// <param name="handler"></param>
+        /// <param name="description"></param>
+        public void Add(Trigger trigger, TriggerHandler handler, string description = null)
         {
-            if (description != null) trigger.Description = description;
-            if (handlers.ContainsKey(trigger) == false)
+            if (description != null && !descriptions.ContainsKey(trigger)) descriptions.Add(trigger, description);
+            if (!handlers.ContainsKey(trigger))
                 handlers.Add(trigger, handler);
-            else throw new UnauthorizedAccessException("Attempt to override existing Trigger handler." + trigger.ToString());
+            else throw new UnauthorizedAccessException($"Override of existing Trigger {trigger}'s handler with handler in {handler.Method}.");
         }
 
         /// <summary>
         /// Registers a Trigger to the TriggerHandler with optional description
         /// </summary>
-        /// <param name="cat">
-        /// </param>
-        /// <param name="id">
-        /// </param>
-        /// <param name="handler">
-        /// </param>
-        /// <param name="description">
-        /// </param>
-        protected void Add(TriggerCategory cat, int id, TriggerHandler handler, string description = null)
+        /// <param name="cat"></param>
+        /// <param name="id"></param>
+        /// <param name="handler"></param>
+        /// <param name="description"></param>
+        public void Add(TriggerCategory cat, int id, TriggerHandler handler, string description = null)
         {
             Trigger trigger = new Trigger(cat, id);
-            if (description != null) trigger.Description = description;
-            if (handlers.ContainsKey(trigger) == false)
+            if (description != null) descriptions.Add(trigger, description);
+            if (!handlers.ContainsKey(trigger))
                 handlers.Add(trigger, handler);
-            else throw new UnauthorizedAccessException("Attempt to override existing Trigger handler." + trigger.ToString());
+            else throw new UnauthorizedAccessException($"Override of existing Trigger {trigger}'s handler with handler in {handler.Method}.");
         }
 
-        #endregion Protected Methods
+        /// <summary>
+        /// Called when page is disposing or resetting.
+        /// </summary>
+        /// <param name="page">The page.</param>
+        public abstract void Unload(Page page);
+
+        /// <summary>
+        /// Builds a string representation of the descriptions of each trigger.
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine(GetType().Name);
+            foreach (var kv in descriptions)
+            {
+                sb.AppendLine(kv.Value);
+            }
+            return sb.ToString();
+        }
+
+        public static IEnumerable<BaseLibrary> GetAllLibraries()
+        {
+            if (Assembly.GetEntryAssembly() != null)
+            {
+                foreach (var asmName in Assembly.GetEntryAssembly().GetReferencedAssemblies())
+                {
+                    var asm = Assembly.Load(asmName);
+                    foreach (var lib in GetLibrariesFromAssembly(asm)) yield return lib;
+                }
+            }
+            else if (Assembly.GetExecutingAssembly() != null)
+            {
+                foreach (var asmName in Assembly.GetExecutingAssembly().GetReferencedAssemblies())
+                {
+                    var asm = Assembly.Load(asmName);
+                    foreach (var lib in GetLibrariesFromAssembly(asm)) yield return lib;
+                }
+            }
+            foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                // avoid all the Microsoft and System assemblies.  All assesmblies it is looking for should be in the local path
+                if (asm.GlobalAssemblyCache) continue;
+
+                foreach (var lib in GetLibrariesFromAssembly(asm)) yield return lib;
+            }
+        }
+
+        /// <summary>
+        /// Loads trigger handlers from a assembly instance
+        /// </summary>
+        /// <param name="asm">The assembly instance</param>
+        public static IEnumerable<BaseLibrary> GetLibrariesFromAssembly(Assembly asm)
+        {
+            if (asm == null) yield break;
+            foreach (var types in ReflectionHelper.GetAllTypesWithAttributeInMembers<TriggerHandlerAttribute>(asm))
+                foreach (MethodInfo method in types.GetMethods().Where(method => method.IsDefined(typeof(TriggerHandlerAttribute), false)))
+                {
+                    foreach (TriggerHandlerAttribute attribute in ReflectionHelper.GetAllAttributesFromMethod<TriggerHandlerAttribute>(method))
+                    {
+                        attribute.owner = method;
+                        try
+                        {
+                            var handler = (TriggerHandler)(reader => (bool)attribute.owner.Invoke(null, new object[] { reader }));
+                            if (handler != null)
+                            {
+                                Attributes.Instance.Add(new Trigger(attribute.TriggerCategory, attribute.TriggerID), handler, attribute.Description);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            throw new MonkeyspeakException(String.Format("Failed to load library from assembly '{0}', couldn't bind to method '{1}.{2}'", asm.FullName, method.DeclaringType.Name, method.Name), ex);
+                        }
+                    }
+                }
+            yield return Attributes.Instance;
+            var subType = typeof(BaseLibrary);
+            foreach (var type in asm.GetTypes())
+            {
+                if (type.IsSubclassOf(subType))
+                    yield return (BaseLibrary)Activator.CreateInstance(type);
+            }
+        }
     }
 }

@@ -4,10 +4,8 @@ using System.Collections.Generic;
 namespace Monkeyspeak
 {
     [Serializable]
-    internal class TriggerList : List<Trigger>
+    public class TriggerList : List<Trigger>
     {
-        #region Public Constructors
-
         public TriggerList()
         {
         }
@@ -22,23 +20,23 @@ namespace Monkeyspeak
         {
         }
 
-        #endregion Public Constructors
-
-        #region Public Methods
-
-        public bool HasTrigger(TriggerCategory cat, int id)
+        /// <summary>
+        /// Operates like IndexOf for Triggers
+        /// </summary>
+        /// <param name="cat"></param>
+        /// <param name="id"></param>
+        /// <returns>Index of trigger or -1 if not found</returns>
+        public int IndexOfTrigger(TriggerCategory cat, int id)
         {
             for (int i = 0; i <= Count - 1; i++)
             {
                 Trigger trigger = this[i];
                 if (trigger.Category == cat && trigger.Id == id)
                 {
-                    return true;
+                    return i;
                 }
             }
-            return false;
+            return -1;
         }
-
-        #endregion Public Methods
     }
 }

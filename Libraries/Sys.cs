@@ -1,14 +1,11 @@
-﻿using System;
+﻿using Monkeyspeak.Extensions;
+using Shared.Core.Logging;
+using System;
 
 namespace Monkeyspeak.Libraries
 {
-    /// <summary>
-    /// Monkey Speak Sys library
-    /// </summary>
-    internal class Sys : AbstractBaseLibrary
+    public class Sys : BaseLibrary
     {
-        #region Public Constructors
-
         public Sys()
         {
             // (1:100) and variable %Variable is defined,
@@ -55,8 +52,7 @@ namespace Monkeyspeak.Libraries
             Add(new Trigger(TriggerCategory.Effect, 102), PrintToConsole,
                 "(5:102) print {...} to the console.");
 
-            // (5:103) get the environment variable named {...} and put it
-            // into #,
+            // (5:103) get the environment variable named {...} and put it into #,
             Add(new Trigger(TriggerCategory.Effect, 103), GetEnvVariable,
                 "(5:103) get the environment variable named {...} and put it into %, (ex: PATH)");
 
@@ -71,203 +67,75 @@ namespace Monkeyspeak.Libraries
                 "(5:110) load library from file {...}. (example Monkeyspeak.dll)");
         }
 
-        #endregion Public Constructors
+        public override void Unload(Page page)
+        {
+        }
 
-        #region Private Methods
-
-        /// <summary>
-        /// (5:103) get the environment variable named {...} and put it into
-        /// %, (ex: PATH)
-        /// </summary>
-        /// <param name="reader">
-        /// </param>
-        /// <returns>
-        /// </returns>
         private bool GetEnvVariable(TriggerReader reader)
         {
             string envVar = Environment.GetEnvironmentVariable(reader.ReadString());
-            Variable var = reader.ReadVariable(true);
+            var var = reader.ReadVariable(true);
             var.Value = envVar;
             return true;
         }
 
-        /// <summary>
-        /// (1:100) and variable % is defined,
-        /// </summary>
-        /// <param name="reader">
-        /// </param>
-        /// <returns>
-        /// </returns>
         private bool IsVariableDefined(TriggerReader reader)
         {
-            Variable var = reader.ReadVariable(false);
+            var var = reader.ReadVariable();
             return reader.Page.HasVariable(var.Name) && var.Value != null;
         }
 
-        /// <summary>
-        /// (1:102) and variable % equals #,
-        /// </summary>
-        /// <param name="reader">
-        /// </param>
-        /// <returns>
-        /// </returns>
         private bool IsVariableEqualToNumberOrVar(TriggerReader reader)
         {
-            Variable var = reader.ReadVariable(false);
-            Variable optVar;
-            double number = 0;
+            var var = reader.ReadVariable();
             double num = 0;
-            double optNum = 0;
-            if (reader.TryReadVariable(out optVar))
+            if (reader.PeekVariable())
             {
-                // var can be undefined or Single Digit number Compensate
-                // for it. -Gerolkae
-                try
-                {
-                    if (Double.TryParse(var.Value.ToString(), out num) && Double.TryParse(optVar.Value.ToString(), out optNum))
-                        return num == optNum;
-                    else
-                        return var.Value.Equals(optVar.Value);
-                }
-                catch
-                {
-                    System.Diagnostics.Debug.Print(var.ToString());
-                    System.Diagnostics.Debug.Print(optVar.ToString());
-                    return false;
-                }
+                var optVar = reader.ReadVariable();
+                num = optVar.Value.As<double>();
             }
-            else if (reader.TryReadNumber(out number))
+            else if (reader.PeekNumber())
             {
-                try
-                {
-                    if (Double.TryParse(var.Value.ToString(), out num))
-                        return num == number;
-                    return false;
-                }
-                catch
-                {
-                    System.Diagnostics.Debug.Print(var.ToString());
-                    return false;
-                }
+                num = reader.ReadNumber();
             }
-            return false;
+
+            return num == var.Value.As<double>();
         }
 
-        /// <summary>
-        /// (1:104) and variable % equals {...},
-        /// </summary>
-        /// <param name="reader">
-        /// </param>
-        /// <returns>
-        /// </returns>
         private bool IsVariableEqualToString(TriggerReader reader)
         {
-            Variable var = reader.ReadVariable(false);
-            string str = reader.ReadString();
-            return str.Equals(var.Value.ToString());
-        }
-
-        /// <summary>
-        /// (1:101) and variable % is not defined,
-        /// </summary>
-        /// <param name="reader">
-        /// </param>
-        /// <returns>
-        /// </returns>
-        private bool IsVariableNotDefined(TriggerReader reader)
-        {
-            return IsVariableDefined(reader) == false;
-        }
-
-        /// <summary>
-        /// (1:103) and variable % does not equal #,
-        /// </summary>
-        /// <param name="reader">
-        /// </param>
-        /// <returns>
-        /// </returns>
-        private bool IsVariableNotEqualToNumberOrVar(TriggerReader reader)
-        {
-            Variable var = reader.ReadVariable(false);
-            Variable optVar;
-            double number = 0;
-            double num = 0;
-            double optNum = 0;
-            if (reader.TryReadVariable(out optVar))
+            var var = reader.ReadVariable();
+            string str = null;
+            if (reader.PeekString())
             {
-                // var can be undefined or Single Digit number Compensate
-                // for it. -Gerolkae
-                try
-                {
-                    if (Double.TryParse(var.Value.ToString(), out num) && Double.TryParse(optVar.Value.ToString(), out optNum))
-                        return num != optNum;
-                    else
-                        return var.Value != optVar.Value;
-                }
-                catch
-                {
-                    System.Diagnostics.Debug.Print(var.ToString());
-                    System.Diagnostics.Debug.Print(optVar.ToString());
-                    return false;
-                }
-            }
-            else if (reader.TryReadNumber(out number))
-            {
-                try
-                {
-                    if (Double.TryParse(var.Value.ToString(), out num))
-                        return num != number;
-                    return false;
-                }
-                catch
-                {
-                    System.Diagnostics.Debug.Print(var.ToString());
-                    return false;
-                }
+                str = reader.ReadString();
+                return var.Value.As<string>().Equals(str, StringComparison.InvariantCulture);
             }
             return false;
         }
 
-        /// <summary>
-        /// (1:105) and variable % does not equal {...},
-        /// </summary>
-        /// <param name="reader">
-        /// </param>
-        /// <returns>
-        /// </returns>
-        private bool IsVariableNotEqualToString(TriggerReader reader)
+        private bool IsVariableNotDefined(TriggerReader reader)
         {
-            //bool test = IsVariableEqualToString(reader);
-            //return IsVariableEqualToString(reader) == false;
-            Variable var = reader.ReadVariable(false);
-            string str = reader.ReadString();
-            if (str.Equals(var.Value.ToString()))
-                return false;
-            else
-                return true;
+            return !IsVariableDefined(reader);
         }
 
-        /// <summary>
-        /// (5:110) load library from file {...}. (example Monkeyspeak.dll)
-        /// </summary>
-        /// <param name="reader">
-        /// </param>
-        /// <returns>
-        /// </returns>
+        private bool IsVariableNotEqualToNumberOrVar(TriggerReader reader)
+        {
+            return !IsVariableEqualToNumberOrVar(reader);
+        }
+
+        private bool IsVariableNotEqualToString(TriggerReader reader)
+        {
+            return !IsVariableEqualToString(reader);
+        }
+
         private bool LoadLibraryFromFile(TriggerReader reader)
         {
-            if (reader.PeekString() == false) return false;
+            if (!reader.PeekString()) return false;
             reader.Page.LoadLibraryFromAssembly(reader.ReadString());
             return true;
         }
 
-        /// <summary>
-        /// (5:102) print {...} to the console.
-        /// </summary>
-        /// <param name="reader">
-        /// </param>
-        /// <returns>
-        /// </returns>
         private bool PrintToConsole(TriggerReader reader)
         {
             string output = reader.ReadString();
@@ -275,13 +143,6 @@ namespace Monkeyspeak.Libraries
             return true;
         }
 
-        /// <summary>
-        /// (5:105) raise an error.
-        /// </summary>
-        /// <param name="reader">
-        /// </param>
-        /// <returns>
-        /// </returns>
         private bool RaiseAnError(TriggerReader reader)
         {
             string errorMsg = "";
@@ -290,35 +151,19 @@ namespace Monkeyspeak.Libraries
             return false;
         }
 
-        /// <summary>
-        /// (5:104) create random number and put it into variable %.
-        /// </summary>
-        /// <param name="reader">
-        /// </param>
-        /// <returns>
-        /// </returns>
         private bool RandomValueToVar(TriggerReader reader)
         {
-            Variable var = reader.ReadVariable(true);
+            var var = reader.ReadVariable(true);
             var.Value = (double)new Random().Next();
             return true;
         }
 
-        /// <summary>
-        /// (5:101) set variable % to #.
-        /// </summary>
-        /// <param name="reader">
-        /// </param>
-        /// <returns>
-        /// </returns>
         private bool SetVariableToNumberOrVariable(TriggerReader reader)
         {
-            if (reader.PeekVariable() == false) return false;
-
-            Variable var = reader.ReadVariable(true);
+            var var = reader.ReadVariable(true);
             if (reader.PeekVariable())
             {
-                Variable otherVar = reader.ReadVariable();
+                var otherVar = reader.ReadVariable();
                 var.Value = otherVar.Value;
             }
             else if (reader.PeekNumber())
@@ -329,46 +174,27 @@ namespace Monkeyspeak.Libraries
             return true;
         }
 
-        /// <summary>
-        /// (5:100) set variable % to {...}.
-        /// </summary>
-        /// <param name="reader">
-        /// </param>
-        /// <returns>
-        /// </returns>
         private bool SetVariableToString(TriggerReader reader)
         {
-            if (reader.PeekVariable() == false) return false;
-
-            Variable var = reader.ReadVariable(true);
-            var.Value = reader.ReadString(true);
-            return true;
+            if (reader.PeekVariable())
+            {
+                var var = reader.ReadVariable(true);
+                if (reader.PeekString())
+                    var.Value = reader.ReadString();
+                else var.Value = string.Empty;
+                return true;
+            }
+            return false;
         }
 
-        /// <summary>
-        /// (1:106) and variable % is constant,
-        /// </summary>
-        /// <param name="reader">
-        /// </param>
-        /// <returns>
-        /// </returns>
         private bool VariableIsConstant(TriggerReader reader)
         {
             return reader.ReadVariable().IsConstant;
         }
 
-        /// <summary>
-        /// (1:107) and variable % is not constant,
-        /// </summary>
-        /// <param name="reader">
-        /// </param>
-        /// <returns>
-        /// </returns>
         private bool VariableIsNotConstant(TriggerReader reader)
         {
-            return VariableIsConstant(reader) == false;
+            return !VariableIsConstant(reader);
         }
-
-        #endregion Private Methods
     }
 }

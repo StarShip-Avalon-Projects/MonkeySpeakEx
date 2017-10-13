@@ -1,225 +1,104 @@
-﻿using System;
+﻿using Monkeyspeak.Extensions;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Monkeyspeak
 {
-#pragma warning disable CS1570 // XML comment has badly formed XML -- 'End tag 'summary' does not match the start tag 'para'.'
-#pragma warning disable CS1570 // XML comment has badly formed XML -- 'End tag 'para' does not match the start tag 'see'.'
-    /// <summary> MonkeySpeak Variable oblect. <para>This obkect acepts <see
-    /// cref="String"/> and <see cref="Double"> types</para> </summary>
+    [Serializable]
+    public class VariableIsConstantException : Exception
+    {
+        public VariableIsConstantException()
+        {
+        }
 
-#pragma warning disable CS1570 // XML comment has badly formed XML -- 'Expected an end tag for element 'summary'.'
+        public VariableIsConstantException(string message)
+            : base(message)
+        {
+        }
+
+        public VariableIsConstantException(string message, Exception inner)
+            : base(message, inner)
+        {
+        }
+
+        protected VariableIsConstantException(
+          System.Runtime.Serialization.SerializationInfo info,
+          System.Runtime.Serialization.StreamingContext context)
+            : base(info, context) { }
+    }
+
+    public interface IVariable : IEquatable<IVariable>
+    {
+        string Name { get; }
+        object Value { get; set; }
+        bool IsConstant { get; }
+    }
 
     [Serializable]
-#pragma warning restore CS1570 // XML comment has badly formed XML -- 'Expected an end tag for element 'summary'.'
-#pragma warning restore CS1570 // XML comment has badly formed XML -- 'End tag 'para' does not match the start tag 'see'.'
-#pragma warning restore CS1570 // XML comment has badly formed XML -- 'End tag 'summary' does not match the start tag 'para'.'
-    [CLSCompliant(true)]
-    public class Variable
+    public class Variable : IVariable
     {
-        #region Public Fields
+        public bool Equals(IVariable other)
+        {
+            return Equals(value, other.Value) && string.Equals(Name, other.Name);
+        }
 
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'Variable.NoValue'
-        public static readonly Variable NoValue = new Variable("%none", "", false);
-#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'Variable.NoValue'
+        /// <summary>
+        /// Returns the hash code for this instance.
+        /// </summary>
+        /// <returns>
+        /// A 32-bit signed integer that is the hash code for this instance.
+        /// </returns>
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hashCode = IsConstant.GetHashCode();
+                hashCode = (hashCode * 397) ^ (value != null ? value.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (Name != null ? Name.GetHashCode() : 0);
+                return hashCode;
+            }
+        }
 
-        #endregion Public Fields
+        public static readonly IVariable NoValue = new Variable("%none", null, true);
 
-        #region Private Fields
-
-        private bool isConstant;
-
-        private string name;
+        public bool IsConstant
+        {
+            get;
+            private set;
+        }
 
         private object value;
 
-        #endregion Private Fields
-
-        #region Internal Constructors
-
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="Name"></param>
-        /// <param name="value"></param>
-        /// <param name="constant"></param>
-        public Variable(string Name, object value, bool constant)
-        {
-            isConstant = constant;
-            name = Name;
-            this.value = value;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="Name"></param>
-        /// <param name="value"></param>
-        public Variable(string Name, object value)
-        {
-            isConstant = false;
-            name = Name;
-            this.value = value;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        public Variable()
-        {
-            this.isConstant = NoValue.isConstant;
-            this.name = NoValue.name;
-            this.value = NoValue.value;
-        }
-
-        #endregion Internal Constructors
-
-        #region Public Properties
-
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'Variable.IsConstant'
-
-        public bool IsConstant
-#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'Variable.IsConstant'
-        {
-            get
-            {
-                return isConstant;
-            }
-            set
-            {
-                isConstant = value;
-            }
-        }
-
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'Variable.Name'
-
-        public string Name
-#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'Variable.Name'
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(name))
-                    name = "%none";
-                return name;
-            }
-            internal set
-            {
-                name = value;
-            }
-        }
-
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'Variable.Value'
-
         public object Value
-#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'Variable.Value'
         {
-            get
-            {
-                return value;
-            }
+            get { return value ?? "null"; }
             set
             {
                 // removed Value = as it interfered with page.setVariable - Gerolkae
-                if (CheckType(value) == false) throw new TypeNotSupportedException(value.GetType().Name +
-    " is not a supported type. Expecting string or double.");
+                if (!CheckType(value)) throw new TypeNotSupportedException(value.GetType().Name +
+                " is not a supported type. Expecting string or double.");
 
-                if (IsConstant == false)
-                    this.value = value;
-                else throw new VariableIsConstantException("Attempt to assign a _value to constant \"" + Name + "\"");
+                if (value != null && IsConstant)
+                    throw new VariableIsConstantException($"Attempt to assign a value to constant '{Name}'");
+                this.value = value;
             }
         }
 
-        #endregion Public Properties
+        public string Name { get; internal set; }
 
-        // Variable var = new variable(); Preset reader.readvariable with
-        // default data Needed for Conditions checking Variables that
-        // haven't been defined yet.
-        // -Gerolkae
-        /* private Variable()
-         {
-             isConstant = false;
-             name = "%none";
-             value = null;
-         }*/
-
-        #region Public Methods
-
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'Variable.operator !=(Variable, Variable)'
-
-        public static bool operator !=(Variable varA, Variable varB)
-#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'Variable.operator !=(Variable, Variable)'
+        internal Variable(string name, bool constant = false)
         {
-            return varA.Value != varB.Value;
+            IsConstant = constant;
+            Name = name;
         }
 
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'Variable.operator ==(Variable, Variable)'
-
-        public static bool operator ==(Variable varA, Variable varB)
-#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'Variable.operator ==(Variable, Variable)'
+        internal Variable(string name, object value, bool constant = false)
         {
-            return varA.Value == varB.Value;
+            IsConstant = constant;
+            Name = name;
+            this.value = value;
         }
-
-        /// <summary>
-        /// </summary>
-        /// <param name="asConstant">
-        /// Clone as Constant
-        /// </param>
-        /// <returns>
-        /// </returns>
-        public Variable Clone(bool asConstant = false)
-        {
-            return new Variable(Name, Value, asConstant);
-        }
-
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'Variable.Equals(object)'
-
-        public override bool Equals(object obj)
-#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'Variable.Equals(object)'
-        {
-            return ((Variable)obj).Name.Equals(Name) && ((Variable)obj).Value.Equals(Value);
-        }
-
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'Variable.ForceAssignValue(object)'
-
-        public void ForceAssignValue(object _value)
-#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'Variable.ForceAssignValue(object)'
-        {
-            if (CheckType(_value) == false) throw new TypeNotSupportedException(_value.GetType().Name +
-" is not a supported type. Expecting string or double.");
-            value = _value;
-        }
-
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'Variable.GetHashCode()'
-
-        public override int GetHashCode()
-#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'Variable.GetHashCode()'
-        {
-            int n = 0;
-            if (value is int)
-            {
-                n = int.Parse(value.ToString());
-                return value.ToString().GetHashCode() ^ name.GetHashCode();
-            }
-            return n ^ name.GetHashCode();
-        }
-
-        /// <summary>
-        /// Returns a const identifier if the variable is constant followed
-        /// by name,
-        /// <para>
-        /// otherwise just the name is returned.
-        /// </para>
-        /// </summary>
-        /// <returns>
-        /// </returns>
-        public override string ToString()
-        {
-            return ((IsConstant) ? "const " : "") + Name + " = " + ((Value == null) ? "null" : Value.ToString());
-        }
-
-        #endregion Public Methods
-
-        #region Private Methods
 
         private bool CheckType(object _value)
         {
@@ -229,49 +108,138 @@ namespace Monkeyspeak
                    _value is double;
         }
 
-        #endregion Private Methods
+        /// <summary>
+        /// Returns a const identifier if the variable is constant followed by name,
+        /// <para>otherwise just the name is returned.</para>
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString()
+        {
+            return ((IsConstant) ? "const " : "") + $"{Name} = {value ?? "null"}";
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="asConstant">Clone as Constant</param>
+        /// <returns></returns>
+        public Variable Clone(bool asConstant = false)
+        {
+            return new Variable(Name, value, asConstant);
+        }
+
+        public static bool operator ==(Variable varA, Variable varB)
+        {
+            return varA.Value == varB.Value;
+        }
+
+        public static bool operator !=(Variable varA, Variable varB)
+        {
+            return varA.Value != varB.Value;
+        }
+
+        public static Variable operator +(Variable varA, double num)
+        {
+            varA.Value = varA.Value.As<double>() + num;
+            return varA;
+        }
+
+        public static Variable operator -(Variable varA, double num)
+        {
+            varA.Value = varA.Value.As<double>() - num;
+            return varA;
+        }
+
+        public static Variable operator *(Variable varA, double num)
+        {
+            varA.Value = varA.Value.As<double>() * num;
+            return varA;
+        }
+
+        public static Variable operator /(Variable varA, double num)
+        {
+            varA.Value = varA.Value.As<double>() / num;
+            return varA;
+        }
+
+        public static Variable operator +(Variable varA, string str)
+        {
+            varA.Value = varA.Value.As<string>() + str;
+            return varA;
+        }
+
+        public static implicit operator string(Variable var)
+        {
+            return var.Value.As<string>();
+        }
+
+        public static implicit operator double(Variable var)
+        {
+            return var.Value.As<double>();
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj != null && obj is Variable && Equals((Variable)obj);
+        }
     }
 
     [Serializable]
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'VariableIsConstantException'
-    public class VariableIsConstantException : Exception
-#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'VariableIsConstantException'
+    public sealed class VariableList : IVariable
     {
-        #region Public Constructors
+        public string Name { get; private set; }
 
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'VariableIsConstantException.VariableIsConstantException()'
+        private List<object> values;
 
-        public VariableIsConstantException()
-#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'VariableIsConstantException.VariableIsConstantException()'
+        public object Value
         {
+            get { return values.FirstOrDefault(); } // this is intended behavior just in case you try to get variable value without [index]
+            set { if (!values.Contains(value)) values.Add(value); }
         }
 
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'VariableIsConstantException.VariableIsConstantException(string)'
-
-        public VariableIsConstantException(string message) : base(message)
-#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'VariableIsConstantException.VariableIsConstantException(string)'
+        public object this[int index]
         {
+            get { return values[index]; }
         }
 
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'VariableIsConstantException.VariableIsConstantException(string, Exception)'
+        public int Count { get => values.Count; }
 
-        public VariableIsConstantException(string message, Exception inner) : base(message, inner)
-#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'VariableIsConstantException.VariableIsConstantException(string, Exception)'
+        public bool IsConstant { get; private set; }
+
+        public VariableList(string name, bool isConstant = false)
         {
+            Name = name;
+            values = new List<object>();
+            IsConstant = isConstant;
         }
 
-        #endregion Public Constructors
+        public VariableList(string name, bool isConstant = false, params object[] values)
+        {
+            Name = name;
+            this.values = new List<object>(values);
+            IsConstant = isConstant;
+        }
 
-        #region Protected Constructors
+        public bool Equals(IVariable other)
+        {
+            return Equals(values, other.Value) && string.Equals(Name, other.Name);
+        }
 
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'VariableIsConstantException.VariableIsConstantException(SerializationInfo, StreamingContext)'
-
-        protected VariableIsConstantException(
-#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'VariableIsConstantException.VariableIsConstantException(SerializationInfo, StreamingContext)'
-          System.Runtime.Serialization.SerializationInfo info,
-          System.Runtime.Serialization.StreamingContext context)
-            : base(info, context) { }
-
-        #endregion Protected Constructors
+        /// <summary>
+        /// Returns the hash code for this instance.
+        /// </summary>
+        /// <returns>
+        /// A 32-bit signed integer that is the hash code for this instance.
+        /// </returns>
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hashCode = IsConstant.GetHashCode();
+                hashCode = (hashCode * 397) ^ (values != null ? values.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (Name != null ? Name.GetHashCode() : 0);
+                return hashCode;
+            }
+        }
     }
 }

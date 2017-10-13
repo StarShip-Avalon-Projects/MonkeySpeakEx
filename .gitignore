@@ -22,3 +22,7 @@
 bin/
 obj/
 build/
+/.vs/Monkeyspeak/v15/sqlite3
+/Monkeyspeak.xml
+/Monkeyspeak.crproj
+/Monkeyspeak.dll

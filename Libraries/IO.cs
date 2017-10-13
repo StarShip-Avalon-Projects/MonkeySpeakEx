@@ -1,16 +1,21 @@
-﻿using System.Text;
+﻿using System.IO;
+using System.Text;
 
 namespace Monkeyspeak.Libraries
 {
-    /// <summary>
-    /// IO Monkey Speak Library
-    /// </summary>
-    internal class IO : AbstractBaseLibrary
+    public class IO : BaseLibrary
     {
-        #region Public Constructors
+        private string DefaultAuthorizedPath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal);
 
-        public IO()
+        public IO() : this(null)
         {
+            // satisfies the page.LoadAllLibraries reflection usage.
+        }
+
+        public IO(string authorizedPath = null)
+        {
+            if (!string.IsNullOrEmpty(authorizedPath)) DefaultAuthorizedPath = authorizedPath;
+
             // (1:200) and the file {...} exists,
             Add(new Trigger(TriggerCategory.Condition, 200), FileExists,
                 "(1:200) and the file {...} exists,");
@@ -44,24 +49,16 @@ namespace Monkeyspeak.Libraries
                 "(5:203) create file {...}.");
         }
 
-        #endregion Public Constructors
+        public override void Unload(Page page)
+        {
+        }
 
-        #region Private Methods
-
-        /// <summary>
-        /// (5:200) append {...} to file {...}.
-        /// </summary>
-        /// <param name="reader">
-        /// <see cref="TriggerReader"/>
-        /// </param>
-        /// <returns>
-        /// </returns>
         private bool AppendToFile(TriggerReader reader)
         {
             string data = reader.ReadString();
             string file = reader.ReadString();
 
-            using (System.IO.StreamWriter streamWriter = new System.IO.StreamWriter(file, true))
+            using (var streamWriter = new StreamWriter(Path.Combine(DefaultAuthorizedPath, file), true))
             {
                 streamWriter.WriteLine(data);
             }
@@ -69,20 +66,12 @@ namespace Monkeyspeak.Libraries
             return true;
         }
 
-        /// <summary>
-        /// (1:202) and the file {...} can be read from,
-        /// </summary>
-        /// <param name="reader">
-        /// <see cref="TriggerReader"/>
-        /// </param>
-        /// <returns>
-        /// </returns>
         private bool CanReadFile(TriggerReader reader)
         {
             string file = reader.ReadString();
             try
             {
-                using (var stream = System.IO.File.Open(file, System.IO.FileMode.Open, System.IO.FileAccess.Read))
+                using (var stream = File.Open(Path.Combine(DefaultAuthorizedPath, file), FileMode.Open, FileAccess.Read))
                 {
                     return true;
                 }
@@ -93,20 +82,12 @@ namespace Monkeyspeak.Libraries
             }
         }
 
-        /// <summary>
-        /// (1:203) and the file {...} can be written to,"
-        /// </summary>
-        /// <param name="reader">
-        /// <see cref="TriggerReader"/>
-        /// </param>
-        /// <returns>
-        /// </returns>
         private bool CanWriteFile(TriggerReader reader)
         {
             string file = reader.ReadString();
             try
             {
-                using (var stream = System.IO.File.Open(file, System.IO.FileMode.Open, System.IO.FileAccess.Write))
+                using (var stream = File.Open(Path.Combine(DefaultAuthorizedPath, file), FileMode.Open, FileAccess.Write))
                 {
                     return true;
                 }
@@ -117,91 +98,47 @@ namespace Monkeyspeak.Libraries
             }
         }
 
-        /// <summary>
-        /// (5:203) create file {...}.
-        /// </summary>
-        /// <param name="reader">
-        /// <see cref="TriggerReader"/>
-        /// </param>
-        /// <returns>
-        /// </returns>
         private bool CreateFile(TriggerReader reader)
         {
-            if (reader.PeekString() == false) return false;
+            if (!reader.PeekString()) return false;
             string file = reader.ReadString();
-            System.IO.File.CreateText(file).Close();
+            File.CreateText(Path.Combine(DefaultAuthorizedPath, file)).Close();
             return true;
         }
 
-        /// <summary>
-        /// (5:202) delete file {...}.
-        /// </summary>
-        /// <param name="reader">
-        /// <see cref="TriggerReader"/>
-        /// </param>
-        /// <returns>
-        /// </returns>
         private bool DeleteFile(TriggerReader reader)
         {
-            if (reader.PeekString() == false) return false;
+            if (!reader.PeekString()) return false;
             string file = reader.ReadString();
-            System.IO.File.Delete(file);
+            File.Delete(Path.Combine(DefaultAuthorizedPath, file));
             return true;
         }
 
-        /// <summary>
-        /// (1:200) and the file {...} exists,
-        /// </summary>
-        /// <param name="reader">
-        /// <see cref="TriggerReader"/>
-        /// </param>
-        /// <returns>
-        /// </returns>
         private bool FileExists(TriggerReader reader)
         {
             string file = (reader.PeekString()) ? reader.ReadString() : "";
-            return System.IO.File.Exists(file);
+            return File.Exists(file);
         }
 
-        /// <summary>
-        /// (1:201) and the file {...} does not exist,
-        /// </summary>
-        /// <param name="reader">
-        /// <see cref="TriggerReader"/>
-        /// </param>
-        /// <returns>
-        /// </returns>
         private bool FileNotExists(TriggerReader reader)
         {
-            return FileExists(reader) == false;
+            return !FileExists(reader);
         }
 
-        /// <summary>
-        /// (5:201) read from file {...} and put it into variable %Variable.
-        /// </summary>
-        /// <param name="reader">
-        /// <see cref="TriggerReader"/>
-        /// </param>
-        /// <returns>
-        /// </returns>
         private bool ReadFileIntoVariable(TriggerReader reader)
         {
             string file = reader.ReadString();
-            Variable var = reader.ReadVariable(true);
+            var var = reader.ReadVariable(true);
             StringBuilder sb = new StringBuilder();
-            using (var stream = System.IO.File.Open(file, System.IO.FileMode.Open, System.IO.FileAccess.Read))
+            using (var stream = File.Open(Path.Combine(DefaultAuthorizedPath, file), FileMode.Open, FileAccess.Read))
             {
-                using (var streamReader = new System.IO.StreamReader(stream))
+                using (var streamReader = new StreamReader(stream))
                 {
-                    string line;
-                    while ((line = streamReader.ReadLine()) != null)
-                        sb.AppendLine(line);
+                    sb.Append(streamReader.ReadToEnd());
                 }
             }
             var.Value = sb.ToString();
             return true;
         }
-
-        #endregion Private Methods
     }
 }

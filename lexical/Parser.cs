@@ -1,102 +1,124 @@
 ﻿using Monkeyspeak.lexical;
+using Monkeyspeak.lexical.Expressions;
+using Shared.Core.Logging;
 using System;
 using System.Collections.Generic;
 
 namespace Monkeyspeak
 {
-    internal sealed class Parser : AbstractParser
+    /// <summary>
+    ///
+    /// </summary>
+    /// <seealso cref="Monkeyspeak.lexical.AbstractParser" />
+    public sealed class Parser : AbstractParser
     {
-        #region Public Constructors
+        public TokenVisitorHandler VisitToken;
 
-        public Parser(MonkeyspeakEngine engine, ILexer lexer) :
-            base(engine, lexer)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Parser"/> class.
+        /// </summary>
+        /// <param name="engine">The engine.</param>
+        public Parser(MonkeyspeakEngine engine) :
+            base(engine)
         {
         }
 
-        #endregion Public Constructors
-
-        #region Public Methods
-
-        public override List<TriggerList> Parse(string source)
+        /// <summary>
+        /// Parses the specified lexer's tokens.
+        /// </summary>
+        /// <param name="lexer">The lexer.</param>
+        /// <returns></returns>
+        /// <exception cref="MonkeyspeakException">
+        /// </exception>
+        /// <exception cref="Exception">String length limit exceeded.</exception>
+        public override IEnumerable<TriggerList> Parse(AbstractLexer lexer)
         {
-            var triggerBlocks = new List<TriggerList>(5000);
-            var block = new TriggerList(1000);
-            Trigger currentTrigger = null, prevTrigger = null;
-            Token token = null;
-            try
+            var block = new TriggerList(20);
+            Trigger currentTrigger = Trigger.None, prevTrigger = Trigger.None;
+            Token token = Token.None, prevToken = Token.None;
+            Expression expr = null;
+            foreach (var t in lexer.Read())
             {
-                using (var iter = Lexer.Tokenize(source).GetEnumerator())
+                token = t;
+
+                if (VisitToken != null)
+                    token = VisitToken(ref token);
+
+                var sourcePos = token.Position;
+
+                string value = token.GetValue(lexer);
+                if (Engine.Options.Debug) Logger.Debug<Parser>(value);
+
+                switch (token.Type)
                 {
-                    while (iter.MoveNext())
-                    {
-                        token = iter.Current;
-                        switch (token.Type)
+                    case TokenType.TRIGGER:
+                        if (currentTrigger != Trigger.None)
                         {
-                            case TokenType.Trigger:
-                                if (currentTrigger != null)
+                            if (prevTrigger != Trigger.None)
+                            {
+                                if (prevTrigger.Category == TriggerCategory.Effect && currentTrigger.Category == TriggerCategory.Cause)
                                 {
-                                    if (prevTrigger != null)
-                                    {
-                                        if (prevTrigger.Category == TriggerCategory.Effect && currentTrigger.Category == TriggerCategory.Cause)
-                                        {
-                                            triggerBlocks.Add(block);
-                                            block = new TriggerList();
-                                        }
-                                    }
-                                    block.Add(currentTrigger);
-                                    prevTrigger = currentTrigger;
+                                    yield return block;
+                                    prevTrigger = Trigger.None;
+                                    block = new TriggerList();
                                 }
-                                currentTrigger = new Trigger
-                                {
-                                    Category = (TriggerCategory)IntParse(token.Value.Substring(1, token.Value.IndexOf(':') - 1))
-                                };
-                                string id = token.Value.Substring(token.Value.IndexOf(':') + 1);
-                                id = id.Substring(0, id.Length - 1);
-                                currentTrigger.Id = IntParse(id);
-                                break;
-
-                            case TokenType.Variable:
-                                //if (currentTrigger.VariableNameReferences.Contains(token.Value) == false)
-                                currentTrigger.contents.Enqueue(token.Value);
-                                break;
-
-                            case TokenType.String:
-                                token.Value = token.Value.Substring(1, token.Value.Length - 2);
-                                if (token.Value.Length > Engine.Options.StringLengthLimit) throw new Exception("String length limit exceeded.");
-                                currentTrigger.contents.Enqueue(token.Value);
-                                break;
-
-                            case TokenType.Number:
-                                double val = double.Parse(token.Value, System.Globalization.NumberStyles.AllowDecimalPoint);
-                                currentTrigger.contents.Enqueue(val);
-                                break;
-
-                            case TokenType.EOF:
-                                if (currentTrigger != null)
-                                {
-                                    //if (currentTrigger.Category != TriggerCategory.Cause || currentTrigger.Category != TriggerCategory.Condition ||
-                                    if (currentTrigger.Category != TriggerCategory.Undefined)
-                                    {
-                                        block.Add(currentTrigger);
-                                        triggerBlocks.Add(block);
-                                    }
-                                }
-                                break;
+                            }
+                            block.Add(currentTrigger);
+                            prevTrigger = currentTrigger;
+                            currentTrigger = Trigger.None;
                         }
-                    }
+                        currentTrigger = new Trigger((TriggerCategory)IntParse(value.Substring(0, value.IndexOf(':'))),
+                            IntParse(value.Substring(value.IndexOf(':') + 1)));
+                        break;
+
+                    case TokenType.VARIABLE:
+                        if (currentTrigger == Trigger.None) throw new MonkeyspeakException($"Trigger was null. \nPrevious trigger = {prevTrigger}\nToken = {token}");
+                        expr = new VariableExpression(ref sourcePos, value);
+                        break;
+
+                    case TokenType.STRING_LITERAL:
+                        if (value.Length > Engine.Options.StringLengthLimit) throw new Exception("String length limit exceeded.");
+                        if (currentTrigger == Trigger.None) throw new MonkeyspeakException($"Trigger was null. \nPrevious trigger = {prevTrigger}\nToken = {token}");
+                        expr = new StringExpression(ref sourcePos, value);
+                        break;
+
+                    case TokenType.NUMBER:
+                        double val = double.Parse(value, System.Globalization.NumberStyles.AllowDecimalPoint);
+                        if (currentTrigger == Trigger.None) throw new MonkeyspeakException($"Trigger was null. \nPrevious trigger = {prevTrigger}\nToken = {token}");
+                        expr = new NumberExpression(ref sourcePos, val);
+                        break;
+
+                    case TokenType.COMMENT:
+                        // we don't care about comments
+                        break;
+
+                    case TokenType.END_OF_FILE:
+                        if (currentTrigger != Trigger.None)
+                        {
+                            if (currentTrigger.Category != TriggerCategory.Undefined)
+                            {
+                                block.Add(currentTrigger);
+                                currentTrigger = Trigger.None;
+                                yield return block;
+                            }
+                        }
+                        break;
+
+                    default: break;
+                }
+                if (currentTrigger != Trigger.None && expr != null)
+                {
+                    currentTrigger.contents.Add(expr);
+                    expr = null;
                 }
             }
-            catch (Exception ex)
-            {
-                throw new MonkeyspeakException(String.Format("Error at {0} with {1}", token, currentTrigger), ex);
-            }
-            return triggerBlocks;
         }
 
-        #endregion Public Methods
-
-        #region Private Methods
-
+        /// <summary>
+        /// Ints the parse. (I love GhostDoc lol)
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns></returns>
         private int IntParse(string value)
         {
             int result = 0;
@@ -106,7 +128,5 @@ namespace Monkeyspeak
             }
             return result;
         }
-
-        #endregion Private Methods
     }
 }

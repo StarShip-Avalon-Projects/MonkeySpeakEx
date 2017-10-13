@@ -2,29 +2,15 @@
 
 namespace Monkeyspeak.lexical
 {
-    internal abstract class AbstractParser
+    public abstract class AbstractParser
     {
-        #region Protected Fields
-
         protected MonkeyspeakEngine Engine;
-        protected ILexer Lexer;
 
-        #endregion Protected Fields
-
-        #region Protected Constructors
-
-        protected AbstractParser(MonkeyspeakEngine engine, ILexer lexer)
+        protected AbstractParser(MonkeyspeakEngine engine)
         {
             Engine = engine;
-            Lexer = lexer;
         }
 
-        #endregion Protected Constructors
-
-        #region Public Methods
-
-        public abstract List<TriggerList> Parse(string source);
-
-        #endregion Public Methods
+        public abstract IEnumerable<TriggerList> Parse(AbstractLexer lexer);
     }
 }

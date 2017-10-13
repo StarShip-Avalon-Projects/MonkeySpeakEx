@@ -1,38 +1,118 @@
-﻿using Microsoft.Win32.SafeHandles;
+﻿using Monkeyspeak.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Threading;
+using System.Threading.Tasks;
+using System.Timers;
 
 namespace Monkeyspeak.Libraries
 {
     /// <summary>
-    /// Reciporcating Timers for Monkey Speak
+    /// A TimerTask object contains Timer and Page Owner.  Timer is not started from a TimerTask constructor.
     /// </summary>
-    public class Timers : AbstractBaseLibrary
+    internal sealed class TimerTask
     {
-        #region Private Fields
+        public double Interval { get; set; }
 
-        private static object lck = new object();
-        private static Dictionary<double, TimerInfo> timers = new Dictionary<double, TimerInfo>();
+        public double Delay { get; set; }
+        public bool FirstRun { get; set; }
 
-        #endregion Private Fields
+        public System.Timers.Timer Timer { get; set; }
 
-        #region Public Constructors
+        public Page Owner { get; set; }
+
+        public double Id { get; set; }
 
         /// <summary>
-        /// Default Timer Library. Call static method Timers.DestroyTimers()
-        /// when your application closes.
+        /// Timer task that executes (0:300) when it triggers
         /// </summary>
-        public Timers()
+        /// <param name="owner"></param>
+        /// <param name="interval">Interval in Seconds</param>
+        /// <param name="id"></param>
+        public TimerTask(Page owner, double interval, double id, double delay = 0)
         {
+            Id = id;
+            this.Owner = owner;
+            this.Interval = interval;
+            Delay = delay;
+            FirstRun = true;
+            Timer = new System.Timers.Timer(TimeSpan.FromSeconds(Interval).TotalMilliseconds)
+            {
+                AutoReset = true
+            };
+            Timer.Elapsed += (_, args) => timer_Elapsed(this);
+            Timer.Start();
+        }
+
+        public void Start()
+        {
+            Timer.Start();
+        }
+
+        public void Stop()
+        {
+            Timer.Stop();
+        }
+
+        public void Dispose()
+        {
+            Timer.Stop();
+            Timer.Dispose();
+        }
+
+        private static void timer_Elapsed(object sender)
+        {
+            try
+            {
+                TimerTask timerTask = (TimerTask)sender;
+                if (timerTask.Timer.Enabled)
+                {
+                    if (timerTask.FirstRun && timerTask.Delay > 0)
+                    {
+                        Thread.Sleep(TimeSpan.FromSeconds(timerTask.Delay));
+                        timerTask.FirstRun = false;
+                        timerTask.Stop(); // fixes timer offset due to Delay bug
+                        timerTask.Start();
+                    }
+                    Timers.CurrentTimer = timerTask.Id;
+                    timerTask.Owner.Execute(300);
+                    Timers.CurrentTimer = 0;
+                }
+            }
+            catch
+            {
+                // Eat the exception.. yummy!
+            }
+        }
+    }
+
+    // Changed from Internal to public in order to expose DestroyTimers() - Gerolkae
+    public class Timers : BaseLibrary
+    {
+        private static DateTime startTime = DateTime.Now;
+        internal static double CurrentTimer;
+
+        private static readonly object lck = new object();
+        private static readonly List<TimerTask> timers = new List<TimerTask>();
+
+        private uint timersLimit;
+
+        public Timers() : this(10)
+        {
+            // needed for reflection based loading of libraries
+        }
+
+        /// <summary>
+        /// Default Timer Library.  Call static method Timers.DestroyTimers() when your application closes.
+        /// </summary>
+        public Timers(uint timersLimit = 10)
+        {
+            if (timersLimit == 0) timersLimit = 1;
+            this.timersLimit = timersLimit;
             // (0:300) When timer # goes off,
             Add(new Trigger(TriggerCategory.Cause, 300), WhenTimerGoesOff,
                 "(0:300) When timer # goes off,");
-
-            Add(new Trigger(TriggerCategory.Cause, 301), WhenAnyTimerGoesOff,
-                "(0:301) When any timer goes off,");
 
             // (1:300) and timer # is running,
             Add(new Trigger(TriggerCategory.Condition, 300), AndTimerIsRunning,
@@ -43,403 +123,213 @@ namespace Monkeyspeak.Libraries
 
             // (5:300) create timer # to go off every # second(s).
             Add(new Trigger(TriggerCategory.Effect, 300), CreateTimer,
-                "(5:300) create timer # to go off every # second(s).");
+                "(5:300) create timer # to go off every # second(s) with a start delay of # second(s).");
 
             // (5:301) stop timer #.
             Add(new Trigger(TriggerCategory.Effect, 301), StopTimer,
                 "(5:301) stop timer #.");
+
+            Add(new Trigger(TriggerCategory.Effect, 302), GetCurrentTimerIntoVar,
+                "(5:302) get current timer and put the id into variable %.");
+
+            Add(new Trigger(TriggerCategory.Effect, 303), PauseScriptExecution,
+                "(5:303) pause script execution for # seconds.");
+
+            Add(new Trigger(TriggerCategory.Effect, 304), GetCurrentUpTimeIntoVar,
+                "(5:304) get the current uptime and put it into variable %.");
         }
 
-        #endregion Public Constructors
+        private bool GetCurrentUpTimeIntoVar(TriggerReader reader)
+        {
+            var var = reader.ReadVariable(true);
+            var.Value = System.Math.Round((DateTime.Now - startTime).TotalSeconds);
+            return true;
+        }
 
-        #region Public Methods
+        private bool PauseScriptExecution(TriggerReader reader)
+        {
+            double delay = 0;
+            if (reader.PeekVariable())
+            {
+                var var = reader.ReadVariable();
+                delay = var.Value.As<double>();
+            }
+            else if (reader.PeekNumber())
+            {
+                delay = reader.ReadNumber();
+            }
+            Thread.Sleep(TimeSpan.FromSeconds(delay));
+            return true;
+        }
 
-       
-        internal static void DestroyTimer(TimerInfo task)
+        private bool GetCurrentTimerIntoVar(TriggerReader reader)
+        {
+            if (CurrentTimer > 0)
+            {
+                var var = reader.ReadVariable(true);
+                var.Value = CurrentTimer;
+                return true;
+            }
+            return false;
+        }
+
+        internal static void DestroyTimer(TimerTask task)
         {
             lock (lck)
             {
                 task.Dispose();
-                timers.Remove(task.ID);
-                task = null;
+                timers.Remove(task);
             }
         }
 
-        #endregion Public Methods
-
-        #region Private Methods
-
-        /// <summary>
-        /// (5:300) create timer # to go off every # second(s).
-        /// </summary>
-        /// <param name="reader">
-        /// </param>
-        /// <returns>
-        /// </returns>
-        private static bool CreateTimer(TriggerReader reader)
+        public override void Unload(Page page)
         {
-            TimerInfo timerInfo = null;
-            double TimerId = new double();
+            lock (lck)
+            {
+                foreach (var task in timers.ToArray())
+                    DestroyTimer(task);
+            }
+        }
+
+        private bool AndTimerIsNotRunning(TriggerReader reader)
+        {
+            return !AndTimerIsRunning(reader);
+        }
+
+        private bool AndTimerIsRunning(TriggerReader reader)
+        {
+            TimerTask timerTask;
+            if (!TryGetTimerFrom(reader, out timerTask))
+                return false;
+            return timerTask.Timer.Enabled;
+        }
+
+        private bool CreateTimer(TriggerReader reader)
+        {
+            if (timers.Count >= timersLimit)
+            {
+                throw new MonkeyspeakException("The amount of timers has exceeded the limit of {0}", timersLimit);
+            }
+            double id = 0;
             if (reader.PeekVariable())
             {
-                Variable var = reader.ReadVariable();
-                if (var.Value != null && var.Value is double)
-                    TimerId = (double)var.Value;
+                var var = reader.ReadVariable();
+                id = var.Value.As<double>();
             }
             else if (reader.PeekNumber())
             {
-                TimerId = reader.ReadNumber();
+                id = reader.ReadNumber();
             }
 
-            double num = double.NaN;
+            double interval = 0;
             if (reader.PeekVariable())
             {
-                Variable var = reader.ReadVariable();
-                if (var.Value.GetType() == typeof(double))
-                    num = Convert.ToDouble(var.Value);
+                var var = reader.ReadVariable();
+                interval = var.Value.As<double>();
             }
             else if (reader.PeekNumber())
             {
-                num = reader.ReadNumber();
+                interval = reader.ReadNumber();
             }
 
-            if (double.IsNaN(num)) return false;
+            double delay = 0;
+            if (reader.PeekVariable())
+            {
+                var var = reader.ReadVariable();
+                delay = var.Value.As<double>();
+            }
+            else if (reader.PeekNumber())
+            {
+                delay = reader.ReadNumber();
+            }
+
+            if (interval <= 0) return false;
+            if (id <= 0) return false; // NOTE no more timers with id 0, must be > 0
 
             lock (lck)
             {
-                timerInfo = new TimerInfo(reader.Page, num, TimerId);
-
-                if (timers.Keys.Contains(TimerId) && !timers[TimerId].Disposed)
+                var timerTask = new TimerTask(reader.Page, interval, id, delay);
+                var existing = timers.FirstOrDefault(task => task.Id == id);
+                if (existing != null)
                 {
-                    Console.WriteLine("New Timer Disposing old timer " + TimerId.ToString());
-                    timers[TimerId].Dispose();
-                    timers.Remove(TimerId);
+#warning Replacing existing timer may cause any triggers dependent on that timer to behave differently
+                    existing.Dispose();
+                    timers.Add(timerTask);
                 }
-
-                timers.Add(TimerId, timerInfo);
+                else
+                {
+                    timers.Add(timerTask);
+                }
             }
 
             return true;
         }
 
-        /// <summary>
-        /// (1:301) and timer # is not running,
-        /// </summary>
-        /// <param name="reader">
-        /// </param>
-        /// <returns>
-        /// </returns>
-        private static bool AndTimerIsNotRunning(TriggerReader reader)
+        private bool StopTimer(TriggerReader reader)
         {
-            bool test = AndTimerIsRunning(reader) == false;
-            return test;
-        }
-
-        /// <summary>
-        /// (1:300) and timer # is running,"
-        /// </summary>
-        /// <param name="reader">
-        /// </param>
-        /// <returns>
-        /// </returns>
-        private static bool AndTimerIsRunning(TriggerReader reader)
-        {
-            if (TryGetTimerFrom(reader, out TimerInfo timerInfo) == false)
-                return false;
-            bool test = timerInfo.Timer != null;
-
-            return test;
-        }
-
-        /// <summary>
-        /// (5:301) stop timer #.
-        /// </summary>
-        /// <param name="reader">
-        /// </param>
-        /// <returns>
-        /// </returns>
-        private static bool StopTimer(TriggerReader reader)
-        {
-            // Does NOT destroy the Timer.
-            //Now it Does! TryGetTimerFrom(reader) uses Dictionary.ContainsKey
-
             double num = 0;
             if (reader.PeekVariable())
             {
-                Variable var = reader.ReadVariable();
-                if (Double.TryParse(var.Value.ToString(), out num) == false)
-                    num = 0;
+                var var = reader.ReadVariable();
+                num = var.Value.As<double>();
             }
             else if (reader.PeekNumber())
             {
                 num = reader.ReadNumber();
             }
-
-            lock (lck)
+            try
             {
-                if (timers.ContainsKey(num))
+                lock (lck)
                 {
-                    System.Diagnostics.Debug.Print("Stop Timer " + num.ToString());
-                    timers[num].Timer.Dispose();
-                    timers.Remove(num);
+                    TimerTask task = timers.FirstOrDefault(timer => timer.Id == num);
+                    task.Dispose();
                 }
             }
-
+            catch (Exception x)
+            {
+                Console.WriteLine(x.Message);
+            }
             return true;
         }
 
-        /// <summary>
-        /// Tried to get a timer by <see cref="Monkeyspeak.Variable"/> or by double
-        /// </summary>
-        /// <param name="reader"></param>
-        /// <param name="timerInfo"></param>
-        /// <returns></returns>
-        private static bool TryGetTimerFrom(TriggerReader reader, out TimerInfo timerInfo)
+        private bool TryGetTimerFrom(TriggerReader reader, out TimerTask timerTask)
         {
-            double num = double.NaN;
+            double num = 0;
             if (reader.PeekVariable())
             {
-                Variable var = reader.ReadVariable();
-                if (var.Value != null && var.Value is double)
-                    num = (double)var.Value;
+                var var = reader.ReadVariable();
+                num = var.Value.As<double>();
             }
             else if (reader.PeekNumber())
             {
                 num = reader.ReadNumber();
             }
 
-            if (double.IsNaN(num) == false)
+            if (num > 0)
             {
-                if (timers.ContainsKey(num) == false)
+                if (!timers.Any(task => task.Id == num))
                 {
                     // Don't add a timer to the Dictionary if it don't
                     // exist. Just return a blank timer
                     // - Gerolkae
-                    timerInfo = new TimerInfo();
+                    // no, must be null because it is a TryGetValue kind of method and those are the rules - Squizzle
+                    timerTask = null;
                     return false;
                 }
-                else
-                {
-                    timerInfo = timers[num];
-                    return true;
-                }
+                timerTask = timers.FirstOrDefault(task => task.Id == num);
+                return true;
             }
-            timerInfo = null;
+            timerTask = null;
             return false;
         }
 
-        /// <summary>
-        /// (0:301) When any timer goes off,
-        /// </summary>
-        /// <param name="reader">
-        /// <see cref="TriggerReader"/>
-        /// </param>
-        /// <returns>
-        /// when any timer goes off
-        /// </returns>
-        private static bool WhenAnyTimerGoesOff(TriggerReader reader)
+        private bool WhenTimerGoesOff(TriggerReader reader)
         {
-            return true;
-        }
-
-        /// <summary>
-        /// (0:300) When timer # goes off,
-        /// </summary>
-        /// <param name="reader">
-        /// <see cref="TriggerReader"/>
-        /// </param>
-        /// <returns>
-        /// when timer # goes off
-        /// </returns>
-        private static bool WhenTimerGoesOff(TriggerReader reader)
-        {
-            TimerInfo timerInfo = null;
-            lock (lck)
+            if (TryGetTimerFrom(reader, out TimerTask timerTask))
             {
-                if (TryGetTimerFrom(reader, out timerInfo) == true)
-                {
-                    // Make sure only the Current Timer triggers
-                    // ~Gerolkae
-                    //System.Diagnostics.Debug.Print(timerInfo.ID.ToString() + "Timer Triggered");
-                    return timerInfo == TimerInfo.CurrentTimer;
-                }
-
-                return false;
+                return timerTask.Id == CurrentTimer;
             }
-        }
-
-        #endregion Private Methods
-    }
-
-    /// <summary>
-    /// A TimerInfo object contains Timer and Page Owner. Timer is not
-    /// started from a TimerInfo constructor.
-    /// </summary>
-    internal class TimerInfo : IDisposable
-    {
-        SafeHandle handle = new SafeFileHandle(IntPtr.Zero, true);
-
-        #region Public Fields
-
-        /// <summary>
-        /// Current Triggering timer
-        /// </summary>
-        public static TimerInfo CurrentTimer { get; set; }
-
-        #endregion Public Fields
-
-        #region Private Fields
-
-        private object _timerLock = new object();
-        private double id;
-        private double interval = 0;
-        private object lck = new object();
-        private Page owner;
-        private Timer timer;
-        public bool Disposed { get; internal set; }
-
-        #endregion Private Fields
-
-        #region Public Constructors
-
-        public TimerInfo()
-        {
-            owner.Resetting += () =>
-            {
-                Timer.Dispose();
-                Timers.DestroyTimer(this);
-            };
-            timer = new Timer(Timer_Elapsed);
-        }
-
-        /// <summary>
-        /// T
-        /// </summary>
-        /// <param name="owner">
-        /// Page owner
-        /// </param>
-        /// <param name="interval">
-        /// cycle time in seconds
-        /// </param>
-        /// <param name="Id">
-        /// MonkeySpeak ID if the timer
-        /// </param>
-        public TimerInfo(Page owner, double interval, double Id)
-        {
-            id = Id;
-            this.owner = owner;
-            this.interval = interval;
-            timer = new Timer(Timer_Elapsed, this, TimeSpan.FromSeconds(interval), TimeSpan.FromSeconds(interval));
-        }
-
-        #endregion Public Constructors
-
-        #region Public Properties
-
-        public double ID
-        {
-            get { return id; }
-        }
-
-        public double Interval
-        {
-            get { return interval; }
-            set { interval = value; }
-        }
-
-        public Page Owner
-        {
-            get { return owner; }
-            set { owner = value; }
-        }
-
-        public Timer Timer
-        {
-            get { return timer; }
-            set { timer = value; }
-        }
-
-        #endregion Public Properties
-
-        #region Private Methods
-
-        /// <summary>
-        /// </summary>
-        /// <param name="sender">
-        /// </param>
-        private void Timer_Elapsed(object sender)
-        {
-            lock (lck)
-            {
-                CurrentTimer = (TimerInfo)sender;
-                owner.Execute(300, 301);
-                CurrentTimer = null;
-            }
-        }
-
-        #endregion Private Methods
-
-        public static bool operator !=(TimerInfo timer1, TimerInfo timer2)
-        {
-            if (timer2 == null || timer2 == null)
-                return false;
-            if (!ReferenceEquals(timer1, null))
-            {
-                return !ReferenceEquals(timer2, null);
-            }
-            return timer1.id != timer2.id;
-        }
-
-        public static bool operator ==(TimerInfo timer1, TimerInfo timer2)
-        {
-            if (ReferenceEquals(timer1, null))
-            {
-                return ReferenceEquals(timer2, null);
-            }
-
-            return timer1.id == timer2.id;
-        }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="disposing"></param>
-        protected void Disposing(bool disposing)
-        {
-            if (Disposed)
-                return;
-
-            if (disposing)
-            {
-                handle.Dispose();
-                timer.Dispose();
-                owner = null;
-            }
-
-            // Free any unmanaged objects here.
-            //
-            Disposed = true;
-        }
-        /// <summary>
-        /// Implement IDisposable
-        /// </summary>
-        public void Dispose() 
-        {
-            Disposing(true);
-         //   GC.SuppressFinalize(this);
-        }
-
-        public override bool Equals(Object obj)
-        {
-            // Check for null values and compare run-time types.
-            if (obj == null || GetType() != obj.GetType())
-                return false;
-            TimerInfo o = (TimerInfo)obj;
-            return id == o.id;
-        }
-
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
+            return false;
         }
     }
 }
