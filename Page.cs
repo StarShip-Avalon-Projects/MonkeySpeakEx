@@ -247,6 +247,16 @@ namespace Monkeyspeak
             }
         }
 
+        public IEnumerable<string> GetTriggerDescriptions(bool HideLibraryNames)
+        {
+            lock (syncObj)
+            {
+                foreach (var lib in libraries)
+                {
+                    yield return lib.ToString(HideLibraryNames);
+                }
+            }
+        }
         public ReadOnlyCollection<IVariable> Scope
         {
             get { return new ReadOnlyCollection<IVariable>(scope.ToArray()); }
@@ -260,8 +270,6 @@ namespace Monkeyspeak
         {
             LoadLibrary(new Libraries.Sys());
         }
-
-
 
         /// <summary>
         /// Loads Monkeyspeak String Library into this Page
@@ -280,14 +288,14 @@ namespace Monkeyspeak
         {
             LoadLibrary(new Libraries.IO());
         }
+
         /// <summary>
         /// Loads Monkeyspeak IO Library into this Page
         /// <para>Used for File Input/Output operations</para>
         /// </summary>
-        /// <param name="FilePath"></param>
-        public void LoadIOLibrary(string FilePath)
+        public void LoadIOLibrary(string FileName)
         {
-            LoadLibrary(new Libraries.IO(FilePath));
+            LoadLibrary(new Libraries.IO(FileName));
         }
 
         /// <summary>
@@ -307,6 +315,9 @@ namespace Monkeyspeak
             LoadLibrary(new Libraries.Timers());
         }
 
+        /// <summary>
+        /// Loads Monkeyspeak Timer Library into this Page
+        /// </summary>
         public void LoadTimerLibrary(uint TimerLimit)
         {
             LoadLibrary(new Libraries.Timers(TimerLimit));
