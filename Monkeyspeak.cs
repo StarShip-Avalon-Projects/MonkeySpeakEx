@@ -1,112 +1,270 @@
 ﻿using Monkeyspeak.lexical;
+using Shared.Core.Logging;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Text;
-using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace Monkeyspeak
 {
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'MonkeyspeakEngine'
-
-    public class MonkeyspeakEngine
-#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'MonkeyspeakEngine'
+    [Serializable]
+    public class MonkeyspeakException : Exception
     {
-        #region Public Fields
+        public MonkeyspeakException()
+        {
+        }
 
-        /// <summary>
-        /// Monkey Speak Options
-        /// </summary>
+        public MonkeyspeakException(string message)
+            : base(message)
+        {
+        }
+
+        public MonkeyspeakException(string format, params object[] message)
+            : base(String.Format(format, message))
+        {
+        }
+
+        public MonkeyspeakException(string message, Exception inner)
+            : base(message, inner)
+        {
+        }
+
+        public MonkeyspeakException(string message, SourcePosition pos)
+            : base(String.Format("{0} at {1}", message, pos))
+        {
+        }
+
+        protected MonkeyspeakException(
+              System.Runtime.Serialization.SerializationInfo info,
+              System.Runtime.Serialization.StreamingContext context)
+            : base(info, context) { }
+    }
+
+    public sealed class MonkeyspeakEngine
+    {
         public Options options;
 
+        public TokenVisitorHandler VisitTokens;
 
-        #endregion Public Fields
-
-        #region Private Fields
-
-        private ILexer lexer;
-        private List<Page> pages;
-        private AbstractParser parser;
-
-        #endregion Private Fields
-
-        #region Public Constructors
-
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'MonkeyspeakEngine.MonkeyspeakEngine()'
+        public event Action<MonkeyspeakEngine> Resetting;
 
         public MonkeyspeakEngine()
-#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'MonkeyspeakEngine.MonkeyspeakEngine()'
         {
-            pages = new List<Page>();
-
-            CreateDefaultOptions();
-
-            CreateDefaultLexer();
-            parser = new Parser(this, lexer);
+            options = new Options();
         }
-
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'MonkeyspeakEngine.MonkeyspeakEngine(Options)'
 
         public MonkeyspeakEngine(Options options)
-#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'MonkeyspeakEngine.MonkeyspeakEngine(Options)'
         {
-            pages = new List<Page>();
-
             this.options = options;
-
-            CreateDefaultLexer();
-            parser = new Parser(this, lexer);
         }
 
-        #endregion Public Constructors
+        public string Banner
+        {
+            get
+            {
+                // DO NOT MODIFY ORIGINAL AUTHOR, YOU MAY ADD ADDITIONAL AUTHORS.
+                StringBuilder sb = new StringBuilder();
+                sb.Append("Monkeyspeak").Append(' ').Append(options.Version.ToString(4)).Append(Environment.NewLine);
+                sb.AppendLine("Author: Kirk");
+                //sb.AppendLine("Author: You");
+                sb.Append(".NET Framework ").Append(Assembly.GetAssembly(typeof(MonkeyspeakEngine)).ImageRuntimeVersion.ToString());
+                return sb.ToString();
+            }
+        }
 
-        #region Public Properties
-
-        [CLSCompliant(false)]
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member 'MonkeyspeakEngine.Options'
         public Options Options
-#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member 'MonkeyspeakEngine.Options'
         {
             get { return options; }
             set { options = value; }
         }
 
-        #endregion Public Properties
-
-        #region Public Methods
-
         /// <summary>
-        /// Compiles a Page to a file
+        /// Loads a Monkeyspeak script from a string into a <see cref="Monkeyspeak.Page"/>.
         /// </summary>
-        /// <param name="page">
-        /// </param>
-        /// <param name="filePath">
-        /// </param>
-        public void CompileToFile(Page page, string filePath)
+        /// <param name="chunk">String that contains the Monkeyspeak script source.</param>
+        /// <returns></returns>
+        public async Task<Page> LoadFromStringAsync(string chunk)
         {
-            page.CompileToFile(filePath);
+            return await Task.Run(() => LoadFromString(chunk));
         }
 
         /// <summary>
-        /// Compiles a Page to a stream
+        /// Loads a Monkeyspeak script from a string into a <see cref="Monkeyspeak.Page"/>.
         /// </summary>
-        /// <param name="page">
-        /// </param>
-        /// <param name="stream">
-        /// </param>
-        public void CompileToStream(Page page, Stream stream)
+        /// <param name="chunk">String that contains the Monkeyspeak script source.</param>
+        /// <returns></returns>
+        public Page LoadFromString(string chunk)
         {
-            page.CompileToStream(stream);
+            try
+            {
+                var stream = new MemoryStream();
+                using (var writer = new StreamWriter(stream, Encoding.UTF8, 1024, true))
+                {
+                    writer.Write(chunk);
+                    writer.Flush();
+                }
+                stream.Seek(0, SeekOrigin.Begin);
+                using (var reader = new SStreamReader(stream, Encoding.UTF8))
+                {
+                    Page page = new Page(this);
+                    using (var lexer = new Lexer(this, reader))
+                    {
+                        page.VisitingToken = VisitTokens;
+                        page.GenerateBlocks(lexer);
+                        page.VisitingToken = null;
+                    }
+                    return page;
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Debug<MonkeyspeakEngine>(ex);
+                throw;
+            }
+        }
+
+        public Page LoadFromFile(string filePath)
+        {
+            using (var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Write))
+            {
+                using (var reader = new SStreamReader(stream))
+                {
+                    Page page = new Page(this);
+                    using (var lexer = new Lexer(this, reader))
+                    {
+                        page.VisitingToken = VisitTokens;
+                        page.GenerateBlocks(lexer);
+                        page.VisitingToken = null;
+                    }
+                    return page;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Loads a Monkeyspeak script from a string into a <see cref="Monkeyspeak.Page"/>.
+        /// </summary>
+        /// <param name="chunk">String that contains the Monkeyspeak script source.</param>
+        /// <param name="existingPage"></param>
+        public async Task LoadFromStringAsync(Page existingPage, string chunk)
+        {
+            await Task.Run(() => LoadFromString(existingPage, chunk));
+        }
+
+        /// <summary>
+        /// Loads a Monkeyspeak script from a string into <paramref name="existingPage"/>. and
+        /// clears the old page
+        /// </summary>
+        /// <param name="existingPage">Reference to an existing Page</param>
+        /// <param name="chunk">String that contains the Monkeyspeak script source.</param>
+        /// <returns></returns>
+        public void LoadFromString(Page existingPage, string chunk)
+        {
+            try
+            {
+                var stream = new MemoryStream();
+                using (var writer = new StreamWriter(stream, Encoding.UTF8, 1024, true))
+                {
+                    writer.Write(chunk);
+                    writer.Flush();
+                }
+                stream.Seek(0, SeekOrigin.Begin);
+                using (var reader = new SStreamReader(stream, Encoding.UTF8))
+                {
+                    using (var lexer = new Lexer(this, reader))
+                    {
+                        existingPage.VisitingToken = VisitTokens;
+                        existingPage.GenerateBlocks(lexer);
+                        existingPage.VisitingToken = null;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Debug<MonkeyspeakEngine>(ex);
+            }
+        }
+
+        /// <summary>
+        /// Loads a Monkeyspeak script from a Stream into a <see cref="Monkeyspeak.Page"/>.
+        /// </summary>
+        /// <param name="stream">Stream that contains the Monkeyspeak script. Closes the stream.</param>
+        /// <returns><see cref="Monkeyspeak.Page"/></returns>
+        public async Task<Page> LoadFromStreamAsync(Stream stream)
+        {
+            return await Task.Run(() => LoadFromStream(stream));
+        }
+
+        /// <summary>
+        /// Loads a Monkeyspeak script from a Stream into a <see cref="Monkeyspeak.Page"/>.
+        /// </summary>
+        /// <param name="stream">Stream that contains the Monkeyspeak script. Closes the stream.</param>
+        /// <returns><see cref="Monkeyspeak.Page"/></returns>
+        public Page LoadFromStream(Stream stream)
+        {
+            try
+            {
+                using (var reader = new SStreamReader(stream, true))
+                {
+                    Page page = new Page(this);
+                    using (var lexer = new Lexer(this, reader))
+                    {
+                        page.VisitingToken = VisitTokens;
+                        page.GenerateBlocks(lexer);
+                        page.VisitingToken = null;
+                    }
+                    return page;
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Debug<MonkeyspeakEngine>(ex);
+            }
+            return new Page(this); // return a empty page so that the top level caller is not destroyed by nullreference exceptions :)
+        }
+
+        /// <summary>
+        /// Loads a Monkeyspeak script from a Stream into a <see cref="Monkeyspeak.Page"/>.
+        /// </summary>
+        /// <param name="stream">Stream that contains the Monkeyspeak script. Closes the stream.</param>
+        /// <param name="existingPage"></param>
+        public async Task LoadFromStreamAsync(Page existingPage, Stream stream)
+        {
+            await Task.Run(() => LoadFromStream(existingPage, stream));
+        }
+
+        /// <summary>
+        /// Loads a Monkeyspeak script from a Stream into <paramref name="existingPage"/>.
+        /// </summary>
+        /// <param name="existingPage">Reference to an existing Page</param>
+        /// <param name="stream">Stream that contains the Monkeyspeak script. Closes the stream.</param>
+        public void LoadFromStream(Page existingPage, Stream stream)
+        {
+            try
+            {
+                using (var reader = new SStreamReader(stream, true))
+                {
+                    using (var lexer = new Lexer(this, reader))
+                    {
+                        existingPage.VisitingToken = VisitTokens;
+                        existingPage.GenerateBlocks(lexer);
+                        existingPage.VisitingToken = null;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Debug<MonkeyspeakEngine>(ex);
+            }
         }
 
         /// <summary>
         /// Loads compiled script from file
         /// </summary>
-        /// <param name="filePath">
-        /// </param>
-        /// <returns>
-        /// </returns>
+        /// <param name="filePath"></param>
+        /// <returns></returns>
         public Page LoadCompiledFile(string filePath)
         {
             try
@@ -118,249 +276,50 @@ namespace Monkeyspeak
             }
             catch (Exception ex)
             {
-                throw new MonkeyspeakException(String.Format("Could not load compiled script from file.  Reason:{0}", ex.Message), ex);
+                Logger.Debug<MonkeyspeakEngine>(ex);
             }
+            return new Page(this);
         }
 
         /// <summary>
         /// Loads a compiled script from stream
         /// </summary>
-        /// <param name="stream">
-        /// </param>
-        /// <returns>
-        /// </returns>
+        /// <param name="stream"></param>
+        /// <returns></returns>
         public Page LoadCompiledStream(Stream stream)
         {
             try
             {
                 var page = new Page(this);
                 var compiler = new Compiler(this);
-                using (Stream zipStream = new System.IO.Compression.DeflateStream(stream, System.IO.Compression.CompressionMode.Decompress))
-                {
-                    page.Write(compiler.DecompileFromStream(zipStream));
-                }
+                page.LoadCompiledStream(stream);
                 return page;
             }
             catch (Exception ex)
             {
-                throw new MonkeyspeakException(String.Format("Could not load compiled script from stream.  Reason:{0}", ex.Message), ex);
+                Logger.Debug<MonkeyspeakEngine>(ex);
             }
+            return new Page(this);
         }
 
         /// <summary>
-        /// Loads a Monkeyspeak script from a string into a <see cref="Monkeyspeak.Page"/>.
+        /// Compiles a Page to a file
         /// </summary>
-        /// <param name="chunk">
-        /// String that contains the Monkeyspeak script source.
-        /// </param>
-        /// <returns>
-        /// </returns>
-        public Page LoadFromString(string chunk)
+        /// <param name="page"></param>
+        /// <param name="filePath"></param>
+        public void CompileToFile(Page page, string filePath)
         {
-            try
-            {
-                Page page = new Page(this);
-                page.Write(parser.Parse(chunk));
-                pages.Add(page);
-                return page;
-            }
-            catch (Exception ex)
-            {
-                throw new MonkeyspeakException(String.Format("Could not load script from chunk.  Reason:{0}", ex.Message));
-            }
+            page.CompileToFile(filePath);
         }
 
         /// <summary>
-        /// Loads a Monkeyspeak script from a string into
-        /// <paramref name="existingPage"/>. and clears the old page
+        /// Compiles a Page to a stream
         /// </summary>
-        /// <param name="existingPage">
-        /// Reference to an existing Page
-        /// </param>
-        /// <param name="chunk">
-        /// String that contains the Monkeyspeak script source.
-        /// </param>
-        /// <returns>
-        /// </returns>
-        public Page LoadFromString(ref Page existingPage, string chunk)
+        /// <param name="page"></param>
+        /// <param name="stream"></param>
+        public void CompileToStream(Page page, Stream stream)
         {
-            try
-            {
-                existingPage.OverWrite(parser.Parse(chunk));
-            }
-            catch (Exception ex)
-            {
-                throw new MonkeyspeakException(String.Format("Could not load script from chunk.  Reason:{0}", ex.Message));
-            }
-            return existingPage;
+            page.CompileToStream(stream);
         }
-
-        #endregion Public Methods
-
-        #region Internal Methods
-
-        /// <summary>
-        /// Loads a Monkeyspeak script from a Stream into a <see cref="Monkeyspeak.Page"/>.
-        /// </summary>
-        /// <param name="stream">
-        /// Stream that contains the Monkeyspeak script. Closes the stream.
-        /// </param>
-        /// <returns>
-        /// <see cref="Monkeyspeak.Page"/>
-        /// </returns>
-        public Page LoadFromStream(Stream stream)
-        {
-            try
-            {
-                Page page;
-                using (var reader = new StreamReader(stream, Encoding.Unicode, true, 1024, true))
-                {
-                    page = LoadFromString(reader.ReadToEnd());
-                }
-                return page;
-            }
-            catch (Exception ex)
-            {
-                throw new MonkeyspeakException(String.Format("Could not load script from stream.  Reason:{0}", ex.Message), ex);
-            }
-        }
-
-        /// <summary>
-        /// Loads a Monkeyspeak script from a Stream into <paramref name="existingPage"/>.
-        /// </summary>
-        /// <param name="existingPage">
-        /// Reference to an existing Page
-        /// </param>
-        /// <param name="stream">
-        /// Stream that contains the Monkeyspeak script. Closes the stream.
-        /// </param>
-        public Page LoadFromStream(ref Page existingPage, Stream stream)
-        {
-            try
-            {
-                Page page = null;
-                using (var reader = new StreamReader(stream, Encoding.Unicode, true, 1024, true))
-                {
-                    page = LoadFromString(ref existingPage, reader.ReadToEnd());
-                }
-                return page;
-            }
-            catch (Exception ex)
-            {
-                throw new MonkeyspeakException(String.Format("Could not load script from stream.  Reason:{0}", ex.Message), ex);
-            }
-        }
-
-        internal void CreateDefaultLexer()
-        {
-            lexer = new Lexer();
-
-            lexer.AddDefinition(new TokenDefinition(
-                TokenType.Trigger,
-                new Regex(@"\([0-9]{1}\:[0-9]{1," + Int32.MaxValue + @"}\)", RegexOptions.Compiled)));
-
-            lexer.AddDefinition(new TokenDefinition(
-                TokenType.Variable,
-                new Regex(String.Format(@"\{0}[\ba-zA-Z\d\D][\ba-zA-Z\d_]*", options.VariableDeclarationSymbol), RegexOptions.Compiled)));
-
-            lexer.AddDefinition(new TokenDefinition(
-                TokenType.String,
-                new Regex(@"\" + options.StringBeginSymbol + @"(.*?)\" + options.StringEndSymbol, RegexOptions.Compiled)));
-
-            lexer.AddDefinition(new TokenDefinition(
-                TokenType.Number,
-                new Regex(@"[-+]?([0-9]*\.[0-9]+|[0-9]+)", RegexOptions.Compiled)));
-
-            lexer.AddDefinition(new TokenDefinition(
-                TokenType.Comment,
-                new Regex(@"\" + options.CommentSymbol + @".*[\r|\n]", RegexOptions.Compiled), true));
-            lexer.AddDefinition(new TokenDefinition(
-                TokenType.Word,
-                new Regex(@"\w+", RegexOptions.Compiled), true));
-            lexer.AddDefinition(new TokenDefinition(
-                TokenType.Symbol,
-                new Regex(@"\W", RegexOptions.Compiled), true));
-            lexer.AddDefinition(new TokenDefinition(
-                TokenType.WhiteSpace,
-                new Regex(@"\s+", RegexOptions.Compiled), true));
-        }
-
-        internal void CreateDefaultOptions()
-        {
-            options = new Options
-            {
-                CanOverrideTriggerHandlers = false,
-                StringBeginSymbol = '{',
-                StringEndSymbol = '}',
-                VariableDeclarationSymbol = '%',
-                CommentSymbol = "*",
-                TriggerLimit = 6000,
-                VariableCountLimit = 1000,
-                StringLengthLimit = Int32.MaxValue,
-                TimerLimit = 100,
-                Version = Assembly.GetExecutingAssembly().GetName().Version
-            };
-        }
-
-        #endregion Internal Methods
-    }
-
-    /// <summary>
-    /// General Exception for Monkey Speak Libraries
-    /// </summary>
-    [Serializable]
-    public class MonkeyspeakException : Exception
-
-    {
-        #region Public Constructors
-
-        /// <summary>
-        /// General Monkey Speak Exception Constructor
-        /// </summary>
-        public MonkeyspeakException() : base()
-        {
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="message"></param>
-        public MonkeyspeakException(string message) : base(message)
-        {
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="format"></param>
-        /// <param name="message"></param>
-        public MonkeyspeakException(string format, params object[] message) : base(String.Format(format, message))
-        {
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="message"></param>
-        /// <param name="inner"></param>
-        public MonkeyspeakException(string message, Exception inner) : base(message, inner)
-        {
-        }
-
-        #endregion Public Constructors
-
-        #region Protected Constructors
-
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="info"></param>
-        /// <param name="context"></param>
-        protected MonkeyspeakException(
-          System.Runtime.Serialization.SerializationInfo info,
-          System.Runtime.Serialization.StreamingContext context)
-            : base(info, context) { }
-
-        #endregion Protected Constructors
     }
 }

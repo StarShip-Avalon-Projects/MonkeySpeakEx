@@ -1,41 +1,35 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 
 namespace Monkeyspeak
 {
     internal class ReflectionHelper
     {
-        #region Public Methods
+        public static Type[] GetAllTypesWithAttributeInMembers<T>(Assembly assembly) where T : Attribute
+        {
+            return assembly.GetTypes().Where(type => type.GetMembers().Any(member => member.GetCustomAttribute<T>() != null)).ToArray();
+        }
 
         public static IEnumerable<T> GetAllAttributesFromMethod<T>(MethodInfo methodInfo) where T : Attribute
         {
-            if (methodInfo.IsDefined(typeof(T), false))
-            {
-                T[] attributes = (T[])methodInfo.GetCustomAttributes(typeof(T), false);
+            var attributes = (T[])methodInfo.GetCustomAttributes(typeof(T), false);
+            if (attributes != null && attributes.Length > 0)
                 for (int k = 0; k <= attributes.Length - 1; k++)
                 {
-                    yield return (T)attributes[k];
+                    yield return attributes[k];
                 }
-            }
         }
 
-        public static IEnumerable<MethodInfo> GetAllMethods(Type[] types)
+        public static IEnumerable<MethodInfo> GetAllMethods(Type type)
         {
-            for (int i = 0; i <= types.Length - 1; i++)
+            MethodInfo[] methods = type.GetMethods();
+            for (int j = 0; j <= methods.Length - 1; j++)
             {
-                MethodInfo[] methods = types[i].GetMethods();
-                for (int j = 0; j <= methods.Length - 1; j++)
-                {
-                    yield return methods[j];
-                }
+                yield return methods[j];
             }
-        }
-
-        public static Type[] GetAllTypes(Assembly assembly)
-        {
-            return assembly.GetTypes();
         }
 
         public static bool TryLoad(string assemblyFile, out Assembly asm)
@@ -48,18 +42,16 @@ namespace Monkeyspeak
 #if DEBUG
             catch (Exception ex)
 #else
-			catch
+            catch
 #endif
             {
                 asm = null;
 #if DEBUG
                 throw ex;
 #else
-				return false;
+                return false;
 #endif
             }
         }
-
-        #endregion Public Methods
     }
 }

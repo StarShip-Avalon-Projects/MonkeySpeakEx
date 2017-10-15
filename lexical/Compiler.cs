@@ -1,27 +1,22 @@
-﻿using System;
+﻿using Monkeyspeak.lexical.Expressions;
+using Shared.Core.Logging;
+using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
+using System.Linq;
+using System.Text;
 
 namespace Monkeyspeak.lexical
 {
     internal class Compiler
     {
-        #region Private Fields
-
         private Version version;
-
-        #endregion Private Fields
-
-        #region Public Constructors
 
         public Compiler(MonkeyspeakEngine engine)
         {
             version = engine.Options.Version;
         }
-
-        #endregion Public Constructors
-
-        #region Public Properties
 
         /// <summary>
         /// Compiler version number
@@ -31,97 +26,155 @@ namespace Monkeyspeak.lexical
             get { return version; }
         }
 
-        #endregion Public Properties
-
-        #region Public Methods
-
-        public void CompileToStream(List<TriggerList> triggers, Stream stream)
+        private IEnumerable<TriggerList> ReadVersion6_5(BinaryReader reader)
         {
-            List<TriggerList> triggerLists = triggers;
-            using (System.IO.BinaryWriter writer = new System.IO.BinaryWriter(stream))
+            var sourcePos = new SourcePosition();
+
+            int triggerListCount = reader.ReadInt32();
+            for (int i = 0; i <= triggerListCount - 1; i++)
             {
-                writer.Write(version.ToString(4));
-
-                writer.Write(triggerLists.Count);
-                for (int i = 0; i <= triggerLists.Count - 1; i++)
+                var triggerList = new TriggerList();
+                int triggerCount = reader.ReadInt32();
+                for (int j = 0; j <= triggerCount - 1; j++)
                 {
-                    TriggerList triggerList = triggerLists[i];
-                    writer.Write(triggerList.Count);
-                    for (int j = 0; j <= triggerList.Count - 1; j++)
-                    {
-                        Trigger trigger = triggerList[j];
-                        writer.Write((byte)trigger.Category);
-                        writer.Write(trigger.Id);
-                        writer.Write(trigger.Description);
+                    var trigger = new Trigger((TriggerCategory)reader.ReadInt32(), reader.ReadInt32());
 
-                        writer.Write(trigger.contents.Count);
-                        var enumerator = trigger.contents.GetEnumerator();
-                        while (enumerator.MoveNext())
+                    int triggerContentCount = reader.ReadInt32();
+                    if (triggerContentCount > 0)
+                        for (int k = triggerContentCount - 1; k >= 0; k--)
                         {
-                            object content = enumerator.Current;
-                            if (content is string)
+                            byte type = reader.ReadByte();
+                            switch (type)
                             {
-                                writer.Write(true);
-                                writer.Write((short)1);
-                                writer.Write((string)content);
+                                case 1:
+                                    trigger.contents.Add(new StringExpression(ref sourcePos, reader.ReadString()));
+                                    break;
+
+                                case 2:
+                                    trigger.contents.Add(new NumberExpression(ref sourcePos, reader.ReadDouble()));
+                                    break;
+
+                                case 3:
+                                    trigger.contents.Add(new VariableExpression(ref sourcePos, reader.ReadString()));
+                                    break;
+
+                                case 4: // reserved
+                                    break;
                             }
-                            else if (content is double)
-                            {
-                                writer.Write(true);
-                                writer.Write((short)2);
-                                writer.Write((double)content);
-                            }
-                            else writer.Write(false);
                         }
-                    }
+                    triggerList.Add(trigger);
                 }
+                yield return triggerList;
             }
         }
 
-        public List<TriggerList> DecompileFromStream(Stream stream)
+        private IEnumerable<TriggerList> ReadVersion1(BinaryReader reader)
         {
-            List<TriggerList> triggerLists = new List<TriggerList>();
-            using (System.IO.BinaryReader reader = new System.IO.BinaryReader(stream))
+            var sourcePos = new SourcePosition();
+
+            int triggerListCount = reader.ReadInt32();
+            for (int i = 0; i <= triggerListCount - 1; i++)
             {
-                Version fileVersion = new Version(reader.ReadString()); // use for versioning comparison
-
-                TriggerList triggerList = new TriggerList();
-                int triggerListCount = reader.ReadInt32();
-                for (int i = 0; i <= triggerListCount - 1; i++)
+                var triggerList = new TriggerList();
+                int triggerCount = reader.ReadInt32();
+                for (int j = 0; j <= triggerCount - 1; j++)
                 {
-                    int triggerCount = reader.ReadInt32();
-                    for (int j = 0; j <= triggerCount - 1; j++)
-                    {
-                        Trigger trigger = new Trigger();
-                        trigger.Category = (TriggerCategory)reader.ReadByte();
-                        trigger.Id = reader.ReadInt32();
-                        trigger.Description = reader.ReadString();
+                    var trigger = new Trigger((TriggerCategory)reader.ReadInt32(), reader.ReadInt32());
 
-                        int triggerContentCount = reader.ReadInt32();
+                    string description = reader.ReadString(); // no longer used, here for compatibility.
+                    int triggerContentCount = reader.ReadInt32();
+                    if (triggerContentCount > 0)
                         for (int k = 0; k <= triggerContentCount - 1; k++)
                         {
-                            if (reader.ReadBoolean() == true)
+                            if (reader.ReadBoolean())
                             {
-                                short type = reader.ReadInt16();
+                                byte type = reader.ReadByte();
                                 if (type == 1) // String
                                 {
-                                    trigger.contents.Enqueue(reader.ReadString());
+                                    trigger.contents.Add(new StringExpression(ref sourcePos, reader.ReadString()));
                                 }
 
-                                if (type == 2)
+                                if (type == 2) // Double
                                 {
-                                    trigger.contents.Enqueue(reader.ReadDouble());
+                                    trigger.contents.Add(new NumberExpression(ref sourcePos, reader.ReadDouble()));
                                 }
                             }
                         }
-                        triggerList.Add(trigger);
-                    }
+                    triggerList.Add(trigger);
                 }
-                triggerLists.Add(triggerList);
+                yield return triggerList;
             }
-            return triggerLists;
         }
 
-        #endregion Public Methods
+        public TriggerList[] DecompileFromStream(Stream stream)
+        {
+            TriggerList[] blocks = null;
+            using (var decompressed = new DeflateStream(stream, CompressionMode.Decompress))
+            using (var reader = new BinaryReader(decompressed, Encoding.UTF8, true))
+            {
+                var fileVersion = new Version(reader.ReadInt32(), reader.ReadInt32()); // use for versioning comparison
+                switch (fileVersion.Major)
+                {
+                    case 1:
+                        blocks = ReadVersion1(reader).ToArray();
+                        break;
+
+                    case 6:
+                        blocks = ReadVersion6_5(reader).ToArray();
+                        break;
+
+                    default:
+                        blocks = ReadVersion6_5(reader).ToArray();
+                        break;
+                }
+            }
+            return blocks;
+        }
+
+        public void CompileToStream(List<TriggerList> triggerBlocks, Stream stream)
+        {
+            using (var compressed = new DeflateStream(stream, CompressionMode.Compress))
+            using (var writer = new BinaryWriter(compressed, Encoding.UTF8, true))
+            {
+                writer.Write(version.Major);
+                writer.Write(version.Minor);
+
+                writer.Write(triggerBlocks.Count);
+                for (int i = 0; i <= triggerBlocks.Count - 1; i++)
+                {
+                    TriggerList triggerBlock = triggerBlocks[i];
+                    writer.Write(triggerBlock.Count);
+                    for (int j = 0; j <= triggerBlock.Count - 1; j++)
+                    {
+                        Trigger trigger = triggerBlock[j];
+                        writer.Write((int)trigger.Category);
+                        writer.Write(trigger.Id);
+
+                        var count = trigger.contents.Count;
+                        writer.Write(count);
+                        for (int k = 0; k <= count - 1; k++)
+                        {
+                            var content = trigger.contents[k];
+                            if (content is StringExpression)
+                            {
+                                writer.Write((byte)1);
+                                writer.Write(((StringExpression)content).Value);
+                            }
+                            else if (content is NumberExpression)
+                            {
+                                writer.Write((byte)2);
+                                writer.Write(((NumberExpression)content).Value);
+                            }
+                            else if (content is VariableExpression)
+                            {
+                                writer.Write((byte)3);
+                                writer.Write(((VariableExpression)content).Value);
+                            }
+                            else writer.Write((byte)4); // reserved
+                        }
+                    }
+                }
+            }
+        }
     }
 }

@@ -1,40 +1,89 @@
-﻿namespace Monkeyspeak
+﻿using Monkeyspeak.lexical;
+using System.Linq;
+using System.Runtime.InteropServices;
+
+namespace Monkeyspeak
 {
-    internal enum TokenType : byte
+    public enum TokenType : byte
     {
-        Trigger, String, Number, Variable, Comment, WhiteSpace, Word, Symbol, EOF
+        // Majority of these won't be used but it is nice to have...
+
+        COMMENT, ASSIGN,
+        PLUS, MINUS, MULTIPLY, DIVIDE, MOD, POWER, // Math operators
+        LPAREN, RPAREN, LBRACE, RBRACE, LBRACKET, RBRACKET, COMMA, COLON, END_STATEMENT, END_OF_FILE,
+        CONCAT, // String operators
+        NOT, AND, OR, // Boolean operators
+        LESS_THEN, LESS_EQUAL, EQUAL, GREATER_EQUAL, GREATER_THEN, NOT_EQUAL, // Comparison operators
+        TRUE, FALSE, // Constant types
+        WORD, LITERAL,
+
+        // custom
+        TRIGGER, VARIABLE, REFERENCE, STRING_LITERAL, NUMBER, NONE
     }
 
-    internal class Token
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+    public struct Token
     {
-        #region Public Constructors
+        private static readonly Token none = new Token(TokenType.NONE, 0, 0, new SourcePosition());
+        public static Token None { get { return none; } }
 
-        public Token(TokenType type, string value, TokenPosition position)
+        private SourcePosition _position;
+        private TokenType _type;
+        private long valueStart;
+        private int valueLength;
+
+        public Token(TokenType type, long valueStart, int valueLength, SourcePosition position)
         {
-            Type = type;
-            Value = value;
-            Position = position;
+            _type = type;
+            this.valueStart = valueStart;
+            this.valueLength = valueLength;
+            _position = position;
         }
 
-        #endregion Public Constructors
+        public Token(TokenType type)
+        {
+            this._type = type;
+            this.valueStart = 0;
+            this.valueLength = 0;
+            _position = new SourcePosition();
+        }
 
-        #region Public Properties
+        public SourcePosition Position
+        {
+            get { return _position; }
+            internal set { _position = value; }
+        }
 
-        public TokenPosition Position { get; set; }
+        public TokenType Type
+        {
+            get { return _type; }
+            set { _type = value; }
+        }
 
-        public TokenType Type { get; set; }
+        /// <summary>
+        /// Gets or sets the value start position within the lexer.
+        /// </summary>
+        /// <value>
+        /// The value start position as located in the lexer.
+        /// </value>
+        public long ValueStartPosition { get => valueStart; set => valueStart = value; }
 
-        public string Value { get; set; }
+        /// <summary>
+        /// Gets or sets the length of the value to be looked up in the lexer.
+        /// </summary>
+        /// <value>
+        /// The length (see above).
+        /// </value>
+        public int Length { get => valueLength; set => valueLength = value; }
 
-        #endregion Public Properties
-
-        #region Public Methods
+        public string GetValue(AbstractLexer lexer)
+        {
+            return new string(lexer.Read(valueStart, valueLength).ToArray());
+        }
 
         public override string ToString()
         {
-            return string.Format("Token: {{ Type: \"{0}\", Value: \"{1}\", Position: {{ Index: \"{2}\", Line: \"{3}\", Column: \"{4}\" }} }}", Type, Value, Position.Index, Position.Line, Position.Column);
+            return $"Type: {Type} at {Position.ToString()}";
         }
-
-        #endregion Public Methods
     }
 }
