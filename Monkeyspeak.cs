@@ -68,7 +68,7 @@ namespace Monkeyspeak
                 StringBuilder sb = new StringBuilder();
                 sb.Append("Monkeyspeak").Append(' ').Append(options.Version.ToString(4)).Append(Environment.NewLine);
                 sb.AppendLine("Author: Kirk");
-                sb.AppendLine("Author: Gerolkae");
+                //sb.AppendLine("Author: You");
                 sb.Append(".NET Framework ").Append(Assembly.GetAssembly(typeof(MonkeyspeakEngine)).ImageRuntimeVersion.ToString());
                 return sb.ToString();
             }

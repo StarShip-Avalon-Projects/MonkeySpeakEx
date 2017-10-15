@@ -66,19 +66,21 @@ namespace Monkeyspeak.Libraries
         /// <param name="page">The page.</param>
         public abstract void Unload(Page page);
 
-        /// <summary>
-        /// Builds a string representation of the descriptions of each trigger.
-        /// </summary>
-        /// <returns></returns>
-        public override string ToString()
+
+        public string ToString(bool HideLibraryies)
         {
             StringBuilder sb = new StringBuilder();
-            sb.AppendLine(GetType().Name);
+           if(!HideLibraryies) sb.AppendLine(GetType().Name);
             foreach (var kv in descriptions)
             {
                 sb.AppendLine(kv.Value);
             }
             return sb.ToString();
+        }
+
+        public override string ToString()
+        {
+            return ToString(true);
         }
 
         public static IEnumerable<BaseLibrary> GetAllLibraries()

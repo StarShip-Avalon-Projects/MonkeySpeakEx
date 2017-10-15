@@ -38,7 +38,7 @@
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
+    <WarningLevel>0</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
     <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
@@ -104,6 +104,12 @@
     <CodeAnalysisIgnoreBuiltInRuleSets>false</CodeAnalysisIgnoreBuiltInRuleSets>
     <CodeAnalysisIgnoreBuiltInRules>false</CodeAnalysisIgnoreBuiltInRules>
   </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>MonkeyTalkEx.pfx</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -124,6 +130,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>AssemblyInfoersion.t4</DependentUpon>
     </Compile>
+    <None Include="ConstantVariable.cs" />
     <Compile Include="Extensions\ObjectExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="GlobalSuppressions.cs" />
@@ -201,6 +208,7 @@
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>AssemblyInfoersion.cs</LastGenOutput>
     </None>
+    <None Include="MonkeyTalkEx.pfx" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
