@@ -9,6 +9,12 @@ namespace Monkeyspeak
     public enum TriggerCategory : int
     {
         /// <summary>
+        /// A trigger that was not defined.  You should never encounter this
+        /// if you do then something isn't quite right.
+        /// </summary>
+        Undefined = -1,
+
+        /// <summary>
         /// A trigger defined with a 0
         /// <para>Example: (0:1) when someone says something, </para>
         /// </summary>
@@ -24,24 +30,18 @@ namespace Monkeyspeak
         /// A trigger defined with a 5
         /// <para>Example: (5:1) print {Hello World} to the console. </para>
         /// </summary>
-        Effect = 5,
-
-        /// <summary>
-        /// A trigger that was not defined.  You should never encounter this
-        /// if you do then something isn't quite right.
-        /// </summary>
-        Undefined = -1
+        Effect = 5
     }
 
     [StructLayout(LayoutKind.Auto)]
     [Serializable]
     public struct Trigger : IEquatable<Trigger>
     {
+        public static readonly Trigger Undefined = new Trigger(TriggerCategory.Undefined, -1);
+
         private TriggerCategory category;
 
         private int id;
-
-        private string description;
 
         internal List<IExpression> contents;
 
@@ -49,7 +49,6 @@ namespace Monkeyspeak
         {
             category = cat;
             this.id = id;
-            description = string.Empty;
             contents = new List<IExpression>();
         }
 
@@ -82,14 +81,6 @@ namespace Monkeyspeak
             get { return contents; }
             set { contents = value; }
         }
-
-        /// <summary>
-        /// Gets the none.
-        /// </summary>
-        /// <value>
-        /// The none.
-        /// </value>
-        public static Trigger None => new Trigger(TriggerCategory.Undefined, -1);
 
         internal Trigger Clone()
         {
@@ -133,10 +124,10 @@ namespace Monkeyspeak
         public override bool Equals(object obj)
         {
             if (obj == null) return false;
-            if (obj is Trigger)
+            if (obj is Trigger other)
             {
-                var other = (Trigger)obj;
-                return other.category == category && other.id == id;
+                other = (Trigger)obj;
+                return other != Trigger.Undefined && other.category == category && other.id == id;
             }
             return false;
         }

@@ -18,35 +18,35 @@ namespace Monkeyspeak.Libraries
 
             // (1:200) and the file {...} exists,
             Add(new Trigger(TriggerCategory.Condition, 200), FileExists,
-                "(1:200) and the file {...} exists,");
+                "and the file {...} exists,");
 
             // (1:201) and the file {...} does not exist,
             Add(new Trigger(TriggerCategory.Condition, 201), FileNotExists,
-                "(1:201) and the file {...} does not exist,");
+                "and the file {...} does not exist,");
 
             // (1:202) and the file {...} can be read from,
             Add(new Trigger(TriggerCategory.Condition, 202), CanReadFile,
-                "(1:202) and the file {...} can be read from,");
+                "and the file {...} can be read from,");
 
             // (1:203) and the file {...} can be written to,
             Add(new Trigger(TriggerCategory.Condition, 203), CanWriteFile,
-                "(1:203) and the file {...} can be written to,");
+                "and the file {...} can be written to,");
 
             // (5:200) append {...} to file {...}.
             Add(new Trigger(TriggerCategory.Effect, 200), AppendToFile,
-                "(5:200) append {...} to file {...}.");
+                "append {...} to file {...}.");
 
             // (5:201) read from file {...} and put it into variable %Variable.
             Add(new Trigger(TriggerCategory.Effect, 201), ReadFileIntoVariable,
-                "(5:201) read from file {...} and put it into variable %Variable.");
+                "read from file {...} and put it into variable %Variable.");
 
             // (5:202) delete file {...}.
             Add(new Trigger(TriggerCategory.Effect, 202), DeleteFile,
-                "(5:202) delete file {...}.");
+                "delete file {...}.");
 
             //(5:203) create file {...}.
             Add(new Trigger(TriggerCategory.Effect, 203), CreateFile,
-                "(5:203) create file {...}.");
+                "create file {...}.");
         }
 
         public override void Unload(Page page)

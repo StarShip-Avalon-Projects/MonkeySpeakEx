@@ -1,13 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Monkeyspeak
 {
-    [Serializable]
-    public class ConstantVariable : IVariable
+    public sealed class ConstantVariable : IVariable
     {
         public string Name { get; private set; }
 
@@ -17,12 +12,6 @@ namespace Monkeyspeak
         {
             Name = name;
             this.value = value;
-        }
-
-        public ConstantVariable(string name)
-        {
-            Name = name;
-            this.value = null;
         }
 
         public ConstantVariable(IVariable variable)
@@ -60,11 +49,6 @@ namespace Monkeyspeak
         public override string ToString()
         {
             return ((IsConstant) ? "const " : "") + $"{Name} = {value ?? "null"}";
-        }
-
-        public void ForceAssignValue(object value)
-        {
-            this.value = value;
         }
     }
 }

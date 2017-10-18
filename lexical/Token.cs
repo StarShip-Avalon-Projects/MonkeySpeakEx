@@ -24,9 +24,6 @@ namespace Monkeyspeak
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
     public struct Token
     {
-        private static readonly Token none = new Token(TokenType.NONE, 0, 0, new SourcePosition());
-        public static Token None { get { return none; } }
-
         private SourcePosition _position;
         private TokenType _type;
         private long valueStart;
@@ -85,5 +82,9 @@ namespace Monkeyspeak
         {
             return $"Type: {Type} at {Position.ToString()}";
         }
+
+        public static bool operator ==(Token a, Token b) => a.Type == b.Type && a.valueStart == b.valueStart;
+
+        public static bool operator !=(Token a, Token b) => a.Type != b.Type && a.valueStart != b.valueStart;
     }
 }

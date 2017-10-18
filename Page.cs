@@ -1,6 +1,5 @@
 ﻿using Monkeyspeak.lexical;
 using Monkeyspeak.Libraries;
-using Shared.Core.Logging;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -42,6 +41,11 @@ namespace Monkeyspeak
     /// <returns>True = Continue to the Next Trigger, False = Stop executing current block of Triggers</returns>
     public delegate bool TriggerHandler(TriggerReader reader);
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="trigger">The trigger.</param>
+    /// <param name="handler">The handler.</param>
     public delegate void TriggerAddedEventHandler(Trigger trigger, TriggerHandler handler);
 
     public delegate bool TriggerHandledEventHandler(Trigger trigger);
@@ -54,6 +58,11 @@ namespace Monkeyspeak
     /// <param name="ex"></param>
     public delegate void TriggerHandlerErrorEvent(TriggerHandler handler, Trigger trigger, Exception ex);
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="token">The token.</param>
+    /// <returns></returns>
     public delegate Token TokenVisitorHandler(ref Token token);
 
     [Serializable]
@@ -62,14 +71,19 @@ namespace Monkeyspeak
         public object syncObj = new Object();
 
         private Parser parser;
-        private List<TriggerList> triggerBlocks;
-        private volatile HashSet<IVariable> scope;
+        private List<TriggerBlock> triggerBlocks;
+        private Dictionary<string, IVariable> scope;
         private HashSet<BaseLibrary> libraries;
 
-        private volatile Dictionary<Trigger, TriggerHandler> handlers = new Dictionary<Trigger, TriggerHandler>();
+        private Dictionary<Trigger, TriggerHandler> handlers = new Dictionary<Trigger, TriggerHandler>();
         private MonkeyspeakEngine engine;
 
         public event Action Resetting;
+
+        /// <summary>
+        /// Occurs when [initiating].  Best to call your variable additions in the event.
+        /// </summary>
+        public event Action<Page> Initiating;
 
         internal TokenVisitorHandler VisitingToken;
 
@@ -99,39 +113,40 @@ namespace Monkeyspeak
         {
             this.engine = engine;
             parser = new Parser(engine);
-            triggerBlocks = new List<TriggerList>();
-            scope = new HashSet<IVariable>();
+            triggerBlocks = new List<TriggerBlock>();
+            scope = new Dictionary<string, IVariable>();
             libraries = new HashSet<BaseLibrary>();
             Initiate();
         }
 
         internal void Initiate()
         {
-            SetVariable(Variable.NoValue);
-            SetVariable(new Variable("%MONKEY", engine.Banner, true));
-            SetVariable(new Variable("%VERSION", engine.Options.Version.ToString(2), true));
+            SetVariable(new ConstantVariable(Variable.NoValue));
+            SetVariable(new ConstantVariable("%MONKEY", engine.Banner));
+            SetVariable(new ConstantVariable("%VERSION", engine.Options.Version.ToString(2)));
             LoadLibrary(Attributes.Instance);
+            Initiating?.Invoke(this);
         }
 
         internal void GenerateBlocks(AbstractLexer lexer)
         {
             parser.VisitToken = VisitingToken;
             AddBlocks(parser.Parse(lexer));
+            parser.VisitToken = null;
         }
 
-        internal void AddBlocks(IEnumerable<TriggerList> blocks)
+        internal void AddBlocks(IEnumerable<TriggerBlock> blocks)
         {
-            int curCount;
             lock (syncObj)
             {
-                curCount = triggerBlocks.Count;
-                triggerBlocks.AddRange(blocks);
+                var blocksArray = blocks.ToArray();
+                for (int i = blocksArray.Length - 1; i >= 0; i--)
+                    Size += blocksArray[i].Count;
+                triggerBlocks.AddRange(blocksArray);
             }
-            Size += triggerBlocks.Count - curCount; // difference of before added blocks to now
             if (Size > engine.Options.TriggerLimit)
             {
-                TrimToLimit(Size);
-                throw new Exception("Trigger limit exceeded.");
+                throw new MonkeyspeakException("Trigger limit exceeded.");
             }
         }
 
@@ -217,9 +232,12 @@ namespace Monkeyspeak
         public void Reset(bool resetTriggerHandlers = false)
         {
             Resetting?.Invoke();
-            scope.Clear();
-            foreach (var lib in libraries) lib.Unload(this);
-            if (resetTriggerHandlers) handlers.Clear();
+            lock (syncObj)
+            {
+                scope.Clear();
+                foreach (var lib in libraries) lib.Unload(this);
+                if (resetTriggerHandlers) handlers.Clear();
+            }
             Initiate();
         }
 
@@ -235,31 +253,22 @@ namespace Monkeyspeak
         /// <summary>
         ///
         /// </summary>
+        /// <param name="excludeLibraryName">[true] hide library name, [false] show library name above triggers</param>
         /// <returns>IEnumerable of Triggers</returns>
-        public IEnumerable<string> GetTriggerDescriptions()
+        public IEnumerable<string> GetTriggerDescriptions(bool excludeLibraryName = false)
         {
             lock (syncObj)
             {
                 foreach (var lib in libraries)
                 {
-                    yield return lib.ToString();
+                    yield return lib.ToString(excludeLibraryName);
                 }
             }
         }
 
-        public IEnumerable<string> GetTriggerDescriptions(bool HideLibraryNames)
-        {
-            lock (syncObj)
-            {
-                foreach (var lib in libraries)
-                {
-                    yield return lib.ToString(HideLibraryNames);
-                }
-            }
-        }
         public ReadOnlyCollection<IVariable> Scope
         {
-            get { return new ReadOnlyCollection<IVariable>(scope.ToArray()); }
+            get { return new ReadOnlyCollection<IVariable>(scope.Values.ToArray()); }
         }
 
         /// <summary>
@@ -284,18 +293,9 @@ namespace Monkeyspeak
         /// Loads Monkeyspeak IO Library into this Page
         /// <para>Used for File Input/Output operations</para>
         /// </summary>
-        public void LoadIOLibrary()
+        public void LoadIOLibrary(string authorizedPath = null)
         {
-            LoadLibrary(new Libraries.IO());
-        }
-
-        /// <summary>
-        /// Loads Monkeyspeak IO Library into this Page
-        /// <para>Used for File Input/Output operations</para>
-        /// </summary>
-        public void LoadIOLibrary(string FileName)
-        {
-            LoadLibrary(new Libraries.IO(FileName));
+            LoadLibrary(new Libraries.IO(authorizedPath));
         }
 
         /// <summary>
@@ -310,17 +310,9 @@ namespace Monkeyspeak
         /// <summary>
         /// Loads Monkeyspeak Timer Library into this Page
         /// </summary>
-        public void LoadTimerLibrary()
+        public void LoadTimerLibrary(uint timersLimit = 10)
         {
-            LoadLibrary(new Libraries.Timers());
-        }
-
-        /// <summary>
-        /// Loads Monkeyspeak Timer Library into this Page
-        /// </summary>
-        public void LoadTimerLibrary(uint TimerLimit)
-        {
-            LoadLibrary(new Libraries.Timers(TimerLimit));
+            LoadLibrary(new Libraries.Timers(timersLimit));
         }
 
         /// <summary>
@@ -456,28 +448,30 @@ namespace Monkeyspeak
         /// <returns></returns>
         public bool RemoveVariable(string name)
         {
-            return scope.RemoveWhere(var => var.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase)) > 0;
+            lock (syncObj)
+            {
+                return scope.Remove(name);
+            }
         }
 
         /// <summary>
         /// Sets the variable.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="variable">The variable.</param>
+        /// <param name="var">The variable.</param>
         /// <exception cref="Monkeyspeak.TypeNotSupportedException"></exception>
         /// <exception cref="Exception">Variable limit exceeded, operation failed.</exception>
-        public void SetVariable<T>(T variable) where T : IVariable
+        public void SetVariable<T>(T var) where T : IVariable
         {
-            if (!CheckType(variable.Value)) throw new TypeNotSupportedException(String.Format("{0} is not a supported type. Expecting string or double.", variable.Value.GetType().Name));
-            if (variable.Name[0] != engine.Options.VariableDeclarationSymbol)
-                throw new MonkeyspeakException($"Invalid variable declaration symbol '{variable.Name[0]}', expected '{engine.Options.VariableDeclarationSymbol}'");
+            if (!CheckType(var.Value)) throw new TypeNotSupportedException(String.Format("{0} is not a supported type. Expecting string or double.", var.Value.GetType().Name));
+            if (var.Name[0] != engine.Options.VariableDeclarationSymbol)
+                throw new MonkeyspeakException($"Invalid variable declaration symbol '{var.Name[0]}', expected '{engine.Options.VariableDeclarationSymbol}'");
 
             lock (syncObj)
             {
-                RemoveVariable(variable.Name);
-
-                if (scope.Count + 1 > engine.Options.VariableCountLimit) throw new MonkeyspeakException("Variable limit exceeded, operation failed.");
-                scope.Add(variable);
+                if (scope.ContainsKey(var.Name)) return;
+                if (scope.Count + 1 > engine.Options.VariableCountLimit) throw new Exception("Variable limit exceeded, operation failed.");
+                scope.Add(var.Name, var);
             }
         }
 
@@ -499,19 +493,17 @@ namespace Monkeyspeak
 
             lock (syncObj)
             {
-                foreach (var v in scope)
+                if (scope.TryGetValue(name, out IVariable v))
                 {
-                    if (v.Name.Equals(name))
-                    {
-                        var = v;
-                        var.Value = value;
-                        return var;
-                    }
+                    var = v;
+                    var.Value = value;
                 }
-
-                if (scope.Count + 1 > engine.Options.VariableCountLimit) throw new Exception("Variable limit exceeded, operation failed.");
-                var = new Variable(name, value, isConstant);
-                scope.Add(var);
+                else
+                {
+                    var = new Variable(name, value, isConstant);
+                    if (scope.Count + 1 > engine.Options.VariableCountLimit) throw new Exception("Variable limit exceeded, operation failed.");
+                    scope.Add(var.Name, var);
+                }
                 return var;
             }
         }
@@ -534,24 +526,17 @@ namespace Monkeyspeak
 
             lock (syncObj)
             {
-                foreach (var v in scope)
+                if (scope.TryGetValue(name, out IVariable v))
                 {
-                    if (v.Name.Equals(name))
-                    {
-                        if (!(v is VariableList))
-                            var = new VariableList(name, isConstant, v.Value);
-                        else
-                        {
-                            var = (VariableList)v;
-                            var.Value = value;
-                        }
-                        return var;
-                    }
+                    var = (VariableList)v;
+                    var.Value = value;
                 }
-
-                if (scope.Count + 1 > engine.Options.VariableCountLimit) throw new Exception("Variable limit exceeded, operation failed.");
-                var = new VariableList(name, isConstant, value);
-                scope.Add(var);
+                else
+                {
+                    var = new VariableList(name, isConstant, value);
+                    if (scope.Count + 1 > engine.Options.VariableCountLimit) throw new Exception("Variable limit exceeded, operation failed.");
+                    scope.Add(var.Name, var);
+                }
                 return var;
             }
         }
@@ -571,13 +556,8 @@ namespace Monkeyspeak
 
             lock (syncObj)
             {
-                foreach (var v in scope)
-                {
-                    if (v.Name.Equals(name))
-                    {
-                        return v;
-                    }
-                }
+                if (scope.TryGetValue(name, out IVariable var))
+                    return var;
                 throw new Exception("Variable \"" + name + "\" not found.");
             }
         }
@@ -595,12 +575,7 @@ namespace Monkeyspeak
                 name = name.Substring(0, name.IndexOf('[') - 1);
             lock (syncObj)
             {
-                foreach (var v in scope)
-                {
-                    if (v.Name.Equals(name))
-                        return true;
-                }
-                return false;
+                return scope.ContainsKey(name);
             }
         }
 
@@ -620,16 +595,12 @@ namespace Monkeyspeak
                 name = name.Substring(0, name.IndexOf('[') - 1);
             lock (syncObj)
             {
-                foreach (var v in scope)
+                if (!scope.TryGetValue(name, out var))
                 {
-                    if (v.Name.Equals(name))
-                    {
-                        var = v;
-                        return true;
-                    }
+                    var = Variable.NoValue;
+                    return false;
                 }
-                var = Variable.NoValue;
-                return false;
+                return true;
             }
         }
 
@@ -677,10 +648,7 @@ namespace Monkeyspeak
         /// <param name="id">The identifier.</param>
         public void RemoveTriggerHandler(TriggerCategory cat, int id)
         {
-            lock (syncObj)
-            {
-                handlers.Remove(new Trigger(cat, id));
-            }
+            handlers.Remove(new Trigger(cat, id));
         }
 
         /// <summary>
@@ -726,6 +694,14 @@ namespace Monkeyspeak
         /// </value>
         public bool Debug { get; set; }
 
+        /// <summary>
+        /// Gets the libraries.
+        /// </summary>
+        /// <value>
+        /// The libraries.
+        /// </value>
+        public IEnumerable<BaseLibrary> Libraries { get => libraries; }
+
         // Changed id to array for multiple Trigger processing.
         // This Compensates for a Design Flaw Lothus Marque spotted - Gerolkae
 
@@ -736,70 +712,91 @@ namespace Monkeyspeak
          * then run 47, then run 48" ... and they're not all at once, in sequence.
          */
 
-        private void ExecuteBlock<T>(T triggerBlock, int causeIndex = 0) where T : IList<Trigger>
+        private void ExecuteBlock(TriggerBlock triggerBlock, int causeIndex = 0, params object[] args)
         {
-            TriggerReader reader = new TriggerReader(this);
-            lock (syncObj)
+            var reader = new TriggerReader(this, triggerBlock)
             {
-                Trigger current, next;
-                int j = 0;
-                for (j = causeIndex; j <= triggerBlock.Count - 1; j++)
+                Parameters = args
+            };
+
+            Trigger current, next;
+            int j = 0;
+            for (j = causeIndex; j <= triggerBlock.Count - 1; j++)
+            {
+                current = triggerBlock[j];
+                next = triggerBlock.Count > j + 1 ? triggerBlock[j + 1] : Trigger.Undefined;
+                handlers.TryGetValue(current, out TriggerHandler handler);
+
+                reader.Trigger = current;
+                reader.CurrentBlockIndex = j;
+                try
                 {
-                    current = triggerBlock[j];
-                    next = triggerBlock.Count > j + 1 ? triggerBlock[j + 1] : Trigger.None;
-                    if (!handlers.ContainsKey(current))
-                    {
-                        continue;
-                    }
-
-                    reader.Trigger = current;
-                    try
-                    {
-                        if (BeforeTriggerHandled?.Invoke(current) == false) continue;
-                        bool canContinue = handlers[current](reader);
-                        if (AfterTriggerHandled?.Invoke(current) == false) continue;
-                        // if canContinue was assigned by a Condition, we care, otherwise continue
-                        if (current.Category == TriggerCategory.Condition && !canContinue)
+                    if (BeforeTriggerHandled?.Invoke(current) == false) continue;
+                    bool canContinue = handler != null ? handler(reader) : false;
+                    if (AfterTriggerHandled?.Invoke(current) == false) continue;
+                    // if canContinue was assigned by a Condition or Cause, we care, otherwise continue
+                    if (!canContinue)
+                        switch (current.Category)
                         {
-                            // skip ahead for another condition to meet
-                            for (int i = j + 1; i <= triggerBlock.Count - 1; i++)
-                            {
-                                Trigger possibleCondition = triggerBlock[i];
-                                if (possibleCondition.Category == TriggerCategory.Condition)
+                            case TriggerCategory.Cause:
+                                // skip ahead for another condition to meet
+                                Trigger possibleCause = Trigger.Undefined;
+                                for (int i = j + 1; i <= triggerBlock.Count - 1; i++)
                                 {
-                                    j = i - 1; // set the current index of the outer loop
-                                    break;
+                                    possibleCause = triggerBlock[i];
+                                    if (possibleCause.Category == TriggerCategory.Cause)
+                                    {
+                                        j = i - 1; // set the current index of the outer loop
+                                        break;
+                                    }
+                                    else possibleCause = Trigger.Undefined;
                                 }
-                            }
-                        }
-                        else if (next.Category == TriggerCategory.Cause) j += 1;
-                    }
-                    catch (Exception e)
-                    {
-                        var ex = new MonkeyspeakException(e.Message);
-                        if (Error != null)
-                            Error(handlers[current], current, ex);
-                        else throw ex;
+                                if (possibleCause.Category == TriggerCategory.Undefined) return;
+                                break;
 
-                        break;
-                    }
+                            case TriggerCategory.Condition:
+                                // skip ahead for another condition to meet
+                                for (int i = j + 1; i <= triggerBlock.Count - 1; i++)
+                                {
+                                    Trigger possibleCondition = triggerBlock[i];
+                                    if (possibleCondition.Category == TriggerCategory.Condition)
+                                    {
+                                        j = i - 1; // set the current index of the outer loop
+                                        break;
+                                    }
+                                }
+                                break;
+                        }
+                }
+                catch (Exception e)
+                {
+                    var ex = new MonkeyspeakException(e.Message);
+                    if (Error != null)
+                        Error(handlers[current], current, ex);
+                    else throw ex;
+
+                    break;
                 }
             }
         }
 
         /// <summary>
-        /// Executes a trigger block containing TriggerCategory.Cause with ID equal to <param name="id" />
+        /// Executes a trigger block containing TriggerCategory.Cause with ID equal to <paramref name="id" />
         ///
         /// </summary>
-        /// <param name="id">I dunno</param>
-        public void Execute(int id = 0)
+        /// <param name="id"></param>
+        /// <param name="args"></param>
+        public void Execute(int id = 0, params object[] args)
         {
-            for (int j = 0; j <= triggerBlocks.Count - 1; j++)
+            lock (syncObj)
             {
-                int causeIndex;
-                if ((causeIndex = triggerBlocks[j].IndexOfTrigger(TriggerCategory.Cause, id)) != -1)
+                for (int j = 0; j <= triggerBlocks.Count - 1; j++)
                 {
-                    ExecuteBlock(triggerBlocks[j], causeIndex);
+                    int causeIndex;
+                    if ((causeIndex = triggerBlocks[j].IndexOfTrigger(TriggerCategory.Cause, id)) != -1)
+                    {
+                        ExecuteBlock(triggerBlocks[j], causeIndex, args);
+                    }
                 }
             }
         }
@@ -809,17 +806,21 @@ namespace Monkeyspeak
         ///
         /// </summary>
         /// <param name="ids">I dunno</param>
-        public void Execute(params int[] ids)
+        /// <param name="args"></param>
+        public void Execute(int[] ids, params object[] args)
         {
             for (int i = 0; i <= ids.Length - 1; i++)
             {
                 int id = ids[i];
-                for (int j = 0; j <= triggerBlocks.Count - 1; j++)
+                lock (syncObj)
                 {
-                    int causeIndex;
-                    if ((causeIndex = triggerBlocks[j].IndexOfTrigger(TriggerCategory.Cause, id)) != -1)
+                    for (int j = 0; j <= triggerBlocks.Count - 1; j++)
                     {
-                        ExecuteBlock(triggerBlocks[j], causeIndex);
+                        int causeIndex;
+                        if ((causeIndex = triggerBlocks[j].IndexOfTrigger(TriggerCategory.Cause, id)) != -1)
+                        {
+                            ExecuteBlock(triggerBlocks[j], causeIndex, args);
+                        }
                     }
                 }
             }
@@ -829,43 +830,107 @@ namespace Monkeyspeak
         /// Executes the asynchronous.
         /// </summary>
         /// <param name="cancellationToken">The cancellation token.</param>
-        /// <param name="ids">The ids.</param>
+        /// <param name="id"></param>
+        /// <param name="args"></param>
         /// <returns></returns>
-        public async Task ExecuteAsync(CancellationToken cancellationToken, params int[] ids)
+        public async Task ExecuteAsync(CancellationToken cancellationToken, int id = 0, params object[] args)
         {
-            for (int i = 0; i <= ids.Length - 1; i++)
+            await Task.Run(() =>
             {
-                int id = ids[i];
-                for (int j = 0; j <= triggerBlocks.Count - 1; j++)
+                lock (syncObj)
                 {
-                    int causeIndex;
-                    if ((causeIndex = triggerBlocks[j].IndexOfTrigger(TriggerCategory.Cause, id)) != -1)
+                    for (int j = 0; j <= triggerBlocks.Count - 1; j++)
                     {
-                        await Task.Run(() => ExecuteBlock(triggerBlocks[j], causeIndex), cancellationToken);
+                        int causeIndex;
+                        if ((causeIndex = triggerBlocks[j].IndexOfTrigger(TriggerCategory.Cause, id)) != -1)
+                        {
+                            ExecuteBlock(triggerBlocks[j], causeIndex, args);
+                        }
                     }
                 }
-            }
+            }, cancellationToken);
+        }
+
+        /// <summary>
+        /// Executes the asynchronous.
+        /// </summary>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <param name="ids">The ids.</param>
+        /// <param name="args">todo: describe args parameter on ExecuteAsync</param>
+        /// <returns></returns>
+        public async Task ExecuteAsync(CancellationToken cancellationToken, int[] ids, params object[] args)
+        {
+            await Task.Run(() =>
+            {
+                for (int i = 0; i <= ids.Length - 1; i++)
+                {
+                    int id = ids[i];
+                    lock (syncObj)
+                    {
+                        for (int j = 0; j <= triggerBlocks.Count - 1; j++)
+                        {
+                            int causeIndex;
+                            if ((causeIndex = triggerBlocks[j].IndexOfTrigger(TriggerCategory.Cause, id)) != -1)
+                            {
+                                ExecuteBlock(triggerBlocks[j], causeIndex, args);
+                            }
+                        }
+                    }
+                }
+            }, cancellationToken);
         }
 
         /// <summary>
         /// Executes the specified Cause asynchronously.
         /// </summary>
         /// <param name="ids">The ids.</param>
+        /// <param name="id"></param>
+        /// <param name="args"></param>
         /// <returns></returns>
-        public async Task ExecuteAsync(params int[] ids)
+        public async Task ExecuteAsync(int id = 0, params object[] args)
         {
-            for (int i = 0; i <= ids.Length - 1; i++)
+            await Task.Run(() =>
             {
-                int id = ids[i];
-                for (int j = 0; j <= triggerBlocks.Count - 1; j++)
+                lock (syncObj)
                 {
-                    int causeIndex;
-                    if ((causeIndex = triggerBlocks[j].IndexOfTrigger(TriggerCategory.Cause, id)) != -1)
+                    for (int j = 0; j <= triggerBlocks.Count - 1; j++)
                     {
-                        await Task.Run(() => ExecuteBlock(triggerBlocks[j], causeIndex), CancellationToken.None);
+                        int causeIndex;
+                        if ((causeIndex = triggerBlocks[j].IndexOfTrigger(TriggerCategory.Cause, id)) != -1)
+                        {
+                            ExecuteBlock(triggerBlocks[j], causeIndex, args);
+                        }
                     }
                 }
-            }
+            });
+        }
+
+        /// <summary>
+        /// Executes the specified Cause asynchronously.
+        /// </summary>
+        /// <param name="ids">The ids.</param>
+        /// <param name="args"></param>
+        /// <returns></returns>
+        public async Task ExecuteAsync(int[] ids, params object[] args)
+        {
+            await Task.Run(() =>
+            {
+                for (int i = 0; i <= ids.Length - 1; i++)
+                {
+                    int id = ids[i];
+                    lock (syncObj)
+                    {
+                        for (int j = 0; j <= triggerBlocks.Count - 1; j++)
+                        {
+                            int causeIndex;
+                            if ((causeIndex = triggerBlocks[j].IndexOfTrigger(TriggerCategory.Cause, id)) != -1)
+                            {
+                                ExecuteBlock(triggerBlocks[j], causeIndex, args);
+                            }
+                        }
+                    }
+                }
+            });
         }
 
         /// <summary>

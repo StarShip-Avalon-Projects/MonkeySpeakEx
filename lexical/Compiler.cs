@@ -1,5 +1,4 @@
 ﻿using Monkeyspeak.lexical.Expressions;
-using Shared.Core.Logging;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -26,14 +25,14 @@ namespace Monkeyspeak.lexical
             get { return version; }
         }
 
-        private IEnumerable<TriggerList> ReadVersion6_5(BinaryReader reader)
+        private IEnumerable<TriggerBlock> ReadVersion6_5(BinaryReader reader)
         {
             var sourcePos = new SourcePosition();
 
             int triggerListCount = reader.ReadInt32();
             for (int i = 0; i <= triggerListCount - 1; i++)
             {
-                var triggerList = new TriggerList();
+                var triggerList = new TriggerBlock();
                 int triggerCount = reader.ReadInt32();
                 for (int j = 0; j <= triggerCount - 1; j++)
                 {
@@ -68,14 +67,14 @@ namespace Monkeyspeak.lexical
             }
         }
 
-        private IEnumerable<TriggerList> ReadVersion1(BinaryReader reader)
+        private IEnumerable<TriggerBlock> ReadVersion1(BinaryReader reader)
         {
             var sourcePos = new SourcePosition();
 
             int triggerListCount = reader.ReadInt32();
             for (int i = 0; i <= triggerListCount - 1; i++)
             {
-                var triggerList = new TriggerList();
+                var triggerList = new TriggerBlock();
                 int triggerCount = reader.ReadInt32();
                 for (int j = 0; j <= triggerCount - 1; j++)
                 {
@@ -106,9 +105,9 @@ namespace Monkeyspeak.lexical
             }
         }
 
-        public TriggerList[] DecompileFromStream(Stream stream)
+        public TriggerBlock[] DecompileFromStream(Stream stream)
         {
-            TriggerList[] blocks = null;
+            TriggerBlock[] blocks = null;
             using (var decompressed = new DeflateStream(stream, CompressionMode.Decompress))
             using (var reader = new BinaryReader(decompressed, Encoding.UTF8, true))
             {
@@ -131,7 +130,7 @@ namespace Monkeyspeak.lexical
             return blocks;
         }
 
-        public void CompileToStream(List<TriggerList> triggerBlocks, Stream stream)
+        public void CompileToStream(List<TriggerBlock> triggerBlocks, Stream stream)
         {
             using (var compressed = new DeflateStream(stream, CompressionMode.Compress))
             using (var writer = new BinaryWriter(compressed, Encoding.UTF8, true))
@@ -142,7 +141,7 @@ namespace Monkeyspeak.lexical
                 writer.Write(triggerBlocks.Count);
                 for (int i = 0; i <= triggerBlocks.Count - 1; i++)
                 {
-                    TriggerList triggerBlock = triggerBlocks[i];
+                    TriggerBlock triggerBlock = triggerBlocks[i];
                     writer.Write(triggerBlock.Count);
                     for (int j = 0; j <= triggerBlock.Count - 1; j++)
                     {

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -66,21 +65,34 @@ namespace Monkeyspeak.Libraries
         /// <param name="page">The page.</param>
         public abstract void Unload(Page page);
 
-
-        public string ToString(bool HideLibraryies)
+        /// <summary>
+        /// Builds a string representation of the descriptions of each trigger.
+        /// </summary>
+        /// <returns></returns>
+        public string ToString(bool excludeLibraryName = false, bool excludeDescriptions = false)
         {
             StringBuilder sb = new StringBuilder();
-           if(!HideLibraryies) sb.AppendLine(GetType().Name);
+            if (!excludeLibraryName) sb.AppendLine(GetType().Name);
+            foreach (var kv in descriptions)
+            {
+                sb.Append(' ').Append(kv.Key).Append(!excludeDescriptions ? kv.Value : string.Empty).Append(Environment.NewLine);
+            }
+            return sb.ToString();
+        }
+
+        /// <summary>
+        /// Builds a string representation of the descriptions of each trigger.
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine(GetType().Name);
             foreach (var kv in descriptions)
             {
                 sb.AppendLine(kv.Value);
             }
             return sb.ToString();
-        }
-
-        public override string ToString()
-        {
-            return ToString(true);
         }
 
         public static IEnumerable<BaseLibrary> GetAllLibraries()

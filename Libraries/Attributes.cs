@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Monkeyspeak.Libraries
+﻿namespace Monkeyspeak.Libraries
 {
     public class Attributes : BaseLibrary
     {
@@ -19,7 +13,6 @@ namespace Monkeyspeak.Libraries
             if (string.IsNullOrEmpty(description)) return;
             if (!descriptions.ContainsKey(trigger))
                 descriptions.Add(trigger, description);
-            handlers.Clear(); // never let handlers be added to this poo.
         }
 
         public new void Add(Trigger trigger, TriggerHandler handler, string description = null)

@@ -28,6 +28,19 @@ namespace Monkeyspeak
             : base(info, context) { }
     }
 
+    public class VariableEqualityComparer : IEqualityComparer<IVariable>
+    {
+        public bool Equals(IVariable x, IVariable y)
+        {
+            return x.Equals(y);
+        }
+
+        public int GetHashCode(IVariable obj)
+        {
+            return obj.GetHashCode();
+        }
+    }
+
     public interface IVariable : IEquatable<IVariable>
     {
         string Name { get; }

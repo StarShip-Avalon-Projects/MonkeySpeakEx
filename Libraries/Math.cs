@@ -1,5 +1,4 @@
 ﻿using Monkeyspeak.Extensions;
-using System;
 
 namespace Monkeyspeak.Libraries
 {
@@ -9,34 +8,34 @@ namespace Monkeyspeak.Libraries
         {
             // (1:150) and variable %Variable is greater than #,
             Add(new Trigger(TriggerCategory.Condition, 150), VariableGreaterThan,
-                "(1:150) and variable %Variable is greater than #,");
+                "and variable %Variable is greater than #,");
             // (1:151) and variable %Variable is greater than or equal to #,
             Add(new Trigger(TriggerCategory.Condition, 151), VariableGreaterThanOrEqual,
-                "(1:151) and variable %Variable is greater than or equal to #,");
+                "and variable %Variable is greater than or equal to #,");
 
             // (1:152) and variable %Variable is less than #,
             Add(new Trigger(TriggerCategory.Condition, 152), VariableLessThan,
-                "(1:152) and variable %Variable is less than #,");
+                "and variable %Variable is less than #,");
 
             // (1:153) and variable %Variable is less than or equal to #,
             Add(new Trigger(TriggerCategory.Condition, 153), VariableLessThanOrEqual,
-                "(1:153) and variable %Variable is less than or equal to #,");
+                "and variable %Variable is less than or equal to #,");
 
             // (5:150) take variable %Variable and add # to it.
             Add(new Trigger(TriggerCategory.Effect, 150), AddToVariable,
-                "(5:150) take variable %Variable and add # to it.");
+                "take variable %Variable and add # to it.");
 
             // (5:151) take variable %Variable and substract it by #.
             Add(new Trigger(TriggerCategory.Effect, 151), SubtractFromVariable,
-                "(5:151) take variable %Variable and subtract # from it.");
+                "take variable %Variable and subtract # from it.");
 
             // (5:152) take variable %Variable and multiply it by #.
             Add(new Trigger(TriggerCategory.Effect, 152), MultiplyByVariable,
-                "(5:152) take variable %Variable and multiply it by #.");
+                "take variable %Variable and multiply it by #.");
 
             // (5:153) take variable %Variable and divide it by #.
             Add(new Trigger(TriggerCategory.Effect, 153), MultiplyByVariable,
-                "(5:153) take variable %Variable and divide it by #.");
+                "take variable %Variable and divide it by #.");
         }
 
         public override void Unload(Page page)
