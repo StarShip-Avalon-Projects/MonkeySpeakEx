@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Timers;
 
 namespace Monkeyspeak.Libraries
@@ -76,7 +75,7 @@ namespace Monkeyspeak.Libraries
                         timerTask.Start();
                     }
                     Timers.CurrentTimer = timerTask.Id;
-                    timerTask.Owner.Execute(300);
+                    timerTask.Owner.Execute(300, timerTask.Id);
                     Timers.CurrentTimer = 0;
                 }
             }
@@ -112,31 +111,91 @@ namespace Monkeyspeak.Libraries
             this.timersLimit = timersLimit;
             // (0:300) When timer # goes off,
             Add(new Trigger(TriggerCategory.Cause, 300), WhenTimerGoesOff,
-                "(0:300) When timer # goes off,");
+                "when timer # goes off,");
 
             // (1:300) and timer # is running,
             Add(new Trigger(TriggerCategory.Condition, 300), AndTimerIsRunning,
-                "(1:300) and timer # is running,");
+                "and timer # is running,");
             // (1:301) and timer # is not running,
             Add(new Trigger(TriggerCategory.Condition, 301), AndTimerIsNotRunning,
-                "(1:301) and timer # is not running,");
+                "and timer # is not running,");
 
             // (5:300) create timer # to go off every # second(s).
             Add(new Trigger(TriggerCategory.Effect, 300), CreateTimer,
-                "(5:300) create timer # to go off every # second(s) with a start delay of # second(s).");
+                "create timer # to go off every # second(s) with a start delay of # second(s).");
 
             // (5:301) stop timer #.
             Add(new Trigger(TriggerCategory.Effect, 301), StopTimer,
-                "(5:301) stop timer #.");
+                "stop timer #.");
 
             Add(new Trigger(TriggerCategory.Effect, 302), GetCurrentTimerIntoVar,
-                "(5:302) get current timer and put the id into variable %.");
+                "get current timer and put the id into variable %.");
 
             Add(new Trigger(TriggerCategory.Effect, 303), PauseScriptExecution,
-                "(5:303) pause script execution for # seconds.");
+                "pause script execution for # seconds.");
 
             Add(new Trigger(TriggerCategory.Effect, 304), GetCurrentUpTimeIntoVar,
-                "(5:304) get the current uptime and put it into variable %.");
+                "get the current uptime and put it into variable %.");
+
+            Add(new Trigger(TriggerCategory.Effect, 305), GetCurrentHourIntoVar,
+                "get the current hour and put it into variable %.");
+
+            Add(new Trigger(TriggerCategory.Effect, 306), GetCurrentMinutesIntoVar,
+                "get the current minutes and put it into variable %.");
+
+            Add(new Trigger(TriggerCategory.Effect, 307), GetCurrentSecondsIntoVar,
+                "get the current seconds and put it into variable %.");
+
+            Add(new Trigger(TriggerCategory.Effect, 308), GetCurrentDayOfMonthIntoVar,
+                "get the current day of the month and put it into variable %.");
+
+            Add(new Trigger(TriggerCategory.Effect, 309), GetCurrentMonthIntoVar,
+                "get the current month and put it into variable %.");
+
+            Add(new Trigger(TriggerCategory.Effect, 310), GetCurrentYearIntoVar,
+                "get the current year and put it into variable %.");
+        }
+
+        private bool GetCurrentYearIntoVar(TriggerReader reader)
+        {
+            var var = reader.ReadVariable(true);
+            var.Value = DateTime.Now.Year.As<double>();
+            return true;
+        }
+
+        private bool GetCurrentMonthIntoVar(TriggerReader reader)
+        {
+            var var = reader.ReadVariable(true);
+            var.Value = DateTime.Now.Month.As<double>();
+            return true;
+        }
+
+        private bool GetCurrentDayOfMonthIntoVar(TriggerReader reader)
+        {
+            var var = reader.ReadVariable(true);
+            var.Value = DateTime.Now.Day.As<double>();
+            return true;
+        }
+
+        private bool GetCurrentSecondsIntoVar(TriggerReader reader)
+        {
+            var var = reader.ReadVariable(true);
+            var.Value = DateTime.Now.TimeOfDay.Seconds.As<double>();
+            return true;
+        }
+
+        private bool GetCurrentMinutesIntoVar(TriggerReader reader)
+        {
+            var var = reader.ReadVariable(true);
+            var.Value = DateTime.Now.TimeOfDay.Minutes.As<double>();
+            return true;
+        }
+
+        private bool GetCurrentHourIntoVar(TriggerReader reader)
+        {
+            var var = reader.ReadVariable(true);
+            var.Value = DateTime.Now.TimeOfDay.Hours.As<double>();
+            return true;
         }
 
         private bool GetCurrentUpTimeIntoVar(TriggerReader reader)
@@ -179,15 +238,6 @@ namespace Monkeyspeak.Libraries
             {
                 task.Dispose();
                 timers.Remove(task);
-            }
-        }
-
-        public override void Unload(Page page)
-        {
-            lock (lck)
-            {
-                foreach (var task in timers.ToArray())
-                    DestroyTimer(task);
             }
         }
 
@@ -327,9 +377,18 @@ namespace Monkeyspeak.Libraries
         {
             if (TryGetTimerFrom(reader, out TimerTask timerTask))
             {
-                return timerTask.Id == CurrentTimer;
+                return timerTask.Id == reader.GetParameter<double>(0);
             }
             return false;
+        }
+
+        public override void Unload(Page page)
+        {
+            lock (lck)
+            {
+                foreach (var task in timers.ToArray())
+                    DestroyTimer(task);
+            }
         }
     }
 }

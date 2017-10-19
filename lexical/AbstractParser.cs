@@ -11,6 +11,6 @@ namespace Monkeyspeak.lexical
             Engine = engine;
         }
 
-        public abstract IEnumerable<TriggerList> Parse(AbstractLexer lexer);
+        public abstract IEnumerable<TriggerBlock> Parse(AbstractLexer lexer);
     }
 }

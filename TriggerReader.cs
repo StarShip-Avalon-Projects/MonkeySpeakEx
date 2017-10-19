@@ -1,14 +1,10 @@
-﻿using Monkeyspeak.lexical;
+﻿using Monkeyspeak.Extensions;
+using Monkeyspeak.lexical;
 using Monkeyspeak.lexical.Expressions;
 using Shared.Core.Logging;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-
-// Removed by Gerolkae Looking for threads
-//using System.Threading;
 
 namespace Monkeyspeak
 {
@@ -42,6 +38,10 @@ namespace Monkeyspeak
     public sealed class TriggerReader
     {
         private Trigger originalTrigger;
+
+        private TriggerBlock currentBlock;
+
+        private object[] args;
         private Page page;
         private SourcePosition lastPos;
         private Queue<IExpression> contents;
@@ -53,17 +53,19 @@ namespace Monkeyspeak
         /// </summary>
         /// <param name="page"></param>
         /// <param name="trigger"></param>
-        public TriggerReader(Page page, Trigger trigger)
-        {
-            Trigger = trigger;
-            this.page = page;
-        }
-
-        internal TriggerReader(Page page)
+        public TriggerReader(Page page, TriggerBlock currentBlock)
         {
             this.page = page;
+            if (currentBlock != null)
+                this.currentBlock = new TriggerBlock(currentBlock);
         }
 
+        /// <summary>
+        /// Gets the trigger.
+        /// </summary>
+        /// <value>
+        /// The trigger.
+        /// </value>
         public Trigger Trigger
         {
             get { return originalTrigger; }
@@ -74,19 +76,52 @@ namespace Monkeyspeak
             }
         }
 
+        /// <summary>
+        /// Gets the current block of triggers.
+        /// </summary>
+        /// <value>
+        /// The block.
+        /// </value>
+        public TriggerBlock CurrentBlock
+        {
+            get { return currentBlock; }
+            internal set { currentBlock = value; }
+        }
+
+        public int CurrentBlockIndex { get; internal set; }
+
+        /// <summary>
+        /// Gets the trigger category.
+        /// </summary>
+        /// <value>
+        /// The trigger category.
+        /// </value>
         public TriggerCategory TriggerCategory
         {
             get { return Trigger.Category; }
         }
 
+        /// <summary>
+        /// Gets the trigger identifier.
+        /// </summary>
+        /// <value>
+        /// The trigger identifier.
+        /// </value>
         public int TriggerId
         {
             get { return Trigger.Id; }
         }
 
+        /// <summary>
+        /// Gets the page.
+        /// </summary>
+        /// <value>
+        /// The page.
+        /// </value>
         public Page Page
         {
             get { return page; }
+            internal set { page = value; }
         }
 
         /// <summary>
@@ -101,8 +136,48 @@ namespace Monkeyspeak
         }
 
         /// <summary>
+        /// Gets or sets the parameters.
+        /// </summary>
+        /// <value>
+        /// The parameters.
+        /// </value>
+        public object[] Parameters { get => args; internal set => args = value; }
+
+        /// <summary>
+        /// Tries the get the parameter at the specified index.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="index">The index.</param>
+        /// <param name="value">The value.</param>
+        /// <returns><c>true</c> on success; <c>false</c> otherwise</returns>
+        public bool TryGetParameter<T>(int index, out T value) where T : struct
+        {
+            if (args != null && args.Length > index)
+            {
+                value = args[index].As<T>();
+                return true;
+            }
+            value = default(T);
+            return false;
+        }
+
+        /// <summary>
+        /// Gets the parameter.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="index">The index.</param>
+        /// <returns></returns>
+        public T GetParameter<T>(int index) where T : struct
+        {
+            if (args != null && args.Length > index)
+                return args[index].As<T>();
+            return default(T);
+        }
+
+        /// <summary>
         /// Reads the next String, throws TriggerReaderException on failure
         /// </summary>
+        /// <param name="processVariables">[true] process variables and replace them with their values; [false] do nothing</param>
         /// <returns></returns>
         /// <exception cref="TriggerReaderException"></exception>
         public string ReadString(bool processVariables = true)
@@ -115,21 +190,25 @@ namespace Monkeyspeak
                 lastPos = expr.Position;
                 var str = expr.Value;
 
-                if (str[0] != '@' || processVariables)
+                if (str[0] == '@')
+                {
+                    processVariables = false;
+                    str = str.Substring(1);
+                }
+
+                if (processVariables)
                 {
                     for (int i = page.Scope.Count - 1; i >= 0; i--)
                     {
                         // replaced string.replace with Regex because
                         //  %ListName would replace %ListName2 leaving the 2 at the end
                         //- Gerolkae
-                        var name = page.Scope[i].Name;
-                        string pattern = name + @"\b?";
+                        var pattern = page.Scope[i].Name + @"\b";
                         var value = page.Scope[i].Value;
                         string replace = (value != null) ? value.ToString() : "null";
                         str = Regex.Replace(str, pattern, replace, RegexOptions.CultureInvariant);
                     }
                 }
-                if (str[0] == '@') return str.ToString().Substring(1);
                 return str;
             }
             catch (Exception ex)
@@ -149,6 +228,12 @@ namespace Monkeyspeak
             return contents.Peek() is StringExpression;
         }
 
+        /// <summary>
+        /// Tries the read a string from the trigger.
+        /// </summary>
+        /// <param name="str">The string.</param>
+        /// <param name="processVariables">if set to <c>true</c> [process variables].</param>
+        /// <returns>true on success; false otherwise</returns>
         public bool TryReadString(out string str, bool processVariables = true)
         {
             if (!PeekString())
@@ -173,10 +258,10 @@ namespace Monkeyspeak
             if (!(contents.Peek() is VariableExpression)) throw new TriggerReaderException($"Expected variable, got {contents.Peek().GetType().Name} at {contents.Peek().Position}");
             try
             {
-                var var = Variable.NoValue;
+                IVariable var;
                 var expr = contents.Dequeue() as VariableExpression;
                 lastPos = expr.Position;
-                var varRef = expr.Value as string;
+                var varRef = expr.Value;
                 if (!page.HasVariable(varRef, out var))
                     if (addIfNotExist)
                         var = page.SetVariable(varRef, null, false);
@@ -225,6 +310,18 @@ namespace Monkeyspeak
         {
             if (contents.Count == 0) return false;
             return contents.Peek() is VariableExpression;
+        }
+
+        /// <summary>
+        /// Peeks at the next value, if the next value is not of <typeparamref name="T"/>, returns false.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public bool PeekVariable<T>() where T : struct
+        {
+            if (contents.Count == 0) return false;
+            var expr = contents.Peek() as VariableExpression;
+            return expr != null && page.HasVariable(expr.Value, out IVariable var) ? var.Value != null && var.Value is T : false;
         }
 
         /// <summary>
@@ -286,6 +383,11 @@ namespace Monkeyspeak
             return contents.Peek() is NumberExpression;
         }
 
+        /// <summary>
+        /// Tries the read a number from the trigger.
+        /// </summary>
+        /// <param name="number">The number.</param>
+        /// <returns>true on success; otherwise false</returns>
         public bool TryReadNumber(out double number)
         {
             if (!PeekNumber())

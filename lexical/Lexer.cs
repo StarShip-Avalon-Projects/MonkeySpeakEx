@@ -15,26 +15,36 @@ namespace Monkeyspeak
     /// </summary>
     public sealed class Lexer : AbstractLexer
     {
-        private int columnNo;
+        private int lineNo = 1, columnNo, rawPos, currentChar;
+        private char varDeclSym, stringBeginSym, stringEndSym, lineCommentSym;
 
-        private MonkeyspeakEngine engine;
-        private int lineNo = 1, currentChar;
-
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Lexer"/> class.
+        /// </summary>
+        /// <param name="engine">The engine.</param>
+        /// <param name="reader">The reader.</param>
         public Lexer(MonkeyspeakEngine engine, SStreamReader reader)
-            : base(reader)
+            : base(engine, reader)
         {
-            this.engine = engine;
+            varDeclSym = engine.Options.VariableDeclarationSymbol;
+            stringBeginSym = engine.Options.StringBeginSymbol;
+            stringEndSym = engine.Options.StringEndSymbol;
+            lineCommentSym = engine.Options.LineCommentSymbol;
         }
 
+        /// <summary>
+        /// Reads the tokens from the reader.  Used by the Parser.
+        /// </summary>
+        /// <returns></returns>
         public override IEnumerable<Token> Read()
         {
             var tokens = new Queue<Token>();
             int character = 0;
             char c = (char)character;
-            Token token = Token.None, lastToken = Token.None;
+            Token token = default(Token), lastToken = default(Token);
             while (character != -1 || token.Type != TokenType.END_OF_FILE)
             {
-                token = Token.None; // needed to clear Token state
+                token = default(Token); // needed to clear Token state
                 character = LookAhead(1);
                 c = (char)character;
                 if (character == -1)
@@ -42,28 +52,28 @@ namespace Monkeyspeak
                     token = CreateToken(TokenType.END_OF_FILE);
                     goto CONTINUE;
                 }
-                if (c == engine.Options.BlockCommentBeginSymbol[0])
+                if (c == Engine.Options.BlockCommentBeginSymbol[0])
                 {
-                    for (int i = 0; i <= engine.Options.BlockCommentBeginSymbol.Length - 1; i++)
+                    for (int i = 0; i <= Engine.Options.BlockCommentBeginSymbol.Length - 1; i++)
                     {
                         // Ensure it is actually a block comment
-                        if (LookAhead(1 + i) != engine.Options.BlockCommentBeginSymbol[i])
+                        if (LookAhead(2 + i) != Engine.Options.BlockCommentBeginSymbol[i])
                             goto SkipCustoms;
                     }
                     SkipBlockComment();
                     goto CONTINUE;
                 }
-                else if (c == engine.Options.LineCommentSymbol)
+                else if (c == lineCommentSym)
                 {
                     SkipLineComment();
                     goto CONTINUE;
                 }
-                else if (c == engine.Options.StringBeginSymbol)
+                else if (c == stringBeginSym)
                 {
                     token = MatchString();
                     goto CONTINUE;
                 }
-                else if (c == engine.Options.VariableDeclarationSymbol)
+                else if (c == varDeclSym)
                 {
                     token = MatchVariable();
                     goto CONTINUE;
@@ -215,18 +225,20 @@ namespace Monkeyspeak
 
         private Token CreateToken(TokenType type)
         {
+            var sourcePos = CurrentSourcePosition;
             long startPos = reader.Position;
             int length = 1;
             Next();
-            return new Token(type, startPos, length, new SourcePosition(lineNo, columnNo));
+            return new Token(type, startPos, length, sourcePos);
         }
 
         private Token CreateToken(TokenType type, string str)
         {
+            var sourcePos = CurrentSourcePosition;
             long startPos = reader.Position;
             int length = str.Length;
             for (int i = 0; i <= str.Length - 1; i++) Next();
-            return new Token(type, startPos, length, new SourcePosition(lineNo, columnNo));
+            return new Token(type, startPos, length, sourcePos);
         }
 
         public override char[] Read(long startPosInStream, int length)
@@ -251,7 +263,7 @@ namespace Monkeyspeak
         /// </summary>
         /// <param name="steps"></param>
         /// <returns>The character number of steps ahead or -1/returns>
-        private int LookAhead(int steps)
+        protected override int LookAhead(int steps)
         {
             if (!reader.BaseStream.CanSeek)
             {
@@ -275,7 +287,7 @@ namespace Monkeyspeak
             return ahead;
         }
 
-        private int LookBack(int steps)
+        protected override int LookBack(int steps)
         {
             if (!reader.BaseStream.CanSeek)
             {
@@ -284,20 +296,22 @@ namespace Monkeyspeak
             int aback = -1;
             long oldPosition = reader.Position;
             // Subtract 1 from the steps so that the Peek method looks at the right value
-            reader.Position = reader.Position - (steps + 1);
-
+            if (reader.Position - (steps + 1) > 0)
+                reader.Position -= (steps + 1);
+            else reader.Position = 0;
             aback = reader.Peek();
 
             reader.Position = oldPosition;
             return aback;
         }
 
-        private void Next()
+        protected override void Next()
         {
             int c = -1;
             int before = LookBack(1);
             c = reader.Read();
             if (c != -1)
+            {
                 if (c == '\n' || (before == '\r' && c == '\n'))
                 {
                     lineNo++;
@@ -307,6 +321,8 @@ namespace Monkeyspeak
                 {
                     columnNo++;
                 }
+                rawPos++;
+            }
             currentChar = c;
         }
 
@@ -330,17 +346,18 @@ namespace Monkeyspeak
         private Token MatchString()
         {
             Next();
+            var stringLenLimit = Engine.Options.StringLengthLimit;
             var sourcePos = CurrentSourcePosition;
             long startPos = reader.Position;
             int length = 0;
             while (true)
             {
                 CheckEOF();
-                if (length >= engine.Options.StringLengthLimit)
+                if (length >= stringLenLimit)
                     throw new MonkeyspeakException("String exceeded limit or was not terminated with a closing bracket", CurrentSourcePosition);
                 Next();
                 length++;
-                if (LookAhead(1) == engine.options.StringEndSymbol)
+                if (LookAhead(1) == stringEndSym)
                     break;
             }
             return new Token(TokenType.STRING_LITERAL, startPos, length, sourcePos);
@@ -386,7 +403,7 @@ namespace Monkeyspeak
             length++;
             var sourcePos = CurrentSourcePosition;
 
-            CheckMatch(engine.Options.VariableDeclarationSymbol);
+            CheckMatch(varDeclSym);
 
             Next();
             length++;
@@ -413,7 +430,9 @@ namespace Monkeyspeak
 
             if (LookAhead(1) == '[')
             {
-                while (true)
+                while (((currentChar >= 'a' && currentChar <= 'z')
+                        || (currentChar >= 'A' && currentChar <= 'Z')
+                        || (currentChar >= '0' && currentChar <= '9')))
                 {
                     if (currentChar == -1)
                     {
@@ -427,10 +446,9 @@ namespace Monkeyspeak
                     }
                     if (!((currentChar >= 'a' && currentChar <= 'z')
                         || (currentChar >= 'A' && currentChar <= 'Z')
-                        || (currentChar >= '0' && currentChar <= '9')
-                        || currentChar == '_'))
+                        || (currentChar >= '0' && currentChar <= '9')))
                     {
-                        throw new MonkeyspeakException("Variable list not terminated", CurrentSourcePosition);
+                        throw new MonkeyspeakException($"Invalid character in variable list index delcaration '{currentChar}'", CurrentSourcePosition);
                     }
                 }
             }
@@ -442,7 +460,7 @@ namespace Monkeyspeak
 
         private void SkipBlockComment()
         {
-            CheckMatch(engine.Options.BlockCommentBeginSymbol);
+            CheckMatch(Engine.Options.BlockCommentBeginSymbol);
 
             Next();
             while (true)
@@ -457,14 +475,14 @@ namespace Monkeyspeak
                 }
                 Next();
             }
+            CheckMatch(Engine.Options.BlockCommentEndSymbol);
             Next();
-            CheckMatch(engine.Options.BlockCommentEndSymbol);
         }
 
         private void SkipLineComment()
         {
             Next();
-            CheckMatch(engine.Options.LineCommentSymbol);
+            CheckMatch(lineCommentSym);
             char c = (char)LookAhead(1);
             while (true)
             {
@@ -478,6 +496,6 @@ namespace Monkeyspeak
                 CheckMatch('\n');
         }
 
-        public override SourcePosition CurrentSourcePosition => new SourcePosition(lineNo, columnNo);
+        public override SourcePosition CurrentSourcePosition => new SourcePosition(lineNo, columnNo, rawPos);
     }
 }

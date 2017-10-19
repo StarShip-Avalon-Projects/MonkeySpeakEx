@@ -1,5 +1,4 @@
 ﻿using Monkeyspeak.Extensions;
-using Shared.Core.Logging;
 using System;
 
 namespace Monkeyspeak.Libraries
@@ -10,65 +9,113 @@ namespace Monkeyspeak.Libraries
         {
             // (1:100) and variable %Variable is defined,
             Add(new Trigger(TriggerCategory.Condition, 100), IsVariableDefined,
-                "(1:100) and variable % is defined,");
+                "and variable % is defined,");
 
             // (1:101) and variable %Variable is not defined,
             Add(new Trigger(TriggerCategory.Condition, 101), IsVariableNotDefined,
-                "(1:101) and variable % is not defined,");
+                "and variable % is not defined,");
 
             // (1:102) and variable %Variable equals #,
             Add(new Trigger(TriggerCategory.Condition, 102), IsVariableEqualToNumberOrVar,
-                "(1:102) and variable % equals #,");
+                "and variable % equals #,");
 
             // (1:103) and variable %Variable does not equal #,
             Add(new Trigger(TriggerCategory.Condition, 103), IsVariableNotEqualToNumberOrVar,
-                "(1:103) and variable % does not equal #,");
+                "and variable % does not equal #,");
 
             // (1:104) and variable %Variable equals {...},
             Add(new Trigger(TriggerCategory.Condition, 104), IsVariableEqualToString,
-                "(1:104) and variable % equals {...},");
+                "and variable % equals {...},");
 
             // (1:105) and variable %Variable does not equal {...},
             Add(new Trigger(TriggerCategory.Condition, 105), IsVariableNotEqualToString,
-                "(1:105) and variable % does not equal {...},");
+                "and variable % does not equal {...},");
 
             // (1:106) and variable %Variable is constant,
             Add(new Trigger(TriggerCategory.Condition, 106), VariableIsConstant,
-                "(1:106) and variable % is constant,");
+                "and variable % is constant,");
 
             // (1:107) and variable %Variable is not constant,
             Add(new Trigger(TriggerCategory.Condition, 107), VariableIsNotConstant,
-                "(1:107) and variable % is not constant,");
+                "and variable % is not constant,");
 
             // (5:100) set variable %Variable to {...}.
             Add(new Trigger(TriggerCategory.Effect, 100), SetVariableToString,
-                "(5:100) set variable % to {...}.");
+                "set variable % to {...}.");
 
             // (5:101) set variable %Variable to #.
             Add(new Trigger(TriggerCategory.Effect, 101), SetVariableToNumberOrVariable,
-                "(5:101) set variable % to #.");
+                "set variable % to #.");
 
             // (5:102) print {...} to the console.
             Add(new Trigger(TriggerCategory.Effect, 102), PrintToConsole,
-                "(5:102) print {...} to the console.");
+                "print {...} to the console.");
 
             // (5:103) get the environment variable named {...} and put it into #,
             Add(new Trigger(TriggerCategory.Effect, 103), GetEnvVariable,
-                "(5:103) get the environment variable named {...} and put it into %, (ex: PATH)");
+                "get the environment variable named {...} and put it into %, (ex: PATH)");
 
             Add(TriggerCategory.Effect, 104, RandomValueToVar,
-                "(5:104) create random number and put it into variable %.");
+                "create random number and put it into variable %.");
             // (5:105) raise an error.
             Add(new Trigger(TriggerCategory.Effect, 105), RaiseAnError,
-                "(5:105) raise an error.");
+                "raise an error.");
+
+            Add(new Trigger(TriggerCategory.Effect, 107), DeleteVariable,
+                "delete variable %.");
 
             // (5:110) load library from file {...}.
             Add(new Trigger(TriggerCategory.Effect, 110), LoadLibraryFromFile,
-                "(5:110) load library from file {...}. (example Monkeyspeak.dll)");
+                "load library from file {...}. (example Monkeyspeak.dll)");
+
+            Add(new Trigger(TriggerCategory.Cause, 100), JobCalled,
+                "when job # is called,");
+
+            Add(new Trigger(TriggerCategory.Effect, 115), CallJob,
+                "call job #.");
         }
 
-        public override void Unload(Page page)
+        private bool CallJob(TriggerReader reader)
         {
+            double jobNumber = 0;
+            if (reader.PeekVariable())
+            {
+                jobNumber = reader.ReadVariable().Value.As<double>();
+            }
+            else if (reader.PeekNumber())
+            {
+                jobNumber = reader.ReadNumber();
+            }
+
+            if (jobNumber > 0)
+                reader.Page.Execute(100, jobNumber);
+            return true;
+        }
+
+        private bool JobCalled(TriggerReader reader)
+        {
+            double jobNumber = 0;
+            if (reader.PeekVariable())
+            {
+                jobNumber = reader.ReadVariable().Value.As<double>();
+            }
+            else if (reader.PeekNumber())
+            {
+                jobNumber = reader.ReadNumber();
+            }
+
+            double requiredJobNumber = reader.GetParameter<double>(0);
+
+            bool result = false;
+            if (jobNumber > 0 && jobNumber == requiredJobNumber)
+                result = reader.CurrentBlock.IndexOfTrigger(TriggerCategory.Effect, 115, reader.CurrentBlockIndex) == -1;
+            return result;
+        }
+
+        private bool DeleteVariable(TriggerReader reader)
+        {
+            var var = reader.ReadVariable();
+            return !var.IsConstant ? reader.Page.RemoveVariable(var.Name) : false;
         }
 
         private bool GetEnvVariable(TriggerReader reader)
@@ -85,14 +132,18 @@ namespace Monkeyspeak.Libraries
             return reader.Page.HasVariable(var.Name) && var.Value != null;
         }
 
+        private bool IsVariableNotDefined(TriggerReader reader)
+        {
+            return !IsVariableDefined(reader);
+        }
+
         private bool IsVariableEqualToNumberOrVar(TriggerReader reader)
         {
             var var = reader.ReadVariable();
             double num = 0;
-            if (reader.PeekVariable())
+            if (reader.PeekVariable<double>())
             {
-                var optVar = reader.ReadVariable();
-                num = optVar.Value.As<double>();
+                num = reader.ReadVariable().Value.As<double>();
             }
             else if (reader.PeekNumber())
             {
@@ -102,26 +153,20 @@ namespace Monkeyspeak.Libraries
             return num == var.Value.As<double>();
         }
 
-        private bool IsVariableEqualToString(TriggerReader reader)
-        {
-            var var = reader.ReadVariable();
-            string str = null;
-            if (reader.PeekString())
-            {
-                str = reader.ReadString();
-                return var.Value.As<string>().Equals(str, StringComparison.InvariantCulture);
-            }
-            return false;
-        }
-
-        private bool IsVariableNotDefined(TriggerReader reader)
-        {
-            return !IsVariableDefined(reader);
-        }
-
         private bool IsVariableNotEqualToNumberOrVar(TriggerReader reader)
         {
             return !IsVariableEqualToNumberOrVar(reader);
+        }
+
+        private bool IsVariableEqualToString(TriggerReader reader)
+        {
+            var var = reader.ReadVariable();
+            if (reader.PeekString())
+            {
+                var str = reader.ReadString();
+                return var.Value.As<string>().Equals(str, StringComparison.InvariantCulture);
+            }
+            return false;
         }
 
         private bool IsVariableNotEqualToString(TriggerReader reader)
@@ -161,10 +206,9 @@ namespace Monkeyspeak.Libraries
         private bool SetVariableToNumberOrVariable(TriggerReader reader)
         {
             var var = reader.ReadVariable(true);
-            if (reader.PeekVariable())
+            if (reader.PeekVariable<double>())
             {
-                var otherVar = reader.ReadVariable();
-                var.Value = otherVar.Value;
+                var.Value = reader.ReadVariable().Value.As<double>();
             }
             else if (reader.PeekNumber())
             {
@@ -176,15 +220,10 @@ namespace Monkeyspeak.Libraries
 
         private bool SetVariableToString(TriggerReader reader)
         {
-            if (reader.PeekVariable())
-            {
-                var var = reader.ReadVariable(true);
-                if (reader.PeekString())
-                    var.Value = reader.ReadString();
-                else var.Value = string.Empty;
-                return true;
-            }
-            return false;
+            var var = reader.ReadVariable(true);
+            var str = reader.ReadString();
+            var.Value = str;
+            return true;
         }
 
         private bool VariableIsConstant(TriggerReader reader)
@@ -194,7 +233,11 @@ namespace Monkeyspeak.Libraries
 
         private bool VariableIsNotConstant(TriggerReader reader)
         {
-            return !VariableIsConstant(reader);
+            return !reader.ReadVariable().IsConstant;
+        }
+
+        public override void Unload(Page page)
+        {
         }
     }
 }

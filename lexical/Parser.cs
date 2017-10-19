@@ -31,60 +31,65 @@ namespace Monkeyspeak
         /// <exception cref="MonkeyspeakException">
         /// </exception>
         /// <exception cref="Exception">String length limit exceeded.</exception>
-        public override IEnumerable<TriggerList> Parse(AbstractLexer lexer)
+        public override IEnumerable<TriggerBlock> Parse(AbstractLexer lexer)
         {
-            var block = new TriggerList(20);
-            Trigger currentTrigger = Trigger.None, prevTrigger = Trigger.None;
-            Token token = Token.None, prevToken = Token.None;
+            var block = new TriggerBlock(10);
+            Trigger currentTrigger = Trigger.Undefined, prevTrigger = Trigger.Undefined;
+            Token token = default(Token);
             Expression expr = null;
             foreach (var t in lexer.Read())
             {
                 token = t;
-
+                if (token == default(Token)) continue;
                 if (VisitToken != null)
                     token = VisitToken(ref token);
 
                 var sourcePos = token.Position;
 
                 string value = token.GetValue(lexer);
-                if (Engine.Options.Debug) Logger.Debug<Parser>(value);
+                if (Engine.Options.Debug && !string.IsNullOrWhiteSpace(value)) Logger.Debug<Parser>(value);
 
                 switch (token.Type)
                 {
                     case TokenType.TRIGGER:
-                        if (currentTrigger != Trigger.None)
+                        if (currentTrigger != Trigger.Undefined && currentTrigger.Category != TriggerCategory.Undefined)
                         {
-                            if (prevTrigger != Trigger.None)
+                            if (prevTrigger != Trigger.Undefined)
                             {
                                 if (prevTrigger.Category == TriggerCategory.Effect && currentTrigger.Category == TriggerCategory.Cause)
                                 {
                                     yield return block;
-                                    prevTrigger = Trigger.None;
-                                    block = new TriggerList();
+                                    prevTrigger = Trigger.Undefined;
+                                    block = new TriggerBlock(10);
                                 }
+                            }
+                            if (currentTrigger != Trigger.Undefined && expr != null)
+                            {
+                                currentTrigger.contents.Add(expr);
+                                expr = null;
                             }
                             block.Add(currentTrigger);
                             prevTrigger = currentTrigger;
-                            currentTrigger = Trigger.None;
+                            currentTrigger = Trigger.Undefined;
                         }
                         currentTrigger = new Trigger((TriggerCategory)IntParse(value.Substring(0, value.IndexOf(':'))),
                             IntParse(value.Substring(value.IndexOf(':') + 1)));
                         break;
 
                     case TokenType.VARIABLE:
-                        if (currentTrigger == Trigger.None) throw new MonkeyspeakException($"Trigger was null. \nPrevious trigger = {prevTrigger}\nToken = {token}");
+                        if (currentTrigger == Trigger.Undefined) throw new MonkeyspeakException($"Trigger was null. \nPrevious trigger = {prevTrigger}\nToken = {token}");
                         expr = new VariableExpression(ref sourcePos, value);
                         break;
 
                     case TokenType.STRING_LITERAL:
                         if (value.Length > Engine.Options.StringLengthLimit) throw new Exception("String length limit exceeded.");
-                        if (currentTrigger == Trigger.None) throw new MonkeyspeakException($"Trigger was null. \nPrevious trigger = {prevTrigger}\nToken = {token}");
+                        if (currentTrigger == Trigger.Undefined) throw new MonkeyspeakException($"Trigger was null. \nPrevious trigger = {prevTrigger}\nToken = {token}");
                         expr = new StringExpression(ref sourcePos, value);
                         break;
 
                     case TokenType.NUMBER:
                         double val = double.Parse(value, System.Globalization.NumberStyles.AllowDecimalPoint);
-                        if (currentTrigger == Trigger.None) throw new MonkeyspeakException($"Trigger was null. \nPrevious trigger = {prevTrigger}\nToken = {token}");
+                        if (currentTrigger == Trigger.Undefined) throw new MonkeyspeakException($"Trigger was null. \nPrevious trigger = {prevTrigger}\nToken = {token}");
                         expr = new NumberExpression(ref sourcePos, val);
                         break;
 
@@ -93,20 +98,23 @@ namespace Monkeyspeak
                         break;
 
                     case TokenType.END_OF_FILE:
-                        if (currentTrigger != Trigger.None)
+                        if (currentTrigger != Trigger.Undefined && currentTrigger.Category != TriggerCategory.Undefined)
                         {
-                            if (currentTrigger.Category != TriggerCategory.Undefined)
+                            if (currentTrigger != Trigger.Undefined && expr != null)
                             {
-                                block.Add(currentTrigger);
-                                currentTrigger = Trigger.None;
-                                yield return block;
+                                currentTrigger.contents.Add(expr);
+                                expr = null;
                             }
+                            block.Add(currentTrigger);
+                            prevTrigger = currentTrigger;
+                            currentTrigger = Trigger.Undefined;
+                            yield return block;
                         }
                         break;
 
                     default: break;
                 }
-                if (currentTrigger != Trigger.None && expr != null)
+                if (currentTrigger != Trigger.Undefined && expr != null)
                 {
                     currentTrigger.contents.Add(expr);
                     expr = null;

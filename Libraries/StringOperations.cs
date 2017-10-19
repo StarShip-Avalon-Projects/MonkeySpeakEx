@@ -1,19 +1,17 @@
-﻿using System;
-
-namespace Monkeyspeak.Libraries
+﻿namespace Monkeyspeak.Libraries
 {
     public class StringOperations : BaseLibrary
     {
         public StringOperations()
         {
             Add(TriggerCategory.Effect, 400, PutWordCountIntoVariable,
-                "(5:403) with {...} get word count and set it to variable %.");
+                "with {...} get word count and set it to variable %.");
             Add(TriggerCategory.Effect, 401, AddStringToVar,
-                "(5:404) with {...} set it to variable %.");
+                "with {...} set it to variable %.");
             Add(TriggerCategory.Effect, 402, SubStringToVar,
-                "(5:402) with {...} get words starting at # to # and set it to variable %.");
+                "with {...} get words starting at # to # and set it to variable %.");
             Add(TriggerCategory.Effect, 403, IndexOfStringToVar,
-                "(5:400) with {...} get index of {...} and set it to variable %.");
+                "with {...} get index of {...} and set it to variable %.");
         }
 
         private bool SubStringToVar(TriggerReader reader)
