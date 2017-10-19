@@ -69,7 +69,7 @@ namespace Monkeyspeak
         public Trigger Trigger
         {
             get { return originalTrigger; }
-            protected internal set
+            internal set
             {
                 originalTrigger = value;
                 contents = new Queue<IExpression>(originalTrigger.contents);
