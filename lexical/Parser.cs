@@ -93,7 +93,9 @@ namespace Monkeyspeak
                         break;
 
                     case TokenType.NUMBER:
-                        double val = double.Parse(value, System.Globalization.NumberStyles.AllowDecimalPoint);
+                        double val = double.Parse(value, System.Globalization.NumberStyles.AllowDecimalPoint
+                            | System.Globalization.NumberStyles.AllowLeadingSign
+                            | System.Globalization.NumberStyles.AllowExponent);
                         if (currentTrigger == Trigger.Undefined) throw new MonkeyspeakException($"Trigger was null. \nPrevious trigger = {prevTrigger}\nToken = {token}");
                         expr = new NumberExpression(ref sourcePos, val);
                         break;

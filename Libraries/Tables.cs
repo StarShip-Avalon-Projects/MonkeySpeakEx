@@ -27,6 +27,26 @@ namespace Monkeyspeak.Libraries
 
             Add(TriggerCategory.Effect, GetTableKeyIntoVar,
                 "with table % get key {...} put it in into variable %.");
+
+            // (1:106) and variable % is constant,
+            Add(TriggerCategory.Condition, VariableIsTable,
+                "and variable % is a table,");
+
+            // (1:107) and variable % is not constant,
+            Add(TriggerCategory.Condition, VariableIsNotTable,
+                "and variable % is not a table,");
+        }
+
+        private bool VariableIsNotTable(TriggerReader reader)
+        {
+            var var = reader.ReadVariable();
+            return !(var is VariableTable);
+        }
+
+        private bool VariableIsTable(TriggerReader reader)
+        {
+            var var = reader.ReadVariable();
+            return var is VariableTable;
         }
 
         private bool ForEntryInTable(TriggerReader reader)

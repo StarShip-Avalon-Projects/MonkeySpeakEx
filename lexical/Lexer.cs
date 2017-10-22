@@ -100,9 +100,12 @@ namespace Monkeyspeak
                         //    token = CreateToken(TokenType.PLUS);
                         //    break;
 
-                        //case '-':
-                        //    token = CreateToken(TokenType.MINUS);
-                        //    break;
+                        case '-':
+                            if (char.IsDigit((char)LookAhead(2)))
+                                token = MatchNumber();
+                            else
+                                token = CreateToken(TokenType.MINUS);
+                            break;
 
                         //case '^':
                         //    token = CreateToken(TokenType.POWER);
@@ -365,12 +368,45 @@ namespace Monkeyspeak
             Next();
             int length = 0;
             char c = (char)currentChar;
-            while (char.IsDigit(c) || currentChar == '.')
+            if (c == '-')
+            {
+                Next();
+                length++;
+                c = (char)currentChar;
+            }
+            bool @decimal = false;
+            while (char.IsDigit(c))
             {
                 CheckEOF(currentChar);
                 Next();
                 length++;
                 c = (char)currentChar;
+                if (c == '.')
+                {
+                    if (!@decimal)
+                    {
+                        @decimal = true;
+                        Next();
+                        length++;
+                        c = (char)currentChar;
+                    }
+                    else break; // we don't want duplicate decimal points
+                }
+
+                // support for exponent
+                if (c == 'E' || c == 'e')
+                {
+                    Next();
+                    length++;
+                    c = (char)currentChar;
+                    if (c == '-' || c == '+')
+                    {
+                        Next();
+                        length++;
+                        c = (char)currentChar;
+                        // now resume the loop because the rest are digits
+                    }
+                }
             }
             return new Token(TokenType.NUMBER, startPos, length, sourcePos);
         }
@@ -442,9 +478,10 @@ namespace Monkeyspeak
 
             Next();
             length++;
+            char c = (char)currentChar;
             while ((currentChar >= 'a' && currentChar <= 'z')
                    || (currentChar >= 'A' && currentChar <= 'Z')
-                   || (currentChar >= '0' && currentChar <= '9')
+                   || (char.IsDigit(c))
                    || currentChar == '_' || currentChar == '@'
                    || currentChar == '$' || currentChar == '#'
                    || currentChar == '&')
@@ -453,6 +490,7 @@ namespace Monkeyspeak
 
                 Next();
                 length++;
+                c = (char)currentChar;
             }
             length--;
 
