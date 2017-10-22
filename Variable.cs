@@ -1,6 +1,8 @@
 ﻿using Monkeyspeak.Extensions;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Text;
 using System.Linq;
 
 namespace Monkeyspeak
@@ -49,6 +51,7 @@ namespace Monkeyspeak
     }
 
     [Serializable]
+    [CLSCompliant(false)]
     public class Variable : IVariable
     {
         public bool Equals(IVariable other)
@@ -66,10 +69,7 @@ namespace Monkeyspeak
         {
             unchecked
             {
-                int hashCode = IsConstant.GetHashCode();
-                hashCode = (hashCode * 397) ^ (value != null ? value.GetHashCode() : 0);
-                hashCode = (hashCode * 397) ^ (Name != null ? Name.GetHashCode() : 0);
-                return hashCode;
+                return Name.GetHashCode();
             }
         }
 
@@ -198,39 +198,107 @@ namespace Monkeyspeak
     }
 
     [Serializable]
-    public sealed class VariableList : IVariable
+    [CLSCompliant(false)]
+    public sealed class VariableTable : IVariable
     {
+        private static int limit = 100;
+        public static int Limit { get => limit; set => limit = value; }
+
         public string Name { get; private set; }
 
-        private List<object> values;
+        /// <summary>
+        /// Gets the index of the current element.
+        /// </summary>
+        /// <value>
+        /// The index of the current element.
+        /// </value>
+        public int CurrentElementIndex { get; private set; }
+
+        /// <summary>
+        /// Gets or sets the active string based indexer.
+        /// </summary>
+        /// <value>
+        /// The active indexer.
+        /// </value>
+        public string ActiveIndexer { get; set; }
+
+        internal Dictionary<string, object> values;
 
         public object Value
         {
-            get { return values.FirstOrDefault(); } // this is intended behavior just in case you try to get variable value without [index]
-            set { if (!values.Contains(value)) values.Add(value); }
+            get { return values.LastOrDefault(); }
+            set { this[ActiveIndexer] = value; }
+        }
+
+        public object this[string key]
+        {
+            get
+            {
+                if (values.TryGetValue(key, out object value))
+                    return value;
+                return null;
+            }
+            set
+            {
+                if (!CheckType(value) || values.Count + 1 > Limit) return;
+                values[key] = value;
+            }
         }
 
         public object this[int index]
         {
-            get { return values[index]; }
+            get
+            {
+                return At(index);
+            }
         }
 
         public int Count { get => values.Count; }
 
         public bool IsConstant { get; private set; }
 
-        public VariableList(string name, bool isConstant = false)
+        public IReadOnlyDictionary<string, object> Contents
         {
-            Name = name;
-            values = new List<object>();
-            IsConstant = isConstant;
+            get => new ReadOnlyDictionary<string, object>(values);
         }
 
-        public VariableList(string name, bool isConstant = false, params object[] values)
+        public VariableTable(string name, bool isConstant = false, int limit = 100)
         {
             Name = name;
-            this.values = new List<object>(values);
+            values = new Dictionary<string, object>(limit);
             IsConstant = isConstant;
+            Limit = limit;
+        }
+
+        public void Add(string key, object value)
+        {
+            if (CheckType(value) || values.Count > Limit) return;
+            values[key] = value;
+        }
+
+        public bool Contains(string index)
+        {
+            return values.ContainsKey(index);
+        }
+
+        private object At(int index)
+        {
+            return values.Values.ElementAtOrDefault(index);
+        }
+
+        public object Next()
+        {
+            var obj = this[CurrentElementIndex];
+            CurrentElementIndex++;
+            return obj;
+        }
+
+        private bool CheckType(object _value)
+        {
+            if (_value == null) return true;
+
+            return _value is string ||
+                   _value is double;
         }
 
         public bool Equals(IVariable other)
@@ -248,11 +316,24 @@ namespace Monkeyspeak
         {
             unchecked
             {
-                int hashCode = IsConstant.GetHashCode();
-                hashCode = (hashCode * 397) ^ (values != null ? values.GetHashCode() : 0);
-                hashCode = (hashCode * 397) ^ (Name != null ? Name.GetHashCode() : 0);
-                return hashCode;
+                return Name.GetHashCode();
             }
+        }
+
+        /// <summary>
+        /// Returns a const identifier if the variable is constant followed by name,
+        /// <para>otherwise just the name is returned.</para>
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString()
+        {
+            string replace = (values != null ? values.ToString(',') : "null");
+            return ((IsConstant) ? "const " : "") + $"{Name} = {replace}";
+        }
+
+        public void ResetIndex()
+        {
+            CurrentElementIndex = 0;
         }
     }
 }

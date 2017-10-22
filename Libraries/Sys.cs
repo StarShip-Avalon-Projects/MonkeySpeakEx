@@ -1,49 +1,50 @@
 ﻿using Monkeyspeak.Extensions;
+using Monkeyspeak.Logging;
 using System;
 
 namespace Monkeyspeak.Libraries
 {
     public class Sys : BaseLibrary
     {
-        public Sys()
+        public override void Initialize()
         {
-            // (1:100) and variable %Variable is defined,
+            // (1:100) and variable % is defined,
             Add(new Trigger(TriggerCategory.Condition, 100), IsVariableDefined,
                 "and variable % is defined,");
 
-            // (1:101) and variable %Variable is not defined,
+            // (1:101) and variable % is not defined,
             Add(new Trigger(TriggerCategory.Condition, 101), IsVariableNotDefined,
                 "and variable % is not defined,");
 
-            // (1:102) and variable %Variable equals #,
+            // (1:102) and variable % equals #,
             Add(new Trigger(TriggerCategory.Condition, 102), IsVariableEqualToNumberOrVar,
                 "and variable % equals #,");
 
-            // (1:103) and variable %Variable does not equal #,
+            // (1:103) and variable % does not equal #,
             Add(new Trigger(TriggerCategory.Condition, 103), IsVariableNotEqualToNumberOrVar,
                 "and variable % does not equal #,");
 
-            // (1:104) and variable %Variable equals {...},
+            // (1:104) and variable % equals {...},
             Add(new Trigger(TriggerCategory.Condition, 104), IsVariableEqualToString,
                 "and variable % equals {...},");
 
-            // (1:105) and variable %Variable does not equal {...},
+            // (1:105) and variable % does not equal {...},
             Add(new Trigger(TriggerCategory.Condition, 105), IsVariableNotEqualToString,
                 "and variable % does not equal {...},");
 
-            // (1:106) and variable %Variable is constant,
+            // (1:106) and variable % is constant,
             Add(new Trigger(TriggerCategory.Condition, 106), VariableIsConstant,
                 "and variable % is constant,");
 
-            // (1:107) and variable %Variable is not constant,
+            // (1:107) and variable % is not constant,
             Add(new Trigger(TriggerCategory.Condition, 107), VariableIsNotConstant,
                 "and variable % is not constant,");
 
-            // (5:100) set variable %Variable to {...}.
+            // (5:100) set variable % to {...}.
             Add(new Trigger(TriggerCategory.Effect, 100), SetVariableToString,
                 "set variable % to {...}.");
 
-            // (5:101) set variable %Variable to #.
+            // (5:101) set variable % to #.
             Add(new Trigger(TriggerCategory.Effect, 101), SetVariableToNumberOrVariable,
                 "set variable % to #.");
 
@@ -57,9 +58,6 @@ namespace Monkeyspeak.Libraries
 
             Add(TriggerCategory.Effect, 104, RandomValueToVar,
                 "create random number and put it into variable %.");
-            // (5:105) raise an error.
-            Add(new Trigger(TriggerCategory.Effect, 105), RaiseAnError,
-                "raise an error.");
 
             Add(new Trigger(TriggerCategory.Effect, 107), DeleteVariable,
                 "delete variable %.");
@@ -115,6 +113,7 @@ namespace Monkeyspeak.Libraries
         private bool DeleteVariable(TriggerReader reader)
         {
             var var = reader.ReadVariable();
+            var.Value = null;
             return !var.IsConstant ? reader.Page.RemoveVariable(var.Name) : false;
         }
 
@@ -129,28 +128,20 @@ namespace Monkeyspeak.Libraries
         private bool IsVariableDefined(TriggerReader reader)
         {
             var var = reader.ReadVariable();
-            return reader.Page.HasVariable(var.Name) && var.Value != null;
+            return var != null && reader.Page.HasVariable(var.Name);
         }
 
         private bool IsVariableNotDefined(TriggerReader reader)
         {
-            return !IsVariableDefined(reader);
+            var var = reader.ReadVariable();
+            return var == null || !reader.Page.HasVariable(var.Name);
         }
 
         private bool IsVariableEqualToNumberOrVar(TriggerReader reader)
         {
             var var = reader.ReadVariable();
             double num = 0;
-            if (reader.PeekVariable<double>())
-            {
-                num = reader.ReadVariable().Value.As<double>();
-            }
-            else if (reader.PeekNumber())
-            {
-                num = reader.ReadNumber();
-            }
-
-            return num == var.Value.As<double>();
+            return reader.ReadVariableOrNumber() == var.Value.As<double>();
         }
 
         private bool IsVariableNotEqualToNumberOrVar(TriggerReader reader)
@@ -161,10 +152,11 @@ namespace Monkeyspeak.Libraries
         private bool IsVariableEqualToString(TriggerReader reader)
         {
             var var = reader.ReadVariable();
+            if (var == null) return false;
             if (reader.PeekString())
             {
                 var str = reader.ReadString();
-                return var.Value.As<string>().Equals(str, StringComparison.InvariantCulture);
+                return var.Value.As<string>(string.Empty).Equals(str, StringComparison.InvariantCulture);
             }
             return false;
         }
@@ -188,14 +180,6 @@ namespace Monkeyspeak.Libraries
             return true;
         }
 
-        private bool RaiseAnError(TriggerReader reader)
-        {
-            string errorMsg = "";
-            if (reader.PeekString()) errorMsg = reader.ReadString();
-            RaiseError(errorMsg);
-            return false;
-        }
-
         private bool RandomValueToVar(TriggerReader reader)
         {
             var var = reader.ReadVariable(true);
@@ -208,7 +192,7 @@ namespace Monkeyspeak.Libraries
             var var = reader.ReadVariable(true);
             if (reader.PeekVariable<double>())
             {
-                var.Value = reader.ReadVariable().Value.As<double>();
+                var.Value = reader.ReadVariable().Value.As(0d);
             }
             else if (reader.PeekNumber())
             {

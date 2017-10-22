@@ -15,7 +15,10 @@ namespace Monkeyspeak.Libraries
         public IO(string authorizedPath = null)
         {
             if (!string.IsNullOrEmpty(authorizedPath)) DefaultAuthorizedPath = authorizedPath;
+        }
 
+        public override void Initialize()
+        {
             // (1:200) and the file {...} exists,
             Add(new Trigger(TriggerCategory.Condition, 200), FileExists,
                 "and the file {...} exists,");
@@ -36,9 +39,9 @@ namespace Monkeyspeak.Libraries
             Add(new Trigger(TriggerCategory.Effect, 200), AppendToFile,
                 "append {...} to file {...}.");
 
-            // (5:201) read from file {...} and put it into variable %Variable.
+            // (5:201) read from file {...} and put it into variable %.
             Add(new Trigger(TriggerCategory.Effect, 201), ReadFileIntoVariable,
-                "read from file {...} and put it into variable %Variable.");
+                "read from file {...} and put it into variable %.");
 
             // (5:202) delete file {...}.
             Add(new Trigger(TriggerCategory.Effect, 202), DeleteFile,

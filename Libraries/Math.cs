@@ -1,41 +1,42 @@
 ﻿using Monkeyspeak.Extensions;
+using System;
 
 namespace Monkeyspeak.Libraries
 {
     public class Math : BaseLibrary
     {
-        public Math()
+        public override void Initialize()
         {
-            // (1:150) and variable %Variable is greater than #,
+            // (1:150) and variable % is greater than #,
             Add(new Trigger(TriggerCategory.Condition, 150), VariableGreaterThan,
-                "and variable %Variable is greater than #,");
-            // (1:151) and variable %Variable is greater than or equal to #,
+                "and variable % is greater than #,");
+            // (1:151) and variable % is greater than or equal to #,
             Add(new Trigger(TriggerCategory.Condition, 151), VariableGreaterThanOrEqual,
-                "and variable %Variable is greater than or equal to #,");
+                "and variable % is greater than or equal to #,");
 
-            // (1:152) and variable %Variable is less than #,
+            // (1:152) and variable % is less than #,
             Add(new Trigger(TriggerCategory.Condition, 152), VariableLessThan,
-                "and variable %Variable is less than #,");
+                "and variable % is less than #,");
 
-            // (1:153) and variable %Variable is less than or equal to #,
+            // (1:153) and variable % is less than or equal to #,
             Add(new Trigger(TriggerCategory.Condition, 153), VariableLessThanOrEqual,
-                "and variable %Variable is less than or equal to #,");
+                "and variable % is less than or equal to #,");
 
-            // (5:150) take variable %Variable and add # to it.
+            // (5:150) take variable % and add # to it.
             Add(new Trigger(TriggerCategory.Effect, 150), AddToVariable,
-                "take variable %Variable and add # to it.");
+                "take variable % and add # to it.");
 
-            // (5:151) take variable %Variable and substract it by #.
+            // (5:151) take variable % and substract it by #.
             Add(new Trigger(TriggerCategory.Effect, 151), SubtractFromVariable,
-                "take variable %Variable and subtract # from it.");
+                "take variable % and subtract # from it.");
 
-            // (5:152) take variable %Variable and multiply it by #.
+            // (5:152) take variable % and multiply it by #.
             Add(new Trigger(TriggerCategory.Effect, 152), MultiplyByVariable,
-                "take variable %Variable and multiply it by #.");
+                "take variable % and multiply it by #.");
 
-            // (5:153) take variable %Variable and divide it by #.
+            // (5:153) take variable % and divide it by #.
             Add(new Trigger(TriggerCategory.Effect, 153), MultiplyByVariable,
-                "take variable %Variable and divide it by #.");
+                "take variable % and divide it by #.");
         }
 
         public override void Unload(Page page)
@@ -45,17 +46,7 @@ namespace Monkeyspeak.Libraries
         private bool AddToVariable(TriggerReader reader)
         {
             var toAssign = reader.ReadVariable(true);
-            double num = 0;
-            if (reader.PeekVariable())
-            {
-                var valueVariable = reader.ReadVariable();
-                if (valueVariable.Value is double)
-                    num = (double)valueVariable.Value;
-            }
-            else if (reader.PeekNumber())
-            {
-                num = reader.ReadNumber();
-            }
+            double num = reader.ReadVariableOrNumber();
 
             toAssign.Value = toAssign.Value.As<double>() + num;
             return true;
@@ -64,17 +55,7 @@ namespace Monkeyspeak.Libraries
         private bool DivideByVariable(TriggerReader reader)
         {
             var toAssign = reader.ReadVariable(true);
-            double num = 0;
-            if (reader.PeekVariable())
-            {
-                var valueVariable = reader.ReadVariable();
-                if (valueVariable.Value is double)
-                    num = (double)valueVariable.Value;
-            }
-            else if (reader.PeekNumber())
-            {
-                num = reader.ReadNumber();
-            }
+            double num = reader.ReadVariableOrNumber();
 
             toAssign.Value = toAssign.Value.As<double>() / num;
             return true;
@@ -83,17 +64,7 @@ namespace Monkeyspeak.Libraries
         private bool MultiplyByVariable(TriggerReader reader)
         {
             var toAssign = reader.ReadVariable(true);
-            double num = 0;
-            if (reader.PeekVariable())
-            {
-                var valueVariable = reader.ReadVariable();
-                if (valueVariable.Value is double)
-                    num = (double)valueVariable.Value;
-            }
-            else if (reader.PeekNumber())
-            {
-                num = reader.ReadNumber();
-            }
+            double num = reader.ReadVariableOrNumber();
 
             toAssign.Value = toAssign.Value.As<double>() * num;
             return true;
@@ -102,17 +73,7 @@ namespace Monkeyspeak.Libraries
         private bool SubtractFromVariable(TriggerReader reader)
         {
             var toAssign = reader.ReadVariable(true);
-            double num = 0;
-            if (reader.PeekVariable())
-            {
-                var valueVariable = reader.ReadVariable();
-                if (valueVariable.Value is double)
-                    num = (double)valueVariable.Value;
-            }
-            else if (reader.PeekNumber())
-            {
-                num = reader.ReadNumber();
-            }
+            double num = reader.ReadVariableOrNumber();
 
             toAssign.Value = toAssign.Value.As<double>() - num;
             return true;
@@ -121,61 +82,29 @@ namespace Monkeyspeak.Libraries
         private bool VariableGreaterThan(TriggerReader reader)
         {
             var mainVar = reader.ReadVariable();
-            double num = 0;
-            if (reader.TryReadVariable(out IVariable var))
-            {
-                return mainVar.Value.As<double>() > var.Value.As<double>();
-            }
-            else if (reader.TryReadNumber(out num))
-            {
-                return mainVar.Value.As<double>() > num;
-            }
-            return false;
+            double num = reader.ReadVariableOrNumber();
+            return mainVar.Value.As<double>() > num;
         }
 
         private bool VariableGreaterThanOrEqual(TriggerReader reader)
         {
             var mainVar = reader.ReadVariable();
-            double num = 0;
-            if (reader.TryReadVariable(out IVariable var))
-            {
-                return mainVar.Value.As<double>() >= var.Value.As<double>();
-            }
-            else if (reader.TryReadNumber(out num))
-            {
-                return mainVar.Value.As<double>() >= num;
-            }
-            return false;
+            double num = reader.ReadVariableOrNumber();
+            return mainVar.Value.As<double>() >= num;
         }
 
         private bool VariableLessThan(TriggerReader reader)
         {
             var mainVar = reader.ReadVariable();
-            double num = 0;
-            if (reader.TryReadVariable(out IVariable var))
-            {
-                return mainVar.Value.As<double>() < var.Value.As<double>();
-            }
-            else if (reader.TryReadNumber(out num))
-            {
-                return mainVar.Value.As<double>() < num;
-            }
-            return false;
+            double num = reader.ReadVariableOrNumber();
+            return mainVar.Value.As<double>() < num;
         }
 
         private bool VariableLessThanOrEqual(TriggerReader reader)
         {
             var mainVar = reader.ReadVariable();
-            double num = 0;
-            if (reader.TryReadVariable(out IVariable var))
-            {
-                return mainVar.Value.As<double>() <= var.Value.As<double>();
-            }
-            else if (reader.TryReadNumber(out num))
-            {
-                return mainVar.Value.As<double>() <= num;
-            }
-            return false;
+            double num = reader.ReadVariableOrNumber();
+            return mainVar.Value.As<double>() <= num;
         }
     }
 }

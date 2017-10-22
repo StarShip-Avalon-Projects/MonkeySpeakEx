@@ -1,4 +1,4 @@
-﻿namespace Shared.Core.Logging
+﻿namespace Monkeyspeak.Logging
 {
     public interface ILogOutput
     {

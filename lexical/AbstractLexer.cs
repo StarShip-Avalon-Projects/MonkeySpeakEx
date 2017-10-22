@@ -14,8 +14,20 @@ namespace Monkeyspeak
             Engine = engine;
         }
 
+        /// <summary>
+        /// Gets the engine.
+        /// </summary>
+        /// <value>
+        /// The engine.
+        /// </value>
         public virtual MonkeyspeakEngine Engine { get; private set; }
 
+        /// <summary>
+        /// Gets the current source position.
+        /// </summary>
+        /// <value>
+        /// The current source position.
+        /// </value>
         public virtual SourcePosition CurrentSourcePosition
         {
             get;
@@ -24,7 +36,7 @@ namespace Monkeyspeak
         /// <summary>
         /// Advances one character in the reader.
         /// </summary>
-        protected abstract void Next();
+        public abstract int Next();
 
         /// <summary>
         /// Reads the tokens from the reader.  Used by the Parser.
@@ -40,12 +52,63 @@ namespace Monkeyspeak
         /// <returns></returns>
         public abstract char[] Read(long startPosInStream, int length);
 
-        protected abstract int LookAhead(int amount);
+        /// <summary>
+        /// Looks ahead a specified number of chars and returns the result.
+        /// </summary>
+        /// <param name="amount">The amount.</param>
+        /// <returns></returns>
+        public abstract int LookAhead(int amount);
 
-        protected abstract int LookBack(int amount);
+        /// <summary>
+        /// Looks back a specified number of chars and returns the result.
+        /// </summary>
+        /// <param name="amount">The amount.</param>
+        /// <returns></returns>
+        public abstract int LookBack(int amount);
 
+        /// <summary>
+        /// Checks if the next input is a match to <paramref name="c"/>.
+        /// </summary>
+        /// <param name="c">The c.</param>
+        /// <exception cref="MonkeyspeakException" />
+        public abstract void CheckMatch(int c);
+
+        /// <summary>
+        /// Checks if the next input is a match to <paramref name="c"/>.
+        /// </summary>
+        /// <param name="c">The c.</param>
+        /// <exception cref="MonkeyspeakException" />
+        public abstract void CheckMatch(char c);
+
+        /// <summary>
+        /// Checks if the next input is a match to <paramref name="str"/>.
+        /// </summary>
+        /// <param name="str">The string.</param>
+        /// <exception cref="MonkeyspeakException" />
+        public abstract void CheckMatch(string str);
+
+        /// <summary>
+        /// Checks if <paramref name="c"/> is a number.
+        /// </summary>
+        /// <param name="c">The c.</param>
+        /// <exception cref="MonkeyspeakException" />
+        public abstract void CheckIsDigit(char c = '\0');
+
+        /// <summary>
+        /// Checks if the next input results in End of File.
+        /// </summary>
+        /// <param name="c">The c.</param>
+        /// <exception cref="MonkeyspeakException" />
+        public abstract void CheckEOF(int c);
+
+        /// <summary>
+        /// Resets this instance.
+        /// </summary>
         public abstract void Reset();
 
+        /// <summary>
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        /// </summary>
         public void Dispose()
         {
             reader.Dispose();

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Timers;
 
 namespace Monkeyspeak.Libraries
@@ -109,6 +110,10 @@ namespace Monkeyspeak.Libraries
         {
             if (timersLimit == 0) timersLimit = 1;
             this.timersLimit = timersLimit;
+        }
+
+        public override void Initialize()
+        {
             // (0:300) When timer # goes off,
             Add(new Trigger(TriggerCategory.Cause, 300), WhenTimerGoesOff,
                 "when timer # goes off,");

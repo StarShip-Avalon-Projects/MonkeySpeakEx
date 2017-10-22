@@ -2,15 +2,15 @@
 {
     public class Debug : BaseLibrary
     {
-        public Debug()
+        public override void Initialize()
         {
             //(0:10000) when a debug breakpoint is hit,
             Add(TriggerCategory.Cause, 10000, WhenBreakpointHit,
-                "(0:10000) when a debug breakpoint is hit,");
+                "when a debug breakpoint is hit,");
 
             //(5:10000) create a debug breakpoint here,
             Add(TriggerCategory.Effect, 10000, CreateBreakPoint,
-                "(5:10000) create a debug breakpoint here,");
+                "create a debug breakpoint here,");
         }
 
         public override void Unload(Page page)

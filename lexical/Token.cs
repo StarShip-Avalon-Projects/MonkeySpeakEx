@@ -18,12 +18,14 @@ namespace Monkeyspeak
         WORD, LITERAL,
 
         // custom
-        TRIGGER, VARIABLE, REFERENCE, STRING_LITERAL, NUMBER, NONE
+        TRIGGER, VARIABLE, TABLE, REFERENCE, STRING_LITERAL, NUMBER, NONE
     }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
     public struct Token
     {
+        public static readonly Token None = new Token(TokenType.NONE);
+
         private SourcePosition _position;
         private TokenType _type;
         private long valueStart;

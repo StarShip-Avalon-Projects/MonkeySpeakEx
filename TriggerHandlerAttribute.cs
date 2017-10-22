@@ -38,7 +38,6 @@ namespace Monkeyspeak
             if (handler != null)
             {
                 Attributes.Instance.Add(new Trigger(TriggerCategory, TriggerID), handler, Description);
-                page.LoadLibrary(Attributes.Instance); // reload the library
             }
         }
     }

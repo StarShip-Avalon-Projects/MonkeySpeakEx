@@ -1,72 +1,75 @@
 ﻿using System.Text;
 
-public static class StringExtensions
+namespace Monkeyspeak.Extensions
 {
-    public static string EscapeForCSharp(this string str)
+    public static class StringExtensions
     {
-        if (string.IsNullOrEmpty(str)) return string.Empty;
-        StringBuilder sb = new StringBuilder();
-        foreach (char c in str)
-            switch (c)
+        public static string EscapeForCSharp(this string str)
+        {
+            if (string.IsNullOrEmpty(str)) return string.Empty;
+            StringBuilder sb = new StringBuilder();
+            foreach (char c in str)
+                switch (c)
+                {
+                    case '\'':
+                    case '"':
+                    case '\\':
+                        sb.Append(c.EscapeForCSharp());
+                        break;
+
+                    default:
+                        if (char.IsControl(c))
+                            sb.Append(c.EscapeForCSharp());
+                        else
+                            sb.Append(c);
+                        break;
+                }
+            return sb.ToString();
+        }
+
+        public static string EscapeForCSharp(this char chr)
+        {
+            switch (chr)
             {
                 case '\'':
+                    return @"\'";
+
                 case '"':
+                    return "\\\"";
+
                 case '\\':
-                    sb.Append(c.EscapeForCSharp());
-                    break;
+                    return @"\\";
+
+                case '\0':
+                    return @"\0";
+
+                case '\a':
+                    return @"\a";
+
+                case '\b':
+                    return @"\b";
+
+                case '\f':
+                    return @"\f";
+
+                case '\n':
+                    return @"\n";
+
+                case '\r':
+                    return @"\r";
+
+                case '\t':
+                    return @"\t";
+
+                case '\v':
+                    return @"\v";
 
                 default:
-                    if (char.IsControl(c))
-                        sb.Append(c.EscapeForCSharp());
+                    if (char.IsControl(chr) || char.IsHighSurrogate(chr) || char.IsLowSurrogate(chr))
+                        return @"\u" + ((int)chr).ToString("X4");
                     else
-                        sb.Append(c);
-                    break;
+                        return new string(chr, 1);
             }
-        return sb.ToString();
-    }
-
-    public static string EscapeForCSharp(this char chr)
-    {
-        switch (chr)
-        {
-            case '\'':
-                return @"\'";
-
-            case '"':
-                return "\\\"";
-
-            case '\\':
-                return @"\\";
-
-            case '\0':
-                return @"\0";
-
-            case '\a':
-                return @"\a";
-
-            case '\b':
-                return @"\b";
-
-            case '\f':
-                return @"\f";
-
-            case '\n':
-                return @"\n";
-
-            case '\r':
-                return @"\r";
-
-            case '\t':
-                return @"\t";
-
-            case '\v':
-                return @"\v";
-
-            default:
-                if (char.IsControl(chr) || char.IsHighSurrogate(chr) || char.IsLowSurrogate(chr))
-                    return @"\u" + ((int)chr).ToString("X4");
-                else
-                    return new string(chr, 1);
         }
     }
 }
