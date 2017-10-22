@@ -1,8 +1,10 @@
-﻿namespace Monkeyspeak.Libraries
+﻿using System;
+
+namespace Monkeyspeak.Libraries
 {
     public class StringOperations : BaseLibrary
     {
-        public StringOperations()
+        public override void Initialize()
         {
             Add(TriggerCategory.Effect, 400, PutWordCountIntoVariable,
                 "with {...} get word count and set it to variable %.");

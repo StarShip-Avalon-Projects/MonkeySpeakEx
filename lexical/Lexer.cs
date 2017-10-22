@@ -1,10 +1,12 @@
 ﻿#region Usings
 
+using Monkeyspeak.Extensions;
 using Monkeyspeak.lexical;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 
 #endregion Usings
 
@@ -41,120 +43,120 @@ namespace Monkeyspeak
             var tokens = new Queue<Token>();
             int character = 0;
             char c = (char)character;
-            Token token = default(Token), lastToken = default(Token);
+            Token token = Token.None, lastToken = Token.None;
             while (character != -1 || token.Type != TokenType.END_OF_FILE)
             {
-                token = default(Token); // needed to clear Token state
+                token = Token.None; // needed to clear Token state
                 character = LookAhead(1);
                 c = (char)character;
                 if (character == -1)
                 {
                     token = CreateToken(TokenType.END_OF_FILE);
-                    goto CONTINUE;
                 }
-                if (c == Engine.Options.BlockCommentBeginSymbol[0])
+                else if (c == Engine.Options.BlockCommentBeginSymbol[0])
                 {
+                    bool isBlockComment = true;
                     for (int i = 0; i <= Engine.Options.BlockCommentBeginSymbol.Length - 1; i++)
                     {
                         // Ensure it is actually a block comment
                         if (LookAhead(2 + i) != Engine.Options.BlockCommentBeginSymbol[i])
-                            goto SkipCustoms;
+                        {
+                            isBlockComment = false;
+                            break;
+                        }
                     }
-                    SkipBlockComment();
-                    goto CONTINUE;
+                    if (isBlockComment)
+                        SkipBlockComment();
                 }
                 else if (c == lineCommentSym)
                 {
                     SkipLineComment();
-                    goto CONTINUE;
                 }
                 else if (c == stringBeginSym)
                 {
                     token = MatchString();
-                    goto CONTINUE;
                 }
                 else if (c == varDeclSym)
                 {
                     token = MatchVariable();
-                    goto CONTINUE;
                 }
-                SkipCustoms:
-                switch (c)
+                else
                 {
-                    case '\r':
-                    case '\n':
-                        //token = CreateToken(TokenType.END_STATEMENT);
-                        Next();
-                        break;
+                    switch (c)
+                    {
+                        case '\r':
+                        case '\n':
+                            //token = CreateToken(TokenType.END_STATEMENT);
+                            Next();
+                            break;
 
-                    case '.':
-                    case ',':
-                        //token = CreateToken(TokenType.END_STATEMENT);
-                        Next();
-                        break;
+                        case '.':
+                        case ',':
+                            //token = CreateToken(TokenType.END_STATEMENT);
+                            Next();
+                            break;
 
-                    //case '+':
-                    //    token = CreateToken(TokenType.PLUS);
-                    //    break;
+                        //case '+':
+                        //    token = CreateToken(TokenType.PLUS);
+                        //    break;
 
-                    //case '-':
-                    //    token = CreateToken(TokenType.MINUS);
-                    //    break;
+                        case '-':
+                            if (char.IsDigit((char)LookAhead(2)))
+                                token = MatchNumber();
+                            else
+                                token = CreateToken(TokenType.MINUS);
+                            break;
 
-                    //case '^':
-                    //    token = CreateToken(TokenType.POWER);
-                    //    break;
+                        //case '^':
+                        //    token = CreateToken(TokenType.POWER);
+                        //    break;
 
-                    //case '~':
-                    //    token = CreateToken(TokenType.CONCAT);
-                    //    break;
+                        //case '~':
+                        //    token = CreateToken(TokenType.CONCAT);
+                        //    break;
 
-                    //case ':':
-                    //    token = CreateToken(TokenType.COLON);
-                    //    break;
+                        //case ':':
+                        //    token = CreateToken(TokenType.COLON);
+                        //    break;
 
-                    //case '(':
-                    //token = CreateToken(TokenType.LPAREN);
-                    //break;
+                        //case '(':
+                        //token = CreateToken(TokenType.LPAREN);
+                        //break;
 
-                    //case ')':
-                    //token = CreateToken(TokenType.RPAREN);
-                    //break;
+                        //case ')':
+                        //token = CreateToken(TokenType.RPAREN);
+                        //break;
 
-                    //case '*':
-                    //    token = CreateToken(TokenType.MULTIPLY);
-                    //    Next();
-                    //    break;
+                        //case '*':
+                        //    token = CreateToken(TokenType.MULTIPLY);
+                        //    Next();
+                        //    break;
 
-                    //case '/':
-                    //    token = CreateToken(TokenType.DIVIDE);
-                    //    Next();
-                    //    break;
+                        //case '/':
+                        //    token = CreateToken(TokenType.DIVIDE);
+                        //    Next();
+                        //    break;
 
-                    case '%':
-                        token = CreateToken(TokenType.MOD);
-                        break;
+                        case '%':
+                            token = CreateToken(TokenType.MOD);
+                            break;
 
-                    case '0':
-                    case '1':
-                    case '5':
-                        token = MatchTrigger();
-                        break;
+                        case '0':
+                        case '1':
+                        case '2':
+                        case '3':
+                        case '4':
+                        case '5':
+                        case '6':
+                        case '7':
+                        case '8':
+                        case '9':
+                            token = MatchTrigger();
+                            break;
 
-                    case '2':
-                    case '3':
-                    case '4':
-                    // skipped 5 trigger category
-                    case '6':
-                    case '7':
-                    case '8':
-                    case '9':
-                        token = MatchNumber();
-                        break;
-
-                    default: Next(); break;
+                        default: Next(); break;
+                    }
                 }
-                CONTINUE:
                 if (token.Type != TokenType.NONE)
                 {
                     //Logger.Debug<Lexer>(token);
@@ -181,13 +183,31 @@ namespace Monkeyspeak
             }
         }
 
-        private void CheckMatch(string str)
+        public bool IsMatch(string str)
         {
-            foreach (var c in str)
-                CheckMatch(c);
+            return str.All(c => IsMatch(c));
         }
 
-        private void CheckMatch(char c)
+        public bool IsMatch(char c)
+        {
+            return currentChar == c;
+        }
+
+        public bool IsMatch(int c)
+        {
+            return currentChar == c;
+        }
+
+        public override void CheckMatch(string str)
+        {
+            for (int i = 0; i <= str.Length - 1; i++)
+            {
+                var c = LookAhead(i);
+                CheckMatch(str[i], c);
+            }
+        }
+
+        public override void CheckMatch(char c)
         {
             if (currentChar != c)
             {
@@ -195,7 +215,7 @@ namespace Monkeyspeak
             }
         }
 
-        private void CheckMatch(int c)
+        public override void CheckMatch(int c)
         {
             int input = currentChar;
             if (input != c)
@@ -205,7 +225,23 @@ namespace Monkeyspeak
             }
         }
 
-        private void CheckIsDigit(char c = '\0')
+        public void CheckMatch(char a, char b)
+        {
+            if (a != b)
+            {
+                throw new MonkeyspeakException(String.Format("Expected '{0}' but got '{1}'", b.EscapeForCSharp(), a.EscapeForCSharp()), CurrentSourcePosition);
+            }
+        }
+
+        public void CheckMatch(int a, int b)
+        {
+            if (a != b)
+            {
+                throw new MonkeyspeakException(String.Format("Expected '{0}' but got '{1}'", ((char)b).EscapeForCSharp(), ((char)a).EscapeForCSharp()), CurrentSourcePosition);
+            }
+        }
+
+        public override void CheckIsDigit(char c = '\0')
         {
             if (c == '\0') c = (char)currentChar;
             if (!char.IsDigit(c))
@@ -214,10 +250,9 @@ namespace Monkeyspeak
             }
         }
 
-        private void CheckEOF()
+        public override void CheckEOF(int c)
         {
-            int input = currentChar;
-            if (input == -1)
+            if (c == -1)
             {
                 throw new MonkeyspeakException("Unexpected end of file", CurrentSourcePosition);
             }
@@ -263,7 +298,7 @@ namespace Monkeyspeak
         /// </summary>
         /// <param name="steps"></param>
         /// <returns>The character number of steps ahead or -1/returns>
-        protected override int LookAhead(int steps)
+        public override int LookAhead(int steps)
         {
             if (!reader.BaseStream.CanSeek)
             {
@@ -287,7 +322,7 @@ namespace Monkeyspeak
             return ahead;
         }
 
-        protected override int LookBack(int steps)
+        public override int LookBack(int steps)
         {
             if (!reader.BaseStream.CanSeek)
             {
@@ -305,14 +340,13 @@ namespace Monkeyspeak
             return aback;
         }
 
-        protected override void Next()
+        public override int Next()
         {
-            int c = -1;
             int before = LookBack(1);
-            c = reader.Read();
+            int c = reader.Read();
             if (c != -1)
             {
-                if (c == '\n' || (before == '\r' && c == '\n'))
+                if (c == '\n') //|| (before == '\r' && c == '\n'))
                 {
                     lineNo++;
                     columnNo = 0;
@@ -324,6 +358,7 @@ namespace Monkeyspeak
                 rawPos++;
             }
             currentChar = c;
+            return currentChar;
         }
 
         private Token MatchNumber()
@@ -333,12 +368,45 @@ namespace Monkeyspeak
             Next();
             int length = 0;
             char c = (char)currentChar;
-            while (char.IsDigit(c) || currentChar == '.')
+            if (c == '-')
             {
-                CheckEOF();
                 Next();
                 length++;
                 c = (char)currentChar;
+            }
+            bool @decimal = false;
+            while (char.IsDigit(c))
+            {
+                CheckEOF(currentChar);
+                Next();
+                length++;
+                c = (char)currentChar;
+                if (c == '.')
+                {
+                    if (!@decimal)
+                    {
+                        @decimal = true;
+                        Next();
+                        length++;
+                        c = (char)currentChar;
+                    }
+                    else break; // we don't want duplicate decimal points
+                }
+
+                // support for exponent
+                if (c == 'E' || c == 'e')
+                {
+                    Next();
+                    length++;
+                    c = (char)currentChar;
+                    if (c == '-' || c == '+')
+                    {
+                        Next();
+                        length++;
+                        c = (char)currentChar;
+                        // now resume the loop because the rest are digits
+                    }
+                }
             }
             return new Token(TokenType.NUMBER, startPos, length, sourcePos);
         }
@@ -346,20 +414,23 @@ namespace Monkeyspeak
         private Token MatchString()
         {
             Next();
+            CheckMatch(stringBeginSym);
             var stringLenLimit = Engine.Options.StringLengthLimit;
             var sourcePos = CurrentSourcePosition;
             long startPos = reader.Position;
             int length = 0;
             while (true)
             {
-                CheckEOF();
+                CheckEOF(currentChar);
                 if (length >= stringLenLimit)
-                    throw new MonkeyspeakException("String exceeded limit or was not terminated with a closing bracket", CurrentSourcePosition);
+                    throw new MonkeyspeakException($"String exceeded limit or was not terminated with a '{stringEndSym}'", CurrentSourcePosition);
                 Next();
                 length++;
                 if (LookAhead(1) == stringEndSym)
                     break;
             }
+            Next(); // hit string end sym
+            CheckMatch(stringEndSym);
             return new Token(TokenType.STRING_LITERAL, startPos, length, sourcePos);
         }
 
@@ -381,7 +452,7 @@ namespace Monkeyspeak
             CheckIsDigit(c);
             while (char.IsDigit(c))
             {
-                CheckEOF();
+                CheckEOF(currentChar);
                 Next();
                 length++;
                 c = (char)currentChar;
@@ -395,7 +466,7 @@ namespace Monkeyspeak
             return new Token(TokenType.TRIGGER, startPos, length, sourcePos);
         }
 
-        private Token MatchVariable(bool isReference = false)
+        private Token MatchVariable()
         {
             long startPos = reader.Position;
             int length = 0;
@@ -407,53 +478,51 @@ namespace Monkeyspeak
 
             Next();
             length++;
-            while (true)
-            {
-                if (!((currentChar >= 'a' && currentChar <= 'z')
+            char c = (char)currentChar;
+            while ((currentChar >= 'a' && currentChar <= 'z')
                    || (currentChar >= 'A' && currentChar <= 'Z')
-                   || (currentChar >= '0' && currentChar <= '9')
-                   || currentChar == '_'))
-                {
-                    length--;
-                    break;
-                }
+                   || (char.IsDigit(c))
+                   || currentChar == '_' || currentChar == '@'
+                   || currentChar == '$' || currentChar == '#'
+                   || currentChar == '&')
+            {
+                CheckEOF(currentChar);
+
                 Next();
                 length++;
+                c = (char)currentChar;
             }
+            length--;
 
-            if (currentChar == -1)
+            if (IsMatch('['))
             {
-                throw new MonkeyspeakException("Unexpected end of file", sourcePos);
-            }
-
-            #region Variable Table Handling
-
-            if (LookAhead(1) == '[')
-            {
-                while (((currentChar >= 'a' && currentChar <= 'z')
-                        || (currentChar >= 'A' && currentChar <= 'Z')
-                        || (currentChar >= '0' && currentChar <= '9')))
+                Next();
+                length++;
+                while ((currentChar >= 'a' && currentChar <= 'z')
+                       || (currentChar >= 'A' && currentChar <= 'Z')
+                       || (currentChar >= '0' && currentChar <= '9')
+                       || currentChar == '_' || currentChar == '@'
+                       || currentChar == '$' || currentChar == '#'
+                       || currentChar == '&')
                 {
-                    if (currentChar == -1)
-                    {
-                        throw new MonkeyspeakException("Unexpected end of file", CurrentSourcePosition);
-                    }
+                    CheckEOF(currentChar);
+
                     Next();
                     length++;
                     if (currentChar == ']')
                     {
                         break;
                     }
-                    if (!((currentChar >= 'a' && currentChar <= 'z')
-                        || (currentChar >= 'A' && currentChar <= 'Z')
-                        || (currentChar >= '0' && currentChar <= '9')))
-                    {
-                        throw new MonkeyspeakException($"Invalid character in variable list index delcaration '{currentChar}'", CurrentSourcePosition);
-                    }
                 }
+                CheckMatch(']');
+                length++;
+                return new Token(TokenType.TABLE, startPos, length, CurrentSourcePosition);
             }
 
-            #endregion Variable Table Handling
+            if (currentChar == -1)
+            {
+                throw new MonkeyspeakException("Unexpected end of file", sourcePos);
+            }
 
             return new Token(TokenType.VARIABLE, startPos, length, CurrentSourcePosition);
         }
@@ -463,20 +532,15 @@ namespace Monkeyspeak
             CheckMatch(Engine.Options.BlockCommentBeginSymbol);
 
             Next();
-            while (true)
+            while (LookAhead(1) != '*' && LookAhead(2) != '/')
             {
                 if (currentChar == -1)
                 {
                     throw new MonkeyspeakException("Unexpected end of file", CurrentSourcePosition);
                 }
-                if (LookAhead(1) == '*' && LookAhead(2) == '/')
-                {
-                    break;
-                }
                 Next();
             }
             CheckMatch(Engine.Options.BlockCommentEndSymbol);
-            Next();
         }
 
         private void SkipLineComment()
@@ -497,5 +561,7 @@ namespace Monkeyspeak
         }
 
         public override SourcePosition CurrentSourcePosition => new SourcePosition(lineNo, columnNo, rawPos);
+
+        public int CurrentCharacter { get => currentChar; set => currentChar = value; }
     }
 }

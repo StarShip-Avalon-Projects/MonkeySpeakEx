@@ -5,7 +5,7 @@ using System.Collections.Concurrent;
 
 #endregion Usings
 
-namespace Shared.Core.Logging
+namespace Monkeyspeak.Logging
 {
     public enum Level : byte
     {

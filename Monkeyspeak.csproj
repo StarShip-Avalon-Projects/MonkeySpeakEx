@@ -107,12 +107,20 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ConstantVariable.cs" />
+    <Compile Include="Extensions\ArrayExtensions.cs" />
     <Compile Include="Extensions\ObjectExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
+    <Compile Include="Extensions\VariablesExtension.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="lexical\Expressions\NullExpression.cs" />
+    <Compile Include="lexical\Expressions\VariableTableExpression.cs" />
     <Compile Include="lexical\TokenDefinitions\ITokenDefinition.cs" />
+    <Compile Include="lexical\TokenDefinitions\VariableDefinition.cs" />
     <Compile Include="Libraries\Attributes.cs" />
+    <Compile Include="Libraries\AutoIncrementBaseLibrary.cs" />
+    <Compile Include="Libraries\BaseLibrary.cs" />
+    <Compile Include="Libraries\Loops.cs" />
+    <Compile Include="Libraries\Tables.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -129,7 +137,6 @@
     <Compile Include="lexical\Expressions\StringExpression.cs" />
     <Compile Include="lexical\Expressions\VariableExpression.cs" />
     <Compile Include="lexical\SourcePosition.cs" />
-    <Compile Include="Libraries\AbstractBaseLibrary.cs" />
     <Compile Include="lexical\AbstractLexer.cs" />
     <Compile Include="lexical\Lexer.cs" />
     <Compile Include="lexical\Parser.cs" />
@@ -144,7 +151,7 @@
     <Compile Include="Options.cs" />
     <Compile Include="Page.cs" />
     <Compile Include="lexical\Token.cs" />
-    <Compile Include="ReflectionHelper.cs" />
+    <Compile Include="Utils\ReflectionHelper.cs" />
     <Compile Include="Trigger.cs" />
     <Compile Include="TriggerBlock.cs" />
     <Compile Include="TriggerHandlerAttribute.cs" />
@@ -204,10 +211,12 @@ set path="C:\Program Files\WinRAR\";%25path%25
 
 REM Create the BIN rar
 cd $(TargetDir)
+del "$(TargetDir)$(TargetName)_$(ConfigurationName)_$(PlatformName)_Binaries.rar"
 winrar a -r -x*.tmp -x*.rar "$(TargetDir)$(TargetName)_$(ConfigurationName)_$(PlatformName)_Binaries.rar" *.*
 
 REM Create the SRC rar
 cd $(ProjectDir)
+del "$(TargetDir)$(TargetName)_$(PlatformName)_Src.rar"
 winrar a -r -x*\.svn\* -x*\bin\* -x*\obj\* -x*.rar "$(TargetDir)$(TargetName)_$(PlatformName)_Src.rar" *.*
 </PostBuildEvent>
   </PropertyGroup>

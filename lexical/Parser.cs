@@ -1,6 +1,6 @@
 ﻿using Monkeyspeak.lexical;
 using Monkeyspeak.lexical.Expressions;
-using Shared.Core.Logging;
+using Monkeyspeak.Logging;
 using System;
 using System.Collections.Generic;
 
@@ -35,19 +35,18 @@ namespace Monkeyspeak
         {
             var block = new TriggerBlock(10);
             Trigger currentTrigger = Trigger.Undefined, prevTrigger = Trigger.Undefined;
-            Token token = default(Token);
+            Token token = Token.None, prevToken = Token.None, nextToken = Token.None;
             Expression expr = null;
             foreach (var t in lexer.Read())
             {
                 token = t;
-                if (token == default(Token)) continue;
+                if (token == Token.None) continue;
                 if (VisitToken != null)
                     token = VisitToken(ref token);
 
                 var sourcePos = token.Position;
 
                 string value = token.GetValue(lexer);
-                if (Engine.Options.Debug && !string.IsNullOrWhiteSpace(value)) Logger.Debug<Parser>(value);
 
                 switch (token.Type)
                 {
@@ -62,11 +61,12 @@ namespace Monkeyspeak
                                     prevTrigger = Trigger.Undefined;
                                     block = new TriggerBlock(10);
                                 }
-                            }
-                            if (currentTrigger != Trigger.Undefined && expr != null)
-                            {
-                                currentTrigger.contents.Add(expr);
-                                expr = null;
+
+                                if (expr != null)
+                                {
+                                    currentTrigger.contents.Add(expr);
+                                    expr = null;
+                                }
                             }
                             block.Add(currentTrigger);
                             prevTrigger = currentTrigger;
@@ -81,6 +81,11 @@ namespace Monkeyspeak
                         expr = new VariableExpression(ref sourcePos, value);
                         break;
 
+                    case TokenType.TABLE:
+                        if (currentTrigger == Trigger.Undefined) throw new MonkeyspeakException($"Trigger was null. \nPrevious trigger = {prevTrigger}\nToken = {token}");
+                        expr = new VariableTableExpression(ref sourcePos, value.Substring(0, value.IndexOf('[')), value.Substring(value.IndexOf('[') + 1).TrimEnd(']'));
+                        break;
+
                     case TokenType.STRING_LITERAL:
                         if (value.Length > Engine.Options.StringLengthLimit) throw new Exception("String length limit exceeded.");
                         if (currentTrigger == Trigger.Undefined) throw new MonkeyspeakException($"Trigger was null. \nPrevious trigger = {prevTrigger}\nToken = {token}");
@@ -88,7 +93,9 @@ namespace Monkeyspeak
                         break;
 
                     case TokenType.NUMBER:
-                        double val = double.Parse(value, System.Globalization.NumberStyles.AllowDecimalPoint);
+                        double val = double.Parse(value, System.Globalization.NumberStyles.AllowDecimalPoint
+                            | System.Globalization.NumberStyles.AllowLeadingSign
+                            | System.Globalization.NumberStyles.AllowExponent);
                         if (currentTrigger == Trigger.Undefined) throw new MonkeyspeakException($"Trigger was null. \nPrevious trigger = {prevTrigger}\nToken = {token}");
                         expr = new NumberExpression(ref sourcePos, val);
                         break;

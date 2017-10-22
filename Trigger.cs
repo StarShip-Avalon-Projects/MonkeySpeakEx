@@ -30,7 +30,12 @@ namespace Monkeyspeak
         /// A trigger defined with a 5
         /// <para>Example: (5:1) print {Hello World} to the console. </para>
         /// </summary>
-        Effect = 5
+        Effect = 5,
+
+        /// <summary>
+        /// A trigger defined with a 6
+        /// <para>Example: (6:0) while variable % is #, </para>
+        Flow = 6
     }
 
     [StructLayout(LayoutKind.Auto)]
@@ -76,10 +81,10 @@ namespace Monkeyspeak
             internal set { id = value; }
         }
 
-        internal List<IExpression> Contents
+        public IReadOnlyCollection<IExpression> Contents
         {
-            get { return contents; }
-            set { contents = value; }
+            get { return contents.AsReadOnly(); }
+            set { contents.AddRange(value); }
         }
 
         internal Trigger Clone()
@@ -124,10 +129,10 @@ namespace Monkeyspeak
         public override bool Equals(object obj)
         {
             if (obj == null) return false;
-            if (obj is Trigger other)
+            if (obj is Trigger)
             {
-                other = (Trigger)obj;
-                return other != Trigger.Undefined && other.category == category && other.id == id;
+                var other = (Trigger)obj;
+                return other != Undefined && other.category == category && other.id == id;
             }
             return false;
         }
@@ -144,10 +149,10 @@ namespace Monkeyspeak
         }
 
         /// <summary>
-        /// Returns a <see cref="System.String" /> that represents this instance.
+        /// Returns a <see cref="string" /> that represents this instance.
         /// </summary>
         /// <returns>
-        /// A <see cref="System.String" /> that represents this instance.
+        /// A <see cref="string" /> that represents this instance.
         /// </returns>
         public override string ToString() => $"({(int)category}:{id})";
     }

@@ -1,10 +1,20 @@
-﻿namespace Monkeyspeak.Libraries
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Monkeyspeak.Libraries
 {
     public class Attributes : BaseLibrary
     {
         public static readonly Attributes Instance = new Attributes();
 
-        public Attributes()
+        private Attributes()
+        {
+        }
+
+        public override void Initialize()
         {
         }
 

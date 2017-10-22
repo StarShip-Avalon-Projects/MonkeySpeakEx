@@ -70,6 +70,11 @@ namespace Monkeyspeak.lexical.Expressions
             return Value.Equals(other.Value);
         }
 
+        public override string ToString()
+        {
+            return $"{Value} at {Position}";
+        }
+
         #endregion Object Overrides
     }
 }

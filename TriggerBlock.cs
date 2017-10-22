@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace Monkeyspeak
 {
@@ -37,16 +38,18 @@ namespace Monkeyspeak
         /// <param name="id"></param>
         /// <param name="startIndex"></param>
         /// <returns>Index of trigger or -1 if not found</returns>
-        public int IndexOfTrigger(TriggerCategory cat, int id, int startIndex = 0)
+        public int IndexOfTrigger(TriggerCategory cat, int id = -1, int startIndex = 0)
         {
-            for (int i = startIndex; i <= Count - 1; i++)
-            {
-                Trigger trigger = base[i];
-                if (trigger.Category == cat && trigger.Id == id)
+            if (startIndex < Count)
+                for (int i = startIndex; i <= Count - 1; i++)
                 {
-                    return i;
+                    Trigger trigger = base[i];
+                    if (trigger.Category == cat)
+                    {
+                        if (id == -1 || trigger.Id == id)
+                            return i;
+                    }
                 }
-            }
             return -1;
         }
 
@@ -58,17 +61,52 @@ namespace Monkeyspeak
         /// <returns>
         ///   <c>true</c> if the block contains the trigger; otherwise, <c>false</c>.
         /// </returns>
-        public bool ContainsTrigger(TriggerCategory cat, int id)
+        public bool ContainsTrigger(TriggerCategory cat, int id = -1)
         {
             for (int i = 0; i <= Count - 1; i++)
             {
                 Trigger trigger = base[i];
-                if (trigger.Category == cat && trigger.Id == id)
+                if (trigger.Category == cat)
                 {
-                    return true;
+                    if (id == -1 || trigger.Id == id)
+                        return true;
                 }
             }
             return false;
+        }
+
+        /// <summary>
+        /// Creates a sub block.
+        /// </summary>
+        /// <param name="index">The index.</param>
+        /// <param name="count">The count.  -1 will go to the end of the collection</param>
+        /// <returns></returns>
+        public TriggerBlock GetSubBlock(int index, int count = -1)
+        {
+            if (index < 0) index = 0;
+            return new TriggerBlock(GetRange(index, count < 0 ? Count - index : count - index));
+        }
+
+        public string ToString(char separator)
+        {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i <= Count - 1; i++)
+            {
+                sb.Append(this[i]);
+                if (i != Count) sb.Append(separator);
+            }
+            return sb.ToString();
+        }
+
+        /// <summary>
+        /// Returns a <see cref="System.String" /> that represents this instance.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="System.String" /> that represents this instance.
+        /// </returns>
+        public override string ToString()
+        {
+            return base.ToString();
         }
     }
 }

@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 #endregion Usings
 
-namespace Shared.Core.Logging
+namespace Monkeyspeak.Logging
 {
     public class DebuggerLogOutput : ConsoleLogOutput
     {
