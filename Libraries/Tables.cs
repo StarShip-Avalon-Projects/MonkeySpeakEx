@@ -11,9 +11,9 @@ namespace Monkeyspeak.Libraries
     {
         public override int BaseId => 250;
 
-        public Tables() : base()
-        {
-        }
+        //public Tables() : base()
+        //{
+        //}
 
         public override void Initialize()
         {

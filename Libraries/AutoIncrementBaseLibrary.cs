@@ -12,9 +12,9 @@ namespace Monkeyspeak.Libraries
     /// <seealso cref="Monkeyspeak.Libraries.BaseLibrary" />
     public abstract class AutoIncrementBaseLibrary : BaseLibrary
     {
-        public AutoIncrementBaseLibrary() : base()
-        {
-        }
+        //public AutoIncrementBaseLibrary() : base()
+        //{
+        //}
 
         private int triggerCauseIdCounter = 0, triggerConditionIdCounter = 0, triggerEffectIdCounter = 0, triggerFlowIdCounter = 0;
 
