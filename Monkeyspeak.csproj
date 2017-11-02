@@ -5,12 +5,12 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{51B6668D-9904-4FA4-8FB8-6A1395B3104D}</ProjectGuid>
+    <ProjectGuid>{925781E6-8B75-471B-887F-616495BBBFDD}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Monkeyspeak</RootNamespace>
     <AssemblyName>Monkeyspeak</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
@@ -202,7 +202,8 @@
   <Target Name="AfterBuild">
   </Target>
   <PropertyGroup>
-    <PostBuildEvent>REM DEL old files
+    <PostBuildEvent Condition="'$(OS)' == 'Windows_NT'">REM DEL old files
+cd $(TargetDir)
 del "$(TargetDir)$(TargetName)_$(ConfigurationName)_$(PlatformName)_Src.rar"
 del "$(TargetDir)$(TargetName)_$(ConfigurationName)_$(PlatformName)_Binaries.rar"
 
@@ -210,19 +211,23 @@ REM set path to WinRAR for rar command
 set path="C:\Program Files\WinRAR\";%25path%25
 
 REM Create the BIN rar
-cd $(TargetDir)
-del "$(TargetDir)$(TargetName)_$(ConfigurationName)_$(PlatformName)_Binaries.rar"
-winrar a -r -x*.tmp -x*.rar "$(TargetDir)$(TargetName)_$(ConfigurationName)_$(PlatformName)_Binaries.rar" *.*
+rar a -r -x*.tmp -x*.rar -x*.tt "$(TargetDir)$(TargetName)_$(ConfigurationName)_$(PlatformName)_Binaries.rar" *.*
 
 REM Create the SRC rar
 cd $(ProjectDir)
-del "$(TargetDir)$(TargetName)_$(PlatformName)_Src.rar"
-winrar a -r -x*\.svn\* -x*\bin\* -x*\obj\* -x*.rar "$(TargetDir)$(TargetName)_$(PlatformName)_Src.rar" *.*
+rar a -r -x*\.svn\* -x*\bin\* -x*\obj\* -x*.rar -x*.tt  "$(TargetDir)$(TargetName)_$(PlatformName)_Src.rar" *.*
+	</PostBuildEvent>
+    <PostBuildEvent Condition="'$(OS)' != 'Windows_NT'">
+cd $(TargetDir)
+rm -rf "$(TargetDir)$(TargetName)_$(ConfigurationName)_$(PlatformName)_Binaries.rar"
+
+cd $(TargetDir)
+rar a -r -x*.tmp -x*.rar -x*.tt "$(TargetDir)$(TargetName)_$(ConfigurationName)_$(PlatformName)_Binaries.rar" *.*
 </PostBuildEvent>
   </PropertyGroup>
-  <ProjectExtensions>
+<!--   <ProjectExtensions>
     <VisualStudio>
       <UserProperties BuildVersion_BuildVersioningStyle="None.None.Increment.MonthAndDayStamp" />
     </VisualStudio>
-  </ProjectExtensions>
+  </ProjectExtensions> -->
 </Project>
