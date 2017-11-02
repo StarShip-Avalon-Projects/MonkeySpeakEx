@@ -16,6 +16,10 @@ namespace Monkeyspeak.Libraries
     {
         public override int BaseId => 450;
 
+        public Loops() : base()
+        {
+        }
+
         public override void Initialize()
         {
             Add(TriggerCategory.Flow, WhileVarIsNotValue,

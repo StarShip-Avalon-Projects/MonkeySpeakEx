@@ -5,12 +5,12 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{925781E6-8B75-471B-887F-616495BBBFDD}</ProjectGuid>
+    <ProjectGuid>{51B6668D-9904-4FA4-8FB8-6A1395B3104D}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Monkeyspeak</RootNamespace>
     <AssemblyName>Monkeyspeak</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
@@ -225,7 +225,7 @@ cd $(TargetDir)
 rar a -r -x*.tmp -x*.rar -x*.tt "$(TargetDir)$(TargetName)_$(ConfigurationName)_$(PlatformName)_Binaries.rar" *.*
 </PostBuildEvent>
   </PropertyGroup>
-<!--   <ProjectExtensions>
+  <!--   <ProjectExtensions>
     <VisualStudio>
       <UserProperties BuildVersion_BuildVersioningStyle="None.None.Increment.MonthAndDayStamp" />
     </VisualStudio>
