@@ -5,7 +5,6 @@ using Monkeyspeak.Logging;
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using System.Linq;
 
 namespace Monkeyspeak
 {
