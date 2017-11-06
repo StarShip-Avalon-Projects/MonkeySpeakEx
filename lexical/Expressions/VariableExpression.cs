@@ -6,9 +6,8 @@
     /// </summary>
     public class VariableExpression : Expression<string>
     {
-        public VariableExpression(ref SourcePosition pos, string varRef) : base(ref pos)
+        public VariableExpression(ref SourcePosition pos, string varRef) : base(ref pos, varRef)
         {
-            Value = varRef;
         }
     }
 }

@@ -12,6 +12,8 @@
 
         public static NullExpression Instance => instance;
 
-        protected NullExpression(ref SourcePosition pos) : base(ref pos) => Value = null;
+        protected NullExpression(ref SourcePosition pos) : base(ref pos, null)
+        {
+        }
     }
 }

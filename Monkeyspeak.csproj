@@ -5,12 +5,12 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{51B6668D-9904-4FA4-8FB8-6A1395B3104D}</ProjectGuid>
+    <ProjectGuid>{925781E6-8B75-471B-887F-616495BBBFDD}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Monkeyspeak</RootNamespace>
     <AssemblyName>Monkeyspeak</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
@@ -116,7 +116,6 @@
     <Compile Include="lexical\Expressions\VariableTableExpression.cs" />
     <Compile Include="lexical\TokenDefinitions\ITokenDefinition.cs" />
     <Compile Include="lexical\TokenDefinitions\VariableDefinition.cs" />
-    <Compile Include="Libraries\Attributes.cs" />
     <Compile Include="Libraries\AutoIncrementBaseLibrary.cs" />
     <Compile Include="Libraries\BaseLibrary.cs" />
     <Compile Include="Libraries\Loops.cs" />
@@ -154,7 +153,6 @@
     <Compile Include="Utils\ReflectionHelper.cs" />
     <Compile Include="Trigger.cs" />
     <Compile Include="TriggerBlock.cs" />
-    <Compile Include="TriggerHandlerAttribute.cs" />
     <Compile Include="TriggerReader.cs" />
     <Compile Include="Utils\TriggerIntegrityUpdater.cs" />
     <Compile Include="Variable.cs" />

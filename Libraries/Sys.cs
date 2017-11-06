@@ -1,11 +1,13 @@
 ﻿using Monkeyspeak.Extensions;
+using Monkeyspeak.Logging;
 using System;
+using System.Linq;
 
 namespace Monkeyspeak.Libraries
 {
     public class Sys : BaseLibrary
     {
-        public override void Initialize()
+        public override void Initialize(params object[] args)
         {
             // (1:100) and variable % is defined,
             Add(new Trigger(TriggerCategory.Condition, 100), IsVariableDefined,
@@ -48,8 +50,8 @@ namespace Monkeyspeak.Libraries
                 "set variable % to #.");
 
             // (5:102) print {...} to the console.
-            Add(new Trigger(TriggerCategory.Effect, 102), PrintToConsole,
-                "print {...} to the console.");
+            Add(new Trigger(TriggerCategory.Effect, 102), PrintToLog,
+                "print {...} to the log.");
 
             // (5:103) get the environment variable named {...} and put it into #,
             Add(new Trigger(TriggerCategory.Effect, 103), GetEnvVariable,
@@ -66,10 +68,10 @@ namespace Monkeyspeak.Libraries
                 "load library from file {...}. (example Monkeyspeak.dll)");
 
             Add(new Trigger(TriggerCategory.Cause, 100), JobCalled,
-                "when job # is called,");
+                "when job # is called put arguments into table % (optional),");
 
             Add(new Trigger(TriggerCategory.Effect, 115), CallJob,
-                "call job #.");
+                "call job # with (add strings, variables, numbers here) arguments.");
         }
 
         private bool CallJob(TriggerReader reader)
@@ -84,8 +86,11 @@ namespace Monkeyspeak.Libraries
                 jobNumber = reader.ReadNumber();
             }
 
+            var args = reader.ReadValues().ToArray();
             if (jobNumber > 0)
-                reader.Page.Execute(100, jobNumber);
+                if (args == null || args.Length == 0)
+                    reader.Page.Execute(100, jobNumber);
+                else reader.Page.Execute(100, Enumerable.Concat(new object[] { jobNumber }, args).ToArray());
             return true;
         }
 
@@ -102,6 +107,13 @@ namespace Monkeyspeak.Libraries
             }
 
             double requiredJobNumber = reader.GetParameter<double>(0);
+
+            if (reader.TryReadVariableTable(out VariableTable table, true))
+            {
+                object[] args = reader.Parameters.Skip(1).ToArray();
+                for (int i = 0; i <= args.Length - 1; i++)
+                    table.Add(i.ToString(), args[i]);
+            }
 
             bool result = false;
             if (jobNumber > 0 && jobNumber == requiredJobNumber)
@@ -172,10 +184,10 @@ namespace Monkeyspeak.Libraries
             return true;
         }
 
-        private bool PrintToConsole(TriggerReader reader)
+        private bool PrintToLog(TriggerReader reader)
         {
             string output = reader.ReadString();
-            Console.WriteLine(output);
+            Logger.Info<Sys>(output);
             return true;
         }
 

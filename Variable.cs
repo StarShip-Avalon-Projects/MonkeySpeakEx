@@ -89,11 +89,14 @@ namespace Monkeyspeak
             {
                 // removed Value = as it interfered with page.setVariable - Gerolkae
                 if (!CheckType(value)) throw new TypeNotSupportedException(value.GetType().Name +
-                " is not a supported type. Expecting string or double.");
+                " is not a supported type. Expecting string, double or variable.");
 
                 if (value != null && IsConstant)
                     throw new VariableIsConstantException($"Attempt to assign a value to constant '{Name}'");
-                this.value = value;
+                if (value is IVariable)
+                    this.value = (value as IVariable).Value;
+                else
+                    this.value = value;
             }
         }
 
@@ -117,7 +120,8 @@ namespace Monkeyspeak
             if (_value == null) return true;
 
             return _value is string ||
-                   _value is double;
+                   _value is double ||
+                   _value is IVariable;
         }
 
         /// <summary>
@@ -200,6 +204,8 @@ namespace Monkeyspeak
     [CLSCompliant(false)]
     public sealed class VariableTable : IVariable
     {
+        public static VariableTable Empty = new VariableTable("null", true, 0);
+
         private static int limit = 100;
         public static int Limit { get => limit; set => limit = value; }
 
@@ -226,7 +232,18 @@ namespace Monkeyspeak
         public object Value
         {
             get { return values.LastOrDefault(); }
-            set { this[ActiveIndexer] = value; }
+            set
+            {
+                if (!CheckType(value)) throw new TypeNotSupportedException(value.GetType().Name +
+                " is not a supported type. Expecting string, double or variable.");
+
+                if (value != null && IsConstant)
+                    throw new VariableIsConstantException($"Attempt to assign a value to constant '{Name}'");
+                if (value is IVariable)
+                    this[ActiveIndexer] = (value as IVariable).Value;
+                else
+                    this[ActiveIndexer] = value;
+            }
         }
 
         public object this[string key]
@@ -239,8 +256,17 @@ namespace Monkeyspeak
             }
             set
             {
-                if (!CheckType(value) || values.Count + 1 > Limit) return;
-                values[key] = value;
+                if (values.Count + 1 > Limit) return;
+
+                if (!CheckType(value)) throw new TypeNotSupportedException(value.GetType().Name +
+                " is not a supported type. Expecting string, double or variable.");
+
+                if (value != null && IsConstant)
+                    throw new VariableIsConstantException($"Attempt to assign a value to constant '{Name}'");
+                if (value is IVariable)
+                    values[key] = (value as IVariable).Value;
+                else
+                    values[key] = value;
             }
         }
 
@@ -271,8 +297,17 @@ namespace Monkeyspeak
 
         public void Add(string key, object value)
         {
-            if (CheckType(value) || values.Count > Limit) return;
-            values[key] = value;
+            if (values.Count + 1 > Limit) return;
+
+            if (!CheckType(value)) throw new TypeNotSupportedException(value.GetType().Name +
+            " is not a supported type. Expecting string, double or variable.");
+
+            if (value != null && IsConstant)
+                throw new VariableIsConstantException($"Attempt to assign a value to constant '{Name}'");
+            if (value is IVariable)
+                values[key] = (value as IVariable).Value;
+            else
+                values[key] = value;
         }
 
         public bool Contains(string index)
@@ -297,7 +332,8 @@ namespace Monkeyspeak
             if (_value == null) return true;
 
             return _value is string ||
-                   _value is double;
+                   _value is double ||
+                   _value is IVariable;
         }
 
         public bool Equals(IVariable other)
@@ -333,6 +369,14 @@ namespace Monkeyspeak
         public void ResetIndex()
         {
             CurrentElementIndex = 0;
+        }
+
+        /// <summary>
+        /// Clears all values in this table.
+        /// </summary>
+        public void Clear()
+        {
+            values.Clear();
         }
     }
 }

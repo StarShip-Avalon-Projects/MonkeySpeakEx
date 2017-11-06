@@ -18,7 +18,7 @@ namespace Monkeyspeak
         WORD, LITERAL,
 
         // custom
-        TRIGGER, VARIABLE, TABLE, REFERENCE, STRING_LITERAL, NUMBER, NONE
+        TRIGGER, VARIABLE, TABLE, REFERENCE, STRING_LITERAL, NUMBER, PREPROCESSOR, NONE
     }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
