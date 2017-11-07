@@ -42,9 +42,9 @@ namespace Monkeyspeak.Logging
             catch
             {
             }
-
-            Debug.Write(BuildMessage(logMsg));
-
+            if (Debugger.IsAttached)
+                Debug.WriteLine(BuildMessage(logMsg));
+            Console.WriteLine(BuildMessage(logMsg));
             try
             {
                 Console.ResetColor();
@@ -73,7 +73,8 @@ namespace Monkeyspeak.Logging
                     {
                         if (!Debugger.IsAttached)
                             Console.WriteLine(msg);
-                        else Debug.WriteLine(msg);
+                        else
+                            Debug.WriteLine(msg);
                     }
                 }
             });

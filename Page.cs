@@ -1043,6 +1043,11 @@ namespace Monkeyspeak
             }, cancellationToken);
         }
 
+        public async Task ExecuteAsync(int id = 0, params object[] args)
+        {
+            await Task.Run(() => ExecuteAsync(TriggerCategory.Cause, id, args));
+        }
+
         /// <summary>
         /// Executes the specified Cause asynchronously.
         /// </summary>
