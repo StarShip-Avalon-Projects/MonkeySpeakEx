@@ -1,5 +1,6 @@
 ﻿using Monkeyspeak.lexical;
 using Monkeyspeak.lexical.Expressions;
+using Monkeyspeak.Logging;
 using System;
 using System.Collections.Generic;
 
@@ -101,6 +102,9 @@ namespace Monkeyspeak
 
                     case TokenType.COMMENT:
                         // we don't care about comments
+                        break;
+
+                    case TokenType.PREPROCESSOR:
                         break;
 
                     case TokenType.END_OF_FILE:

@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Timers;
 
 namespace Monkeyspeak.Libraries
@@ -88,7 +89,7 @@ namespace Monkeyspeak.Libraries
     }
 
     // Changed from Internal to public in order to expose DestroyTimers() - Gerolkae
-    public class Timers : BaseLibrary
+    public class Timers : AutoIncrementBaseLibrary
     {
         private static DateTime startTime = DateTime.Now;
         internal static double CurrentTimer;
@@ -97,6 +98,8 @@ namespace Monkeyspeak.Libraries
         private static readonly List<TimerTask> timers = new List<TimerTask>();
 
         private uint timersLimit;
+
+        public override int BaseId => 300;
 
         public Timers() : this(10)
         {
@@ -159,6 +162,9 @@ namespace Monkeyspeak.Libraries
 
             Add(TriggerCategory.Effect, 310, GetCurrentYearIntoVar,
                 "get the current year and put it into variable %.");
+
+            Add(TriggerCategory.Effect, 311, StartTimer,
+                "start timer #.");
         }
 
         private bool GetCurrentYearIntoVar(TriggerReader reader)
@@ -282,22 +288,24 @@ namespace Monkeyspeak.Libraries
             return true;
         }
 
+        private bool StartTimer(TriggerReader reader)
+        {
+            if (TryGetTimerFrom(reader, out TimerTask timer))
+            {
+                timer.Start();
+                return true;
+            }
+            return false;
+        }
+
         private bool StopTimer(TriggerReader reader)
         {
-            double num = reader.ReadNumber();
-            try
+            if (TryGetTimerFrom(reader, out TimerTask timer))
             {
-                lock (lck)
-                {
-                    TimerTask task = timers.FirstOrDefault(timer => timer.Id == num);
-                    task.Dispose();
-                }
+                timer.Stop();
+                return true;
             }
-            catch (Exception x)
-            {
-                Console.WriteLine(x.Message);
-            }
-            return true;
+            return false;
         }
 
         private bool TryGetTimerFrom(TriggerReader reader, out TimerTask timerTask)
@@ -306,17 +314,8 @@ namespace Monkeyspeak.Libraries
 
             if (num > 0)
             {
-                if (!timers.Any(task => task.Id == num))
-                {
-                    // Don't add a timer to the Dictionary if it don't
-                    // exist. Just return a blank timer
-                    // - Gerolkae
-                    // no, must be null because it is a TryGetValue kind of method and thems the rules - Squizzle
-                    timerTask = null;
-                    return false;
-                }
                 timerTask = timers.FirstOrDefault(task => task.Id == num);
-                return true;
+                return timerTask != null;
             }
             timerTask = null;
             return false;
@@ -326,7 +325,7 @@ namespace Monkeyspeak.Libraries
         {
             if (TryGetTimerFrom(reader, out TimerTask timerTask))
             {
-                return timerTask.Id == reader.GetParameter<double>(0);
+                return timerTask.Id == reader.GetParameter<double>();
             }
             return false;
         }

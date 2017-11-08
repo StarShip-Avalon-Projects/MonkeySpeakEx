@@ -4,6 +4,7 @@ using Monkeyspeak.Libraries;
 using Monkeyspeak.Utils;
 using Monkeyspeak.Logging;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -11,6 +12,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Text;
 
 namespace Monkeyspeak
 {
@@ -815,7 +817,17 @@ namespace Monkeyspeak
                             break;
 
                         case TriggerCategory.Effect:
-                            found = true;
+                            for (int i = index + 1; i <= triggerBlock.Count - 1; i++)
+                            {
+                                Trigger possibleFlow = triggerBlock[i];
+                                if (possibleFlow.Category == TriggerCategory.Effect)
+                                {
+                                    index = i - 1; // set the current index of the outer loop
+                                    found = true;
+                                    break;
+                                }
+                            }
+                            //found = true;
                             break;
                     }
                     if (!found) index = triggerBlock.Count;
@@ -843,17 +855,17 @@ namespace Monkeyspeak
                             var indexOfOtherFlow = triggerBlock.IndexOfTrigger(TriggerCategory.Flow, startIndex: index + 1);
                             var subBlock = triggerBlock.GetSubBlock(index + 1, indexOfOtherFlow);
                             var subReader = new TriggerReader(this, subBlock) { Parameters = reader.Parameters };
-                            int j = 0;
+                            int j = index;
                             for (int i = 0; i <= subBlock.Count - 1; i++)
                             {
                                 ExecuteTrigger(subBlock, ref i, subReader);
-                                j = i;
+                                j += i;
                                 if (i == -1)
                                     break;
                             }
                             //ExecuteBlock(subBlock, args: reader.Parameters);
                             if (j == -1)
-                                index += subBlock.Count;
+                                index = j + 1;
                             else index -= 1;
                             break;
                     }
@@ -1043,11 +1055,6 @@ namespace Monkeyspeak
             }, cancellationToken);
         }
 
-        public async Task ExecuteAsync(int id = 0, params object[] args)
-        {
-            await Task.Run(() => ExecuteAsync(TriggerCategory.Cause, id, args));
-        }
-
         /// <summary>
         /// Executes the specified Cause asynchronously.
         /// </summary>
@@ -1124,6 +1131,30 @@ namespace Monkeyspeak
                             {
                                 ExecuteBlock(triggerBlocks[j], index, args);
                             }
+                        }
+                    }
+                }
+            });
+        }
+
+        /// <summary>
+        /// Executes the specified Cause asynchronously.
+        /// </summary>
+        /// <param name="args"></param>
+        /// <param name="id">The id</param>
+        /// <returns></returns>
+        public async Task ExecuteAsync(int id, params object[] args)
+        {
+            await Task.Run(() =>
+            {
+                lock (syncObj)
+                {
+                    for (int j = 0; j <= triggerBlocks.Count - 1; j++)
+                    {
+                        int index;
+                        if ((index = triggerBlocks[j].IndexOfTrigger(TriggerCategory.Cause, id)) != -1)
+                        {
+                            ExecuteBlock(triggerBlocks[j], index, args);
                         }
                     }
                 }

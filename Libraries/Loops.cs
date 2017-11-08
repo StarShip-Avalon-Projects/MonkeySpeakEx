@@ -1,5 +1,10 @@
 ﻿using Monkeyspeak.Extensions;
+using Monkeyspeak.Logging;
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Monkeyspeak.Libraries
 {
@@ -44,6 +49,7 @@ namespace Monkeyspeak.Libraries
                 canContinue = false;
                 reader.Page.RemoveVariable(counter);
             }
+            canContinue &= reader.CurrentBlock.ContainsTrigger(TriggerCategory.Flow, index: reader.CurrentBlock.IndexOfTrigger(TriggerCategory.Flow));
             return canContinue;
         }
 
