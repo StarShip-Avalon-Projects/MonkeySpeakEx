@@ -971,6 +971,26 @@
             The identifier.
             </value>
         </member>
+        <member name="M:Monkeyspeak.Trigger.op_Equality(Monkeyspeak.Trigger,Monkeyspeak.Trigger)">
+            <summary>
+            Implements the operator ==.
+            </summary>
+            <param name="a">a.</param>
+            <param name="b">The b.</param>
+            <returns>
+            The result of the operator.
+            </returns>
+        </member>
+        <member name="M:Monkeyspeak.Trigger.op_Inequality(Monkeyspeak.Trigger,Monkeyspeak.Trigger)">
+            <summary>
+            Implements the operator !=.
+            </summary>
+            <param name="a">a.</param>
+            <param name="b">The b.</param>
+            <returns>
+            The result of the operator.
+            </returns>
+        </member>
         <member name="M:Monkeyspeak.Trigger.Equals(Monkeyspeak.Trigger)">
             <summary>
             Indicates whether the current object is equal to another object of the same type.
@@ -1254,6 +1274,94 @@
              </summary>
              <param name="asConstant">Clone as Constant</param>
              <returns></returns>
+        </member>
+        <member name="M:Monkeyspeak.Variable.op_Equality(Monkeyspeak.Variable,Monkeyspeak.Variable)">
+            <summary>
+            Implements the operator ==.
+            </summary>
+            <param name="varA">The variable a.</param>
+            <param name="varB">The variable b.</param>
+            <returns>
+            The result of the operator.
+            </returns>
+        </member>
+        <member name="M:Monkeyspeak.Variable.op_Inequality(Monkeyspeak.Variable,Monkeyspeak.Variable)">
+            <summary>
+            Implements the operator !=.
+            </summary>
+            <param name="varA">The variable a.</param>
+            <param name="varB">The variable b.</param>
+            <returns>
+            The result of the operator.
+            </returns>
+        </member>
+        <member name="M:Monkeyspeak.Variable.op_Addition(Monkeyspeak.Variable,System.Double)">
+            <summary>
+            Implements the operator +.
+            </summary>
+            <param name="varA">The variable a.</param>
+            <param name="num">The number.</param>
+            <returns>
+            The result of the operator.
+            </returns>
+        </member>
+        <member name="M:Monkeyspeak.Variable.op_Subtraction(Monkeyspeak.Variable,System.Double)">
+            <summary>
+            Implements the operator -.
+            </summary>
+            <param name="varA">The variable a.</param>
+            <param name="num">The number.</param>
+            <returns>
+            The result of the operator.
+            </returns>
+        </member>
+        <member name="M:Monkeyspeak.Variable.op_Multiply(Monkeyspeak.Variable,System.Double)">
+            <summary>
+            Implements the operator *.
+            </summary>
+            <param name="varA">The variable a.</param>
+            <param name="num">The number.</param>
+            <returns>
+            The result of the operator.
+            </returns>
+        </member>
+        <member name="M:Monkeyspeak.Variable.op_Division(Monkeyspeak.Variable,System.Double)">
+            <summary>
+            Implements the operator /.
+            </summary>
+            <param name="varA">The variable a.</param>
+            <param name="num">The number.</param>
+            <returns>
+            The result of the operator.
+            </returns>
+        </member>
+        <member name="M:Monkeyspeak.Variable.op_Addition(Monkeyspeak.Variable,System.String)">
+            <summary>
+            Implements the operator +.
+            </summary>
+            <param name="varA">The variable a.</param>
+            <param name="str">The string.</param>
+            <returns>
+            The result of the operator.
+            </returns>
+        </member>
+        <member name="M:Monkeyspeak.Variable.op_Implicit(Monkeyspeak.Variable)~System.String">
+            <summary>
+            Performs an implicit conversion from <see cref="T:Monkeyspeak.Variable"/> to <see cref="T:System.String"/>.
+            </summary>
+            <param name="var">The variable.</param>
+            <returns>
+            The result of the conversion.
+            </returns>
+        </member>
+        <member name="M:Monkeyspeak.Variable.op_Implicit(Monkeyspeak.Variable)~System.Double">
+            <summary>
+            Performs an implicit conversion from <see cref="T:Monkeyspeak.Variable"/> to <see cref="T:System.Double"/>.
+            </summary>
+            <param name="var">The variable.</param>
+            <returns>
+            The result of the conversion.
+            </returns>
         </member>
         <member name="P:Monkeyspeak.VariableTable.CurrentElementIndex">
             <summary>
