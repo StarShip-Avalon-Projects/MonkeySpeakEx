@@ -1,0 +1,1284 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Monkeyspeak</name>
+    </assembly>
+    <members>
+        <member name="M:Monkeyspeak.ConstantVariable.ToString">
+            <summary>
+            Returns a const identifier if the variable is constant followed by name,
+            <para>otherwise just the name is returned.</para>
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Monkeyspeak.lexical.Expressions.VariableExpression">
+            <summary>
+            Expression pointing to a Variable reference
+            <para>This expression does not have the value of the variable because the variable would not have been assigned yet</para>
+            </summary>
+        </member>
+        <member name="P:Monkeyspeak.lexical.Compiler.Version">
+            <summary>
+            Compiler version number
+            </summary>
+        </member>
+        <member name="P:Monkeyspeak.lexical.SourcePosition.Line">
+            <summary>
+            Gets the line.
+            </summary>
+            <value>
+            The line.
+            </value>
+        </member>
+        <member name="P:Monkeyspeak.lexical.SourcePosition.Column">
+            <summary>
+            Gets the column.
+            </summary>
+            <value>
+            The column.
+            </value>
+        </member>
+        <member name="P:Monkeyspeak.lexical.SourcePosition.RawPosition">
+            <summary>
+            Gets the raw character position.  Useful for looking up the location from a string.Substring call.
+            </summary>
+            <value>
+            The character position.
+            </value>
+        </member>
+        <member name="T:Monkeyspeak.Libraries.AutoIncrementBaseLibrary">
+            <summary>
+            Automatically increments the Trigger Id for each Trigger category so that you don't have to deal with it!
+            </summary>
+            <seealso cref="T:Monkeyspeak.Libraries.BaseLibrary" />
+        </member>
+        <member name="M:Monkeyspeak.Libraries.AutoIncrementBaseLibrary.Add(Monkeyspeak.Trigger,Monkeyspeak.TriggerHandler,System.String)">
+            <summary>
+            Registers a Trigger to the TriggerHandler with optional description
+            </summary>
+            <param name="trigger"></param>
+            <param name="handler"></param>
+            <param name="description"></param>
+        </member>
+        <member name="M:Monkeyspeak.Libraries.AutoIncrementBaseLibrary.Add(Monkeyspeak.TriggerCategory,Monkeyspeak.TriggerHandler,System.String)">
+            <summary>
+            Registers a Trigger to the TriggerHandler with optional description
+            </summary>
+            <param name="cat"></param>
+            <param name="id"></param>
+            <param name="handler"></param>
+            <param name="description"></param>
+        </member>
+        <member name="M:Monkeyspeak.Libraries.BaseLibrary.#ctor">
+            <summary>
+            Base abstract class for Monkeyspeak Libraries
+            </summary>
+        </member>
+        <member name="M:Monkeyspeak.Libraries.BaseLibrary.Initialize(System.Object[])">
+            <summary>
+            Initializes this instance.  Add your trigger handlers here.
+            </summary>
+            <param name="args">Parametized argument of objects to use to pass runtime objects to a library at initialization</param>
+        </member>
+        <member name="M:Monkeyspeak.Libraries.BaseLibrary.RaiseError(System.String)">
+            <summary>
+            Raises a MonkeyspeakException
+            </summary>
+            <param name="reason">Reason for the error</param>
+        </member>
+        <member name="M:Monkeyspeak.Libraries.BaseLibrary.Add(Monkeyspeak.Trigger,Monkeyspeak.TriggerHandler,System.String)">
+            <summary>
+            Registers a Trigger to the TriggerHandler with optional description
+            </summary>
+            <param name="trigger"></param>
+            <param name="handler"></param>
+            <param name="description"></param>
+        </member>
+        <member name="M:Monkeyspeak.Libraries.BaseLibrary.Add(Monkeyspeak.TriggerCategory,System.Int32,Monkeyspeak.TriggerHandler,System.String)">
+            <summary>
+            Registers a Trigger to the TriggerHandler with optional description
+            </summary>
+            <param name="cat"></param>
+            <param name="id"></param>
+            <param name="handler"></param>
+            <param name="description"></param>
+        </member>
+        <member name="M:Monkeyspeak.Libraries.BaseLibrary.Unload(Monkeyspeak.Page)">
+            <summary>
+            Called when page is disposing or resetting.
+            </summary>
+            <param name="page">The page.</param>
+        </member>
+        <member name="M:Monkeyspeak.Libraries.BaseLibrary.ToString(Monkeyspeak.Trigger,System.Boolean,System.Boolean)">
+            <summary>
+            Builds a string representation of the descriptions of <paramref name="trigger"/>.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Monkeyspeak.Libraries.BaseLibrary.ToString(System.Boolean,System.Boolean)">
+            <summary>
+            Builds a string representation of the descriptions of each trigger.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Monkeyspeak.Libraries.BaseLibrary.ToString">
+            <summary>
+            Builds a string representation of the descriptions of each trigger.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Monkeyspeak.Libraries.BaseLibrary.GetLibrariesFromAssembly(System.Reflection.Assembly)">
+            <summary>
+            Loads trigger handlers from a assembly instance
+            </summary>
+            <param name="asm">The assembly instance</param>
+        </member>
+        <member name="T:Monkeyspeak.Libraries.Loops">
+             <summary>
+            
+             </summary>
+             <seealso cref="T:Monkeyspeak.Libraries.BaseLibrary" />
+        </member>
+        <member name="T:Monkeyspeak.Libraries.TimerTask">
+            <summary>
+            A TimerTask object contains Timer and Page Owner.  Timer is not started from a TimerTask constructor.
+            </summary>
+        </member>
+        <member name="M:Monkeyspeak.Libraries.TimerTask.#ctor(Monkeyspeak.Page,System.Double,System.Double,System.Double)">
+            <summary>
+            Timer task that executes (0:300) when it triggers
+            </summary>
+            <param name="owner"></param>
+            <param name="interval">Interval in Seconds</param>
+            <param name="id"></param>
+        </member>
+        <member name="M:Monkeyspeak.Libraries.Timers.#ctor(System.UInt32)">
+            <summary>
+            Default Timer Library.  Call static method Timers.DestroyTimers() when your application closes.
+            </summary>
+        </member>
+        <member name="M:Monkeyspeak.Logging.LogMessage.GetHashCode">
+            <summary>
+            Returns a hash code for this instance.
+            </summary>
+            <returns>
+            A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.
+            </returns>
+        </member>
+        <member name="M:Monkeyspeak.Logging.LogMessage.Equals(System.Object)">
+            <summary>
+            Determines whether the specified <see cref="T:System.Object" />, is equal to this instance.
+            </summary>
+            <param name="obj">The <see cref="T:System.Object" /> to compare with this instance.</param>
+            <returns>
+              <c>true</c> if the specified <see cref="T:System.Object" /> is equal to this instance; otherwise, <c>false</c>.
+            </returns>
+        </member>
+        <member name="M:Monkeyspeak.Logging.LogMessage.ToString">
+            <summary>
+            Returns a <see cref="T:System.String" /> that represents this instance.
+            </summary>
+            <returns>
+            A <see cref="T:System.String" /> that represents this instance.
+            </returns>
+        </member>
+        <member name="P:Monkeyspeak.Logging.Logger.MessagesExpire">
+            <summary>
+            Gets or sets the messages expire time limit.
+            Messages that have expired are removed from history.
+            This property used in conjunction with SupressSpam = true prevents
+            too much memory from being used over time
+            </summary>
+            <value>
+            The messages expire time limit.
+            </value>
+        </member>
+        <member name="P:Monkeyspeak.Logging.Logger.LogOutput">
+            <summary>
+            Sets the <see cref="T:Monkeyspeak.Logging.ILogOutput"/>.
+            </summary>
+            <param name="output">The output.</param>
+            <exception cref="T:System.ArgumentNullException">output</exception>
+        </member>
+        <member name="M:Monkeyspeak.SStreamReader.IsPreamble">
+            <summary>
+            Encoding can really haven't preamble
+            </summary>
+        </member>
+        <member name="P:Monkeyspeak.SStreamReader.Position">
+            <summary>
+            Use this property for get and set real position in file.
+            Position in BaseStream can be not right.
+            </summary>
+        </member>
+        <member name="P:Monkeyspeak.AbstractLexer.Engine">
+            <summary>
+            Gets the engine.
+            </summary>
+            <value>
+            The engine.
+            </value>
+        </member>
+        <member name="P:Monkeyspeak.AbstractLexer.CurrentSourcePosition">
+            <summary>
+            Gets the current source position.
+            </summary>
+            <value>
+            The current source position.
+            </value>
+        </member>
+        <member name="M:Monkeyspeak.AbstractLexer.Next">
+            <summary>
+            Advances one character in the reader.
+            </summary>
+        </member>
+        <member name="M:Monkeyspeak.AbstractLexer.Read">
+            <summary>
+            Reads the tokens from the reader.  Used by the Parser.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Monkeyspeak.AbstractLexer.Read(System.Int64,System.Int32)">
+            <summary>
+            Reads the specified start position in stream.  Used by the Token to read the token's value.
+            </summary>
+            <param name="startPosInStream">The start position in stream.</param>
+            <param name="length">The length.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Monkeyspeak.AbstractLexer.LookAhead(System.Int32)">
+            <summary>
+            Looks ahead a specified number of chars and returns the result.
+            </summary>
+            <param name="amount">The amount.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Monkeyspeak.AbstractLexer.LookBack(System.Int32)">
+            <summary>
+            Looks back a specified number of chars and returns the result.
+            </summary>
+            <param name="amount">The amount.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Monkeyspeak.AbstractLexer.CheckMatch(System.Int32)">
+            <summary>
+            Checks if the next input is a match to <paramref name="c"/>.
+            </summary>
+            <param name="c">The c.</param>
+            <exception cref="T:Monkeyspeak.MonkeyspeakException" />
+        </member>
+        <member name="M:Monkeyspeak.AbstractLexer.CheckMatch(System.Char)">
+            <summary>
+            Checks if the next input is a match to <paramref name="c"/>.
+            </summary>
+            <param name="c">The c.</param>
+            <exception cref="T:Monkeyspeak.MonkeyspeakException" />
+        </member>
+        <member name="M:Monkeyspeak.AbstractLexer.CheckMatch(System.String)">
+            <summary>
+            Checks if the next input is a match to <paramref name="str"/>.
+            </summary>
+            <param name="str">The string.</param>
+            <exception cref="T:Monkeyspeak.MonkeyspeakException" />
+        </member>
+        <member name="M:Monkeyspeak.AbstractLexer.CheckIsDigit(System.Char)">
+            <summary>
+            Checks if <paramref name="c"/> is a number.
+            </summary>
+            <param name="c">The c.</param>
+            <exception cref="T:Monkeyspeak.MonkeyspeakException" />
+        </member>
+        <member name="M:Monkeyspeak.AbstractLexer.CheckEOF(System.Int32)">
+            <summary>
+            Checks if the next input results in End of File.
+            </summary>
+            <param name="c">The c.</param>
+            <exception cref="T:Monkeyspeak.MonkeyspeakException" />
+        </member>
+        <member name="M:Monkeyspeak.AbstractLexer.Reset">
+            <summary>
+            Resets this instance.
+            </summary>
+        </member>
+        <member name="M:Monkeyspeak.AbstractLexer.Dispose">
+            <summary>
+            Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+            </summary>
+        </member>
+        <member name="T:Monkeyspeak.Lexer">
+            <summary>
+                Converts a reader containing a Monkeyspeak script into a
+            </summary>
+        </member>
+        <member name="M:Monkeyspeak.Lexer.#ctor(Monkeyspeak.MonkeyspeakEngine,Monkeyspeak.SStreamReader)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Monkeyspeak.Lexer"/> class.
+            </summary>
+            <param name="engine">The engine.</param>
+            <param name="reader">The reader.</param>
+        </member>
+        <member name="M:Monkeyspeak.Lexer.Read">
+            <summary>
+            Reads the tokens from the reader.  Used by the Parser.
+            </summary>
+            <returns></returns>
+        </member>
+        <!-- Badly formed XML comment ignored for member "M:Monkeyspeak.Lexer.LookAhead(System.Int32)" -->
+        <member name="T:Monkeyspeak.Parser">
+             <summary>
+            
+             </summary>
+             <seealso cref="T:Monkeyspeak.lexical.AbstractParser" />
+        </member>
+        <member name="M:Monkeyspeak.Parser.#ctor(Monkeyspeak.MonkeyspeakEngine)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Monkeyspeak.Parser"/> class.
+            </summary>
+            <param name="engine">The engine.</param>
+        </member>
+        <member name="M:Monkeyspeak.Parser.Parse(Monkeyspeak.AbstractLexer)">
+            <summary>
+            Parses the specified lexer's tokens.
+            </summary>
+            <param name="lexer">The lexer.</param>
+            <returns></returns>
+            <exception cref="T:Monkeyspeak.MonkeyspeakException">
+            </exception>
+            <exception cref="T:System.Exception">String length limit exceeded.</exception>
+        </member>
+        <member name="M:Monkeyspeak.Parser.IntParse(System.String)">
+            <summary>
+            Ints the parse. (I love GhostDoc lol)
+            </summary>
+            <param name="value">The value.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Monkeyspeak.MonkeyspeakEngine.LoadFromStringAsync(System.String)">
+            <summary>
+            Loads a Monkeyspeak script from a string into a <see cref="T:Monkeyspeak.Page"/>.
+            </summary>
+            <param name="chunk">String that contains the Monkeyspeak script source.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Monkeyspeak.MonkeyspeakEngine.LoadFromString(System.String)">
+            <summary>
+            Loads a Monkeyspeak script from a string into a <see cref="T:Monkeyspeak.Page"/>.
+            </summary>
+            <param name="chunk">String that contains the Monkeyspeak script source.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Monkeyspeak.MonkeyspeakEngine.LoadFromStringAsync(Monkeyspeak.Page,System.String)">
+            <summary>
+            Loads a Monkeyspeak script from a string into a <see cref="T:Monkeyspeak.Page"/>.
+            </summary>
+            <param name="chunk">String that contains the Monkeyspeak script source.</param>
+            <param name="existingPage"></param>
+        </member>
+        <member name="M:Monkeyspeak.MonkeyspeakEngine.LoadFromString(Monkeyspeak.Page,System.String)">
+            <summary>
+            Loads a Monkeyspeak script from a string into <paramref name="existingPage"/>. and
+            clears the old page
+            </summary>
+            <param name="existingPage">Reference to an existing Page</param>
+            <param name="chunk">String that contains the Monkeyspeak script source.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Monkeyspeak.MonkeyspeakEngine.LoadFromStreamAsync(System.IO.Stream)">
+            <summary>
+            Loads a Monkeyspeak script from a Stream into a <see cref="T:Monkeyspeak.Page"/>.
+            </summary>
+            <param name="stream">Stream that contains the Monkeyspeak script. Closes the stream.</param>
+            <returns><see cref="T:Monkeyspeak.Page"/></returns>
+        </member>
+        <member name="M:Monkeyspeak.MonkeyspeakEngine.LoadFromStream(System.IO.Stream)">
+            <summary>
+            Loads a Monkeyspeak script from a Stream into a <see cref="T:Monkeyspeak.Page"/>.
+            </summary>
+            <param name="stream">Stream that contains the Monkeyspeak script. Closes the stream.</param>
+            <returns><see cref="T:Monkeyspeak.Page"/></returns>
+        </member>
+        <member name="M:Monkeyspeak.MonkeyspeakEngine.LoadFromStreamAsync(Monkeyspeak.Page,System.IO.Stream)">
+            <summary>
+            Loads a Monkeyspeak script from a Stream into a <see cref="T:Monkeyspeak.Page"/>.
+            </summary>
+            <param name="stream">Stream that contains the Monkeyspeak script. Closes the stream.</param>
+            <param name="existingPage"></param>
+        </member>
+        <member name="M:Monkeyspeak.MonkeyspeakEngine.LoadFromStream(Monkeyspeak.Page,System.IO.Stream)">
+            <summary>
+            Loads a Monkeyspeak script from a Stream into <paramref name="existingPage"/>.
+            </summary>
+            <param name="existingPage">Reference to an existing Page</param>
+            <param name="stream">Stream that contains the Monkeyspeak script. Closes the stream.</param>
+        </member>
+        <member name="M:Monkeyspeak.MonkeyspeakEngine.LoadCompiledFile(System.String)">
+            <summary>
+            Loads compiled script from file
+            </summary>
+            <param name="filePath"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Monkeyspeak.MonkeyspeakEngine.LoadCompiledStream(System.IO.Stream)">
+            <summary>
+            Loads a compiled script from stream
+            </summary>
+            <param name="stream"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Monkeyspeak.MonkeyspeakEngine.CompileToFile(Monkeyspeak.Page,System.String)">
+            <summary>
+            Compiles a Page to a file
+            </summary>
+            <param name="page"></param>
+            <param name="filePath"></param>
+        </member>
+        <member name="M:Monkeyspeak.MonkeyspeakEngine.CompileToStream(Monkeyspeak.Page,System.IO.Stream)">
+            <summary>
+            Compiles a Page to a stream
+            </summary>
+            <param name="page"></param>
+            <param name="stream"></param>
+        </member>
+        <member name="P:Monkeyspeak.Options.Version">
+            <summary>
+            Current assembly version used internally by the compiler to handle versioning
+            </summary>
+        </member>
+        <member name="P:Monkeyspeak.Options.CanOverrideTriggerHandlers">
+            <summary>
+            If set to TRUE then an existing TriggerHandler can be overridden by newer TriggerHandler
+            <para>Default: false</para>
+            </summary>
+        </member>
+        <member name="P:Monkeyspeak.Options.StringBeginSymbol">
+            <summary>
+            Beginning string literal symbol
+            <para>Default: {</para>
+            </summary>
+        </member>
+        <member name="P:Monkeyspeak.Options.StringEndSymbol">
+            <summary>
+            Ending string literal symbol
+            <para>Default: }</para>
+            </summary>
+        </member>
+        <member name="P:Monkeyspeak.Options.VariableDeclarationSymbol">
+            <summary>
+            Variable literal symbol
+            <para>Default: %</para>
+            </summary>
+        </member>
+        <member name="P:Monkeyspeak.Options.LineCommentSymbol">
+            <summary>
+            Comment literal symbol
+            <para>Default: *</para>
+            </summary>
+        </member>
+        <member name="P:Monkeyspeak.Options.BlockCommentBeginSymbol">
+            <summary>
+            Block Comment beginning literal symbol
+            <para>Default: *</para>
+            </summary>
+        </member>
+        <member name="P:Monkeyspeak.Options.BlockCommentEndSymbol">
+            <summary>
+            Block Comment ending literal symbol
+            <para>Default: *</para>
+            </summary>
+        </member>
+        <member name="P:Monkeyspeak.Options.TriggerLimit">
+            <summary>
+            Used to limit the maximum amount of triggers per page
+            <para>Default: 6000</para>
+            </summary>
+        </member>
+        <member name="P:Monkeyspeak.Options.StringLengthLimit">
+            <summary>
+            Used to limit the maximum length of a string
+            <para>Default: Int32.MaxValue</para>
+            </summary>
+        </member>
+        <member name="P:Monkeyspeak.Options.VariableCountLimit">
+            <summary>
+            Used to limit the maximum amount of variables per page
+            <para>Default: 1000</para>
+            </summary>
+        </member>
+        <member name="P:Monkeyspeak.Options.VariableTableCountLimit">
+            <summary>
+            Gets or sets the variable table count limit.
+            </summary>
+            <value>
+            The variable table count limit.
+            </value>
+        </member>
+        <member name="P:Monkeyspeak.Options.LoopLimit">
+            <summary>
+            Gets or sets the loop limit.
+            </summary>
+            <value>
+            The loop limit.
+            </value>
+        </member>
+        <member name="P:Monkeyspeak.Options.Debug">
+            <summary>
+            Gets or sets a value indicating whether debug log output is enabled.
+            </summary>
+            <value>
+              <c>true</c> if debug; otherwise, <c>false</c>.
+            </value>
+        </member>
+        <member name="T:Monkeyspeak.TriggerHandler">
+            <summary>
+            Used for handling triggers at runtime.
+            </summary>
+            <param name="reader"></param>
+            <returns>True = Continue to the Next Trigger, False = Stop executing current block of Triggers</returns>
+        </member>
+        <member name="T:Monkeyspeak.TriggerAddedEventHandler">
+             <summary>
+            
+             </summary>
+             <param name="trigger">The trigger.</param>
+             <param name="handler">The handler.</param>
+        </member>
+        <member name="T:Monkeyspeak.TriggerHandlerErrorEvent">
+            <summary>
+            Event for any errors that occur during execution
+            If not assigned Exceptions will be thrown.
+            </summary>
+            <param name="trigger"></param>
+            <param name="ex"></param>
+        </member>
+        <member name="T:Monkeyspeak.TokenVisitorHandler">
+             <summary>
+            
+             </summary>
+             <param name="token">The token.</param>
+             <returns></returns>
+        </member>
+        <member name="E:Monkeyspeak.Page.Initiating">
+            <summary>
+            Occurs when [initiating].  Best to call your variable additions in the event.
+            </summary>
+        </member>
+        <member name="E:Monkeyspeak.Page.Error">
+            <summary>
+            Called when an Exception is raised during execution
+            </summary>
+        </member>
+        <member name="E:Monkeyspeak.Page.TriggerAdded">
+            <summary>
+            Called when a Trigger and TriggerHandler is added to the Page
+            </summary>
+        </member>
+        <member name="E:Monkeyspeak.Page.BeforeTriggerHandled">
+            <summary>
+            Called before the Trigger's TriggerHandler is called.  If there is no TriggerHandler for that Trigger
+            then this event is not raised.
+            </summary>
+        </member>
+        <member name="E:Monkeyspeak.Page.AfterTriggerHandled">
+            <summary>
+            Called after the Trigger's TriggerHandler is called.  If there is no TriggerHandler for that Trigger
+            then this event is not raised.
+            </summary>
+        </member>
+        <member name="M:Monkeyspeak.Page.Reset(System.Boolean)">
+            <summary>
+            Clears all Variables and optionally clears all TriggerHandlers from this Page.
+            </summary>
+        </member>
+        <member name="M:Monkeyspeak.Page.Clear">
+            <summary>
+            Removes the triggers.
+            </summary>
+        </member>
+        <member name="M:Monkeyspeak.Page.GetTriggerDescriptions(System.Boolean)">
+            <summary>
+            Gets the description for all triggers
+            </summary>
+            <param name="excludeLibraryName">[true] hide library name, [false] show library name above triggers</param>
+            <returns>IEnumerable of Triggers</returns>
+        </member>
+        <member name="M:Monkeyspeak.Page.GetTriggerDescription(Monkeyspeak.Trigger,System.Boolean)">
+            <summary>
+            Gets the description for a trigger
+            </summary>
+            <param name="excludeLibraryName">[true] hide library name, [false] show library name above triggers</param>
+            <param name="trigger">todo: describe trigger parameter on GetTriggerDescription</param>
+            <returns>string</returns>
+        </member>
+        <member name="P:Monkeyspeak.Page.Scope">
+            <summary>
+            All variables loaded into this page
+            </summary>
+        </member>
+        <member name="M:Monkeyspeak.Page.LoadSysLibrary">
+            <summary>
+            Loads Monkeyspeak Sys Library into this Page
+            <para>Used for System operations involving the Environment or Operating System</para>
+            </summary>
+        </member>
+        <member name="M:Monkeyspeak.Page.LoadStringLibrary">
+            <summary>
+            Loads Monkeyspeak String Library into this Page
+            <para>Used for basic String operations</para>
+            </summary>
+        </member>
+        <member name="M:Monkeyspeak.Page.LoadIOLibrary(System.String)">
+            <summary>
+            Loads Monkeyspeak IO Library into this Page
+            <para>Used for File Input/Output operations</para>
+            </summary>
+        </member>
+        <member name="M:Monkeyspeak.Page.LoadMathLibrary">
+            <summary>
+            Loads Monkeyspeak Math Library into this Page
+            <para>Used for Math operations (add, subtract, multiply, divide)</para>
+            </summary>
+        </member>
+        <member name="M:Monkeyspeak.Page.LoadTimerLibrary(System.UInt32)">
+            <summary>
+            Loads Monkeyspeak Timer Library into this Page
+            </summary>
+        </member>
+        <member name="M:Monkeyspeak.Page.LoadDebugLibrary">
+            <summary>
+            Loads Monkeyspeak Debug Library into this Page
+            <para>Used for Debug breakpoint insertion. Won't work without Debugger attached.</para>
+            </summary>
+        </member>
+        <member name="M:Monkeyspeak.Page.LoadLibrary(Monkeyspeak.Libraries.BaseLibrary,System.Object[])">
+            <summary>
+            Loads a <see cref="T:Monkeyspeak.Libraries.BaseLibrary"/> into this Page
+            </summary>
+            <param name="lib"></param>
+        </member>
+        <member name="M:Monkeyspeak.Page.LoadLibraryFromAssembly(System.Reflection.Assembly)">
+            <summary>
+            Loads trigger handlers from a assembly instance
+            </summary>
+            <param name="asm">The assembly instance</param>
+        </member>
+        <member name="M:Monkeyspeak.Page.LoadLibraryFromAssembly(System.String)">
+            <summary>
+            Loads trigger handlers from a assembly dll file
+            </summary>
+            <param name="assemblyFile">The assembly in the local file system</param>
+        </member>
+        <member name="M:Monkeyspeak.Page.LoadAllLibraries">
+            <summary>
+            Loads all libraries.
+            </summary>
+        </member>
+        <member name="M:Monkeyspeak.Page.RemoveVariable(System.String)">
+            <summary>
+            Removes the variable.
+            </summary>
+            <param name="name">The name.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Monkeyspeak.Page.RemoveVariable(Monkeyspeak.IVariable)">
+            <summary>
+            Removes the variable.
+            </summary>
+            <param name="name">The name.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Monkeyspeak.Page.SetVariable``1(``0)">
+            <summary>
+            Sets the variable.
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="var">The variable.</param>
+            <exception cref="T:Monkeyspeak.TypeNotSupportedException"></exception>
+            <exception cref="T:System.Exception">Variable limit exceeded, operation failed.</exception>
+        </member>
+        <member name="M:Monkeyspeak.Page.SetVariable(System.String,System.Object,System.Boolean)">
+            <summary>
+            Sets the variable.
+            </summary>
+            <param name="name">The name.</param>
+            <param name="value">The value.</param>
+            <param name="isConstant">if set to <c>true</c> [is constant].</param>
+            <returns></returns>
+            <exception cref="T:Monkeyspeak.TypeNotSupportedException"></exception>
+            <exception cref="T:System.Exception">Variable limit exceeded, operation failed.</exception>
+        </member>
+        <member name="M:Monkeyspeak.Page.SetVariableTable(System.String,System.Boolean)">
+            <summary>
+            Sets the variable table.
+            </summary>
+            <param name="name">The name.</param>
+            <param name="value">The value.</param>
+            <param name="isConstant">if set to <c>true</c> [is constant].</param>
+            <returns></returns>
+            <exception cref="T:Monkeyspeak.TypeNotSupportedException"></exception>
+            <exception cref="T:System.Exception">Variable limit exceeded, operation failed.</exception>
+        </member>
+        <member name="M:Monkeyspeak.Page.GetVariable(System.String)">
+            <summary>
+            Gets a Variable with Name set to <paramref name="name"/>
+            <b>Throws Exception if Variable not found.</b>
+            </summary>
+            <param name="name">The name of the Variable to retrieve</param>
+            <returns>The variable found with the specified <paramref name="name"/> or throws Exception</returns>
+        </member>
+        <member name="M:Monkeyspeak.Page.HasVariable(System.String)">
+            <summary>
+            Checks the scope for the Variable with Name set to <paramref name="name"/>
+            </summary>
+            <param name="name">The name of the Variable to retrieve</param>
+            <returns>True on Variable found.  <para>False if Variable not found.</para></returns>
+        </member>
+        <member name="M:Monkeyspeak.Page.HasVariable``1(System.String,``0@)">
+            <summary>
+            Determines whether the specified variable exists.
+            </summary>
+            <param name="name">The name.</param>
+            <param name="var">The variable.</param>
+            <returns>
+              <c>true</c> if the specified variable exists; otherwise, <c>false</c>.
+            </returns>
+        </member>
+        <member name="M:Monkeyspeak.Page.SetTriggerHandler(Monkeyspeak.TriggerCategory,System.Int32,Monkeyspeak.TriggerHandler,System.String)">
+            <summary>
+            Assigns the TriggerHandler to a trigger with <paramref name="category"/> and <paramref name="id"/>
+            </summary>
+            <param name="category"></param>
+            <param name="id"></param>
+            <param name="handler"></param>
+            <param name="description"></param>
+        </member>
+        <member name="M:Monkeyspeak.Page.SetTriggerHandler(Monkeyspeak.Trigger,Monkeyspeak.TriggerHandler,System.String)">
+            <summary>
+            Assigns the TriggerHandler to <paramref name="trigger"/>
+            </summary>
+            <param name="trigger"><see cref="T:Monkeyspeak.Trigger"/></param>
+            <param name="handler"><see cref="T:Monkeyspeak.TriggerHandler"/></param>
+            <param name="description">optional description of the trigger, normally the human readable form of the trigger
+            <para>Example: "(0:1) when someone says something,"</para></param>
+        </member>
+        <member name="M:Monkeyspeak.Page.RemoveTriggerHandler(Monkeyspeak.TriggerCategory,System.Int32)">
+            <summary>
+            Removes the trigger handler.
+            </summary>
+            <param name="cat">The category.</param>
+            <param name="id">The identifier.</param>
+        </member>
+        <member name="M:Monkeyspeak.Page.RemoveTriggerHandler(Monkeyspeak.Trigger)">
+            <summary>
+            Removes the trigger handler.
+            </summary>
+            <param name="trigger">The trigger.</param>
+        </member>
+        <member name="M:Monkeyspeak.Page.RemoveAllTriggerHandlers(Monkeyspeak.Libraries.BaseLibrary)">
+            <summary>
+            Removes all trigger handlers.
+            </summary>
+            <param name="lib">The library.</param>
+        </member>
+        <member name="P:Monkeyspeak.Page.Size">
+            <summary>
+            Returns the Trigger count on this Page.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="P:Monkeyspeak.Page.Debug">
+            <summary>
+            Gets or sets a value indicating whether this <see cref="T:Monkeyspeak.Page"/> is in debug mode.
+            </summary>
+            <value>
+              <c>true</c> if debug; otherwise, <c>false</c>.
+            </value>
+        </member>
+        <member name="P:Monkeyspeak.Page.Libraries">
+            <summary>
+            Gets the libraries.
+            </summary>
+            <value>
+            The libraries.
+            </value>
+        </member>
+        <member name="M:Monkeyspeak.Page.Execute(System.Int32,System.Object[])">
+             <summary>
+             Executes a trigger block containing TriggerCategory.Cause with ID equal to <paramref name="id" />
+            
+             </summary>
+             <param name="id"></param>
+             <param name="args"></param>
+        </member>
+        <member name="M:Monkeyspeak.Page.Execute(Monkeyspeak.TriggerCategory,System.Int32,System.Object[])">
+             <summary>
+             Executes a trigger block containing <paramref name="cat"/> with ID equal to <paramref name="id" />
+            
+             </summary>
+             <param name="id"></param>
+             <param name="args"></param>
+             <param name="cat"><see cref="T:Monkeyspeak.TriggerCategory"/></param>
+        </member>
+        <member name="M:Monkeyspeak.Page.Execute(System.Int32[],System.Object[])">
+             <summary>
+             Executes a trigger block containing TriggerCategory.Cause with ID equal to <param name="id" />
+            
+             </summary>
+             <param name="ids">I dunno</param>
+             <param name="args"></param>
+        </member>
+        <member name="M:Monkeyspeak.Page.ExecuteAsync(System.Threading.CancellationToken,Monkeyspeak.TriggerCategory,System.Int32,System.Object[])">
+            <summary>
+            Executes the asynchronous.
+            </summary>
+            <param name="cancellationToken">The cancellation token.</param>
+            <param name="id"></param>
+            <param name="args"></param>
+            <param name="cat"><see cref="T:Monkeyspeak.TriggerCategory"/></param>
+            <returns></returns>
+        </member>
+        <member name="M:Monkeyspeak.Page.ExecuteAsync(System.Threading.CancellationToken,Monkeyspeak.TriggerCategory,System.Int32[],System.Object[])">
+            <summary>
+            Executes the asynchronous.
+            </summary>
+            <param name="cancellationToken">The cancellation token.</param>
+            <param name="ids">The ids.</param>
+            <param name="args">todo: describe args parameter on ExecuteAsync</param>
+            <param name="cat"><see cref="T:Monkeyspeak.TriggerCategory"/></param>
+            <returns></returns>
+        </member>
+        <member name="M:Monkeyspeak.Page.ExecuteAsync(System.Threading.CancellationToken,System.Int32[],System.Object[])">
+            <summary>
+            Executes the asynchronous.
+            </summary>
+            <param name="cancellationToken">The cancellation token.</param>
+            <param name="ids">The ids.</param>
+            <param name="args">todo: describe args parameter on ExecuteAsync</param>
+            <param name="cat"><see cref="T:Monkeyspeak.TriggerCategory"/></param>
+            <returns></returns>
+        </member>
+        <member name="M:Monkeyspeak.Page.ExecuteAsync(Monkeyspeak.TriggerCategory,System.Int32,System.Object[])">
+            <summary>
+            Executes the specified Cause asynchronously.
+            </summary>
+            <param name="id">The id.</param>
+            <param name="cat"><see cref="T:Monkeyspeak.TriggerCategory"/></param>
+            <param name="args"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Monkeyspeak.Page.ExecuteAsync(Monkeyspeak.TriggerCategory,System.Int32[],System.Object[])">
+            <summary>
+            Executes the specified Cause asynchronously.
+            </summary>
+            <param name="ids">The ids.</param>
+            <param name="args"></param>
+            <param name="cat"><see cref="T:Monkeyspeak.TriggerCategory"/></param>
+            <returns></returns>
+        </member>
+        <member name="M:Monkeyspeak.Page.ExecuteAsync(System.Int32[],System.Object[])">
+            <summary>
+            Executes the specified Cause asynchronously.
+            </summary>
+            <param name="ids">The ids.</param>
+            <param name="args"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Monkeyspeak.Page.ExecuteAsync(System.Int32,System.Object[])">
+            <summary>
+            Executes the specified Cause asynchronously.
+            </summary>
+            <param name="args"></param>
+            <param name="id">The id</param>
+            <returns></returns>
+        </member>
+        <member name="M:Monkeyspeak.Page.Dispose">
+            <summary>
+            Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+            </summary>
+        </member>
+        <member name="P:Monkeyspeak.Token.ValueStartPosition">
+            <summary>
+            Gets or sets the value start position within the lexer.
+            </summary>
+            <value>
+            The value start position as located in the lexer.
+            </value>
+        </member>
+        <member name="P:Monkeyspeak.Token.Length">
+            <summary>
+            Gets or sets the length of the value to be looked up in the lexer.
+            </summary>
+            <value>
+            The length (see above).
+            </value>
+        </member>
+        <member name="T:Monkeyspeak.Utils.TriggerIntegrityUpdater">
+             <summary>
+             Reads triggers from a stream and updates those trigger's to reflect the library's trigger description.
+             This is useful if you have a trigger handler that was changed but it isn't reflected on the script itself.
+            
+             Caution: This is a intensive operation due to analyzing and replacing any characters in the code that don't match up.
+             Use sparingly.
+             </summary>
+        </member>
+        <member name="F:Monkeyspeak.TriggerCategory.Undefined">
+            <summary>
+            A trigger that was not defined.  You should never encounter this
+            if you do then something isn't quite right.
+            </summary>
+        </member>
+        <member name="F:Monkeyspeak.TriggerCategory.Cause">
+            <summary>
+            A trigger defined with a 0
+            <para>Example: (0:1) when someone says something, </para>
+            </summary>
+        </member>
+        <member name="F:Monkeyspeak.TriggerCategory.Condition">
+            <summary>
+            A trigger defined with a 1
+            <para>Example: (1:2) and they moved # units left, </para>
+            </summary>
+        </member>
+        <member name="F:Monkeyspeak.TriggerCategory.Effect">
+            <summary>
+            A trigger defined with a 5
+            <para>Example: (5:1) print {Hello World} to the console. </para>
+            </summary>
+        </member>
+        <!-- Badly formed XML comment ignored for member "F:Monkeyspeak.TriggerCategory.Flow" -->
+        <member name="P:Monkeyspeak.Trigger.Category">
+            <summary>
+            Gets the category.
+            </summary>
+            <value>
+            The category.
+            </value>
+        </member>
+        <member name="P:Monkeyspeak.Trigger.Id">
+            <summary>
+            Gets the identifier.
+            </summary>
+            <value>
+            The identifier.
+            </value>
+        </member>
+        <member name="M:Monkeyspeak.Trigger.Equals(Monkeyspeak.Trigger)">
+            <summary>
+            Indicates whether the current object is equal to another object of the same type.
+            </summary>
+            <param name="other">An object to compare with this object.</param>
+            <returns>
+            true if the current object is equal to the <paramref name="other" /> parameter; otherwise, false.
+            </returns>
+        </member>
+        <member name="M:Monkeyspeak.Trigger.Equals(System.Object)">
+            <summary>
+            Determines whether the specified <see cref="T:System.Object" />, is equal to this instance.
+            </summary>
+            <param name="obj">The <see cref="T:System.Object" /> to compare with this instance.</param>
+            <returns>
+              <c>true</c> if the specified <see cref="T:System.Object" /> is equal to this instance; otherwise, <c>false</c>.
+            </returns>
+        </member>
+        <member name="M:Monkeyspeak.Trigger.GetHashCode">
+            <summary>
+            Returns a hash code for this instance.
+            </summary>
+            <returns>
+            A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.
+            </returns>
+        </member>
+        <member name="M:Monkeyspeak.Trigger.ToString">
+            <summary>
+            Returns a <see cref="T:System.String" /> that represents this instance.
+            </summary>
+            <returns>
+            A <see cref="T:System.String" /> that represents this instance.
+            </returns>
+        </member>
+        <member name="M:Monkeyspeak.TriggerBlock.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Monkeyspeak.TriggerBlock"/> class.
+            </summary>
+        </member>
+        <member name="M:Monkeyspeak.TriggerBlock.#ctor(System.Int32)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Monkeyspeak.TriggerBlock"/> class.
+            </summary>
+            <param name="initialCapacity">The initial capacity.</param>
+        </member>
+        <member name="M:Monkeyspeak.TriggerBlock.#ctor(System.Collections.Generic.IEnumerable{Monkeyspeak.Trigger})">
+            <summary>
+            Initializes a new instance of the <see cref="T:Monkeyspeak.TriggerBlock"/> class.
+            </summary>
+            <param name="collection">The collection whose elements are copied to the new list.</param>
+        </member>
+        <member name="M:Monkeyspeak.TriggerBlock.IndexOfTrigger(Monkeyspeak.TriggerCategory,System.Int32,System.Int32)">
+            <summary>
+            Operates like IndexOf for Triggers
+            </summary>
+            <param name="cat"></param>
+            <param name="id"></param>
+            <param name="startIndex"></param>
+            <returns>Index of trigger or -1 if not found</returns>
+        </member>
+        <member name="M:Monkeyspeak.TriggerBlock.ContainsTrigger(Monkeyspeak.TriggerCategory,System.Int32)">
+            <summary>
+            Determines whether the block contains the trigger.
+            </summary>
+            <param name="cat">The category.</param>
+            <param name="id">The identifier.</param>
+            <returns>
+              <c>true</c> if the block contains the trigger; otherwise, <c>false</c>.
+            </returns>
+        </member>
+        <member name="M:Monkeyspeak.TriggerBlock.GetSubBlock(System.Int32,System.Int32)">
+            <summary>
+            Creates a sub block.
+            </summary>
+            <param name="index">The index.</param>
+            <param name="count">The count.  -1 will go to the end of the collection</param>
+            <returns></returns>
+        </member>
+        <member name="M:Monkeyspeak.TriggerBlock.ToString">
+            <summary>
+            Returns a <see cref="T:System.String" /> that represents this instance.
+            </summary>
+            <returns>
+            A <see cref="T:System.String" /> that represents this instance.
+            </returns>
+        </member>
+        <member name="T:Monkeyspeak.TriggerReader">
+            <summary>
+            A Reader that is used to get Variables, Strings, and Numbers from Triggers
+            </summary>
+        </member>
+        <member name="M:Monkeyspeak.TriggerReader.#ctor(Monkeyspeak.Page,Monkeyspeak.TriggerBlock)">
+            <summary>
+            A Reader that is used to get Variables, Strings, and Numbers from Triggers
+            </summary>
+            <param name="page"></param>
+            <param name="trigger"></param>
+        </member>
+        <member name="P:Monkeyspeak.TriggerReader.Trigger">
+            <summary>
+            Gets the trigger.
+            </summary>
+            <value>
+            The trigger.
+            </value>
+        </member>
+        <member name="P:Monkeyspeak.TriggerReader.CurrentBlock">
+            <summary>
+            Gets the current block of triggers.
+            </summary>
+            <value>
+            The block.
+            </value>
+        </member>
+        <member name="P:Monkeyspeak.TriggerReader.TriggerCategory">
+            <summary>
+            Gets the trigger category.
+            </summary>
+            <value>
+            The trigger category.
+            </value>
+        </member>
+        <member name="P:Monkeyspeak.TriggerReader.TriggerId">
+            <summary>
+            Gets the trigger identifier.
+            </summary>
+            <value>
+            The trigger identifier.
+            </value>
+        </member>
+        <member name="P:Monkeyspeak.TriggerReader.Page">
+            <summary>
+            Gets the page.
+            </summary>
+            <value>
+            The page.
+            </value>
+        </member>
+        <member name="M:Monkeyspeak.TriggerReader.Reset">
+            <summary>
+            Resets the reader's indexes to 0
+            </summary>
+        </member>
+        <member name="P:Monkeyspeak.TriggerReader.Parameters">
+            <summary>
+            Gets or sets the parameters.
+            </summary>
+            <value>
+            The parameters.
+            </value>
+        </member>
+        <member name="M:Monkeyspeak.TriggerReader.TryGetParameter``1(System.Int32,``0@)">
+            <summary>
+            Tries the get the parameter at the specified index.
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="index">The index.</param>
+            <param name="value">The value.</param>
+            <returns><c>true</c> on success; <c>false</c> otherwise</returns>
+        </member>
+        <member name="M:Monkeyspeak.TriggerReader.GetParameter``1(System.Int32)">
+            <summary>
+            Gets the parameter.
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="index">The index.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Monkeyspeak.TriggerReader.ReadString(System.Boolean)">
+            <summary>
+            Reads the next String, throws TriggerReaderException on failure
+            </summary>
+            <param name="processVariables">[true] process variables and replace them with their values; [false] do nothing</param>
+            <returns></returns>
+            <exception cref="T:Monkeyspeak.TriggerReaderException"></exception>
+        </member>
+        <member name="M:Monkeyspeak.TriggerReader.PeekString">
+            <summary>
+            Peeks at the next value
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Monkeyspeak.TriggerReader.TryReadString(System.String@,System.Boolean)">
+            <summary>
+            Tries the read a string from the trigger.
+            </summary>
+            <param name="str">The string.</param>
+            <param name="processVariables">if set to <c>true</c> [process variables].</param>
+            <returns>true on success; false otherwise</returns>
+        </member>
+        <member name="M:Monkeyspeak.TriggerReader.ReadVariable(System.Boolean)">
+            <summary>
+            Reads the next Variable available, throws TriggerReaderException on failure
+            </summary>
+            <param name="addIfNotExist">Add the Variable if it doesn't exist and return that Variable with a Value equal to null.</param>
+            <returns>Variable</returns>
+            <exception cref="T:Monkeyspeak.TriggerReaderException"></exception>
+        </member>
+        <member name="M:Monkeyspeak.TriggerReader.TryReadVariableTable(Monkeyspeak.VariableTable@,System.Boolean)">
+            <summary>
+            Trys to read the next Variable table available
+            </summary>
+            <param name="table">Variable table is assigned on success</param>
+            <param name="addIfNotExist"></param>
+            <returns>bool on success</returns>
+        </member>
+        <member name="M:Monkeyspeak.TriggerReader.ReadVariableTable(System.Boolean)">
+            <summary>
+            Reads the next Variable table available and the key if there is one, throws TriggerReaderException on failure
+            </summary>
+            <param name="addIfNotExist">Add the Variable if it doesn't exist and return that Variable with a Value equal to null.</param>
+            <returns>Variable</returns>
+            <exception cref="T:Monkeyspeak.TriggerReaderException"></exception>
+        </member>
+        <member name="M:Monkeyspeak.TriggerReader.PeekVariable">
+            <summary>
+            Peeks at the next value
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Monkeyspeak.TriggerReader.PeekVariable``1">
+            <summary>
+            Peeks at the next value, if the next value is not of <typeparamref name="T"/>, returns false.
+            </summary>
+            <typeparam name="T"></typeparam>
+            <returns></returns>
+        </member>
+        <member name="M:Monkeyspeak.TriggerReader.TryReadVariable(Monkeyspeak.IVariable@,System.Boolean)">
+            <summary>
+            Trys to read the next Variable available
+            </summary>
+            <param name="var">Variable is assigned on success</param>
+            <param name="addIfNotExist"></param>
+            <returns>bool on success</returns>
+        </member>
+        <member name="M:Monkeyspeak.TriggerReader.ReadNumber">
+            <summary>
+            Reads the next Number available, throws TriggerReaderException on failure
+            </summary>
+            <returns>Number</returns>
+            <exception cref="T:Monkeyspeak.TriggerReaderException"></exception>
+        </member>
+        <member name="M:Monkeyspeak.TriggerReader.PeekNumber">
+            <summary>
+            Peeks at the next value
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Monkeyspeak.TriggerReader.TryReadNumber(System.Double@)">
+            <summary>
+            Tries the read a number from the trigger.
+            </summary>
+            <param name="number">The number.</param>
+            <returns>true on success; otherwise false</returns>
+        </member>
+        <member name="M:Monkeyspeak.TriggerReader.ReadValues">
+            <summary>
+            Reads a undefined amount of values.  This is usually used for variable arguments on the end of a trigger.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Monkeyspeak.Variable.GetHashCode">
+            <summary>
+            Returns the hash code for this instance.
+            </summary>
+            <returns>
+            A 32-bit signed integer that is the hash code for this instance.
+            </returns>
+        </member>
+        <member name="M:Monkeyspeak.Variable.ToString">
+            <summary>
+            Returns a const identifier if the variable is constant followed by name,
+            <para>otherwise just the name is returned.</para>
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Monkeyspeak.Variable.Clone(System.Boolean)">
+             <summary>
+            
+             </summary>
+             <param name="asConstant">Clone as Constant</param>
+             <returns></returns>
+        </member>
+        <member name="P:Monkeyspeak.VariableTable.CurrentElementIndex">
+            <summary>
+            Gets the index of the current element.
+            </summary>
+            <value>
+            The index of the current element.
+            </value>
+        </member>
+        <member name="P:Monkeyspeak.VariableTable.ActiveIndexer">
+            <summary>
+            Gets or sets the active string based indexer.
+            </summary>
+            <value>
+            The active indexer.
+            </value>
+        </member>
+        <member name="M:Monkeyspeak.VariableTable.GetHashCode">
+            <summary>
+            Returns the hash code for this instance.
+            </summary>
+            <returns>
+            A 32-bit signed integer that is the hash code for this instance.
+            </returns>
+        </member>
+        <member name="M:Monkeyspeak.VariableTable.ToString">
+            <summary>
+            Returns a const identifier if the variable is constant followed by name,
+            <para>otherwise just the name is returned.</para>
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Monkeyspeak.VariableTable.Clear">
+            <summary>
+            Clears all values in this table.
+            </summary>
+        </member>
+    </members>
+</doc>

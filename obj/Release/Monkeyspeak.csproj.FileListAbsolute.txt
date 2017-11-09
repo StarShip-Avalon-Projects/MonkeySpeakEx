@@ -1,0 +1,6 @@
+D:\Monkey System 3\MonkeySpeakEx\bin\Release\license.txt
+D:\Monkey System 3\MonkeySpeakEx\bin\Release\Monkeyspeak.xml
+D:\Monkey System 3\MonkeySpeakEx\bin\Release\Monkeyspeak.dll
+D:\Monkey System 3\MonkeySpeakEx\obj\Release\Monkeyspeak.csprojResolveAssemblyReference.cache
+D:\Monkey System 3\MonkeySpeakEx\obj\Release\Monkeyspeak.csproj.CoreCompileInputs.cache
+D:\Monkey System 3\MonkeySpeakEx\obj\Release\Monkeyspeak.dll

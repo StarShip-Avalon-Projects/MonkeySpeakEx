@@ -136,7 +136,6 @@ namespace Monkeyspeak.Logging
         internal static readonly ConcurrentList<LogMessage> history = new ConcurrentList<LogMessage>();
         internal static readonly ConcurrentQueue<LogMessage> queue = new ConcurrentQueue<LogMessage>();
         private static LogMessageComparer comparer = new LogMessageComparer();
-        private static object syncObj = new object();
         private static bool _infoEnabled = true;
         private static bool _warningEnabled = true;
         private static bool _errorEnabled = true;
@@ -144,10 +143,7 @@ namespace Monkeyspeak.Logging
         private static bool _suppressSpam;
         private static TimeSpan _messagesExpire = TimeSpan.FromSeconds(10);
 
-        private static bool singleThreaded;
-
         private static Task logTask;
-
         private static CancellationTokenSource cancelToken;
 
         public static event Action<LogMessage> SpamFound;
@@ -161,36 +157,36 @@ namespace Monkeyspeak.Logging
 #else
             _debugEnabled = false; // can be set via property
 #endif
-            singleThreaded = true;
-
-            cancelToken = new CancellationTokenSource(100);
+            cancelToken = new CancellationTokenSource();
             logTask = new Task(() =>
             {
-                while (true)
+                while (!cancelToken.IsCancellationRequested)
                 {
                     Thread.Sleep(10);
-                    if (!singleThreaded)
+                    // take many dumps
+                    do
                     {
-                        // take a dump
                         Dump();
-                    }
+                    } while (!queue.IsEmpty);
                 }
-            }, cancelToken.Token);
+            }, cancelToken.Token, TaskCreationOptions.LongRunning);
             logTask.Start();
-
             AppDomain.CurrentDomain.ProcessExit += (sender, e) =>
             {
-                //Shutdown();
+                cancelToken.Cancel();
+                try
+                {
+                    Thread.BeginCriticalRegion();
+                    do
+                    {
+                        Dump();
+                    } while (!queue.IsEmpty);
+                }
+                finally
+                {
+                    Thread.EndCriticalRegion();
+                }
             };
-        }
-
-        /// <summary>
-        /// Shutdowns this instance.
-        /// </summary>
-        public static void Shutdown()
-        {
-            Dump();
-            cancelToken.Cancel();
         }
 
         public static bool InfoEnabled
@@ -252,26 +248,13 @@ namespace Monkeyspeak.Logging
             }
         }
 
-        /// <summary>
-        /// Gets or sets a value indicating whether [single threaded].
-        /// </summary>
-        /// <value>
-        ///   <c>true</c> if [single threaded]; otherwise, <c>false</c>.
-        /// </value>
-        public static bool SingleThreaded { get => singleThreaded; set => singleThreaded = value; }
-
         private static void Log(LogMessage msg)
         {
             queue.Enqueue(msg);
-            if (singleThreaded)
-            {
-                Dump();
-            }
         }
 
         private static void Dump()
         {
-            if (queue.Count == 0) return;
             if (queue.TryDequeue(out LogMessage msg))
             {
                 if (msg.IsSpam)

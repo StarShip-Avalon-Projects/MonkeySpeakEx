@@ -188,7 +188,6 @@ namespace Monkeyspeak.Libraries
         {
             string output = reader.ReadString();
             Logger.Info<Sys>(output);
-            //Console.WriteLine(output);
             return true;
         }
 

@@ -14,6 +14,8 @@ namespace Monkeyspeak.Logging
 {
     public class ConsoleLogOutput : ILogOutput
     {
+        private Task logTask;
+
         public ConsoleLogOutput()
         {
         }

@@ -49,7 +49,6 @@ namespace Monkeyspeak.Libraries
                 canContinue = false;
                 reader.Page.RemoveVariable(counter);
             }
-            canContinue &= reader.CurrentBlock.ContainsTrigger(TriggerCategory.Flow, index: reader.CurrentBlock.IndexOfTrigger(TriggerCategory.Flow));
             return canContinue;
         }
 
