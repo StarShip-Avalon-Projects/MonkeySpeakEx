@@ -89,7 +89,7 @@ namespace Monkeyspeak.Libraries
     }
 
     // Changed from Internal to public in order to expose DestroyTimers() - Gerolkae
-    public class Timers : BaseLibrary
+    public class Timers : AutoIncrementBaseLibrary
     {
         private static DateTime startTime = DateTime.Now;
         internal static double CurrentTimer;
@@ -98,6 +98,8 @@ namespace Monkeyspeak.Libraries
         private static readonly List<TimerTask> timers = new List<TimerTask>();
 
         private uint timersLimit;
+
+        public override int BaseId => 300;
 
         public Timers() : this(10)
         {
@@ -168,42 +170,42 @@ namespace Monkeyspeak.Libraries
         private bool GetCurrentYearIntoVar(TriggerReader reader)
         {
             var var = reader.ReadVariable(true);
-            var.Value = DateTime.Now.Year.As<double>();
+            var.Value = DateTime.Now.Year.AsDouble();
             return true;
         }
 
         private bool GetCurrentMonthIntoVar(TriggerReader reader)
         {
             var var = reader.ReadVariable(true);
-            var.Value = DateTime.Now.Month.As<double>();
+            var.Value = DateTime.Now.Month.AsDouble();
             return true;
         }
 
         private bool GetCurrentDayOfMonthIntoVar(TriggerReader reader)
         {
             var var = reader.ReadVariable(true);
-            var.Value = DateTime.Now.Day.As<double>();
+            var.Value = DateTime.Now.Day.AsDouble();
             return true;
         }
 
         private bool GetCurrentSecondsIntoVar(TriggerReader reader)
         {
             var var = reader.ReadVariable(true);
-            var.Value = DateTime.Now.TimeOfDay.Seconds.As<double>();
+            var.Value = DateTime.Now.TimeOfDay.Seconds.AsDouble();
             return true;
         }
 
         private bool GetCurrentMinutesIntoVar(TriggerReader reader)
         {
             var var = reader.ReadVariable(true);
-            var.Value = DateTime.Now.TimeOfDay.Minutes.As<double>();
+            var.Value = DateTime.Now.TimeOfDay.Minutes.AsDouble();
             return true;
         }
 
         private bool GetCurrentHourIntoVar(TriggerReader reader)
         {
             var var = reader.ReadVariable(true);
-            var.Value = DateTime.Now.TimeOfDay.Hours.As<double>();
+            var.Value = DateTime.Now.TimeOfDay.Hours.AsDouble();
             return true;
         }
 

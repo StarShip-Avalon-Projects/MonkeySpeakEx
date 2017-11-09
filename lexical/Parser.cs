@@ -48,6 +48,7 @@ namespace Monkeyspeak
 
                 string value = token.GetValue(lexer);
 
+                //Logger.Debug<Parser>(token);
                 switch (token.Type)
                 {
                     case TokenType.TRIGGER:
@@ -72,8 +73,13 @@ namespace Monkeyspeak
                             prevTrigger = currentTrigger;
                             currentTrigger = Trigger.Undefined;
                         }
-                        currentTrigger = new Trigger((TriggerCategory)IntParse(value.Substring(0, value.IndexOf(':'))),
-                            IntParse(value.Substring(value.IndexOf(':') + 1)));
+                        if (string.IsNullOrWhiteSpace(value)) continue;
+                        var cat = value.Substring(0, value.IndexOf(':'));
+                        if (string.IsNullOrWhiteSpace(cat)) continue;
+                        var id = value.Substring(value.IndexOf(':') + 1);
+                        if (string.IsNullOrWhiteSpace(id)) continue;
+                        currentTrigger = new Trigger((TriggerCategory)IntParse(cat),
+                            IntParse(id));
                         break;
 
                     case TokenType.VARIABLE:
