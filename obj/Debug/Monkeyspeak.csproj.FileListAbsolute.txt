@@ -1,8 +1,0 @@
-D:\Monkey System 3\MonkeySpeakEx\bin\Debug\license.txt
-D:\Monkey System 3\MonkeySpeakEx\bin\Debug\Monkeyspeak.xml
-D:\Monkey System 3\MonkeySpeakEx\bin\Debug\Monkeyspeak.dll
-D:\Monkey System 3\MonkeySpeakEx\bin\Debug\Monkeyspeak.pdb
-D:\Monkey System 3\MonkeySpeakEx\obj\Debug\Monkeyspeak.csprojResolveAssemblyReference.cache
-D:\Monkey System 3\MonkeySpeakEx\obj\Debug\Monkeyspeak.csproj.CoreCompileInputs.cache
-D:\Monkey System 3\MonkeySpeakEx\obj\Debug\Monkeyspeak.dll
-D:\Monkey System 3\MonkeySpeakEx\obj\Debug\Monkeyspeak.pdb
