@@ -152,10 +152,15 @@ namespace Monkeyspeak
 
         /// <summary>
         /// Tries the get the parameter at the specified index.
+        ///
+        /// <para>
+        /// See also <seealso cref="GetParameter{T}(int)"/>
+        /// </para>
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="index">The index.</param>
         /// <param name="value">The value.</param>
+        /// <exception cref="NullReferenceException">Thrown when <typeparamref name="T"/> doesn't match</exception>
         /// <returns><c>true</c> on success; <c>false</c> otherwise</returns>
         public bool TryGetParameter<T>(int index, out T value)
         {
@@ -170,15 +175,52 @@ namespace Monkeyspeak
 
         /// <summary>
         /// Gets the parameter.
+        ///
+        /// <para>
+        /// See also <seealso cref="TryGetParameter{T}(int, out T)"/>
+        /// </para>
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="index">The index.</param>
+        /// <exception cref="NullReferenceException">Thrown when <typeparamref name="T"/> doesn't match</exception>
         /// <returns></returns>
         public T GetParameter<T>(int index = 0)
         {
             if (args != null && args.Length > index)
                 return (T)args[index];
             return default(T);
+        }
+
+        /// <summary>
+        /// Gets the parameters of a certain type.
+        ///
+        /// <para>
+        /// See also <seealso cref="TryGetParameter{T}(int, out T)"/>
+        /// </para>
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public T[] GetParametersOfType<T>()
+        {
+            if (args != null && args.Length > 0)
+                return args.OfType<T>().ToArray();
+            return new T[0];
+        }
+
+        /// <summary>
+        /// Gets the parameters of a certain type.
+        ///
+        /// <para>
+        /// See also <seealso cref="TryGetParameter{T}(int, out T)"/>
+        /// </para>
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public IEnumerable<object> EnumerateParameters()
+        {
+            if (args != null && args.Length > 0)
+                return args.AsEnumerable();
+            return Enumerable.Empty<object>();
         }
 
         /// <summary>
