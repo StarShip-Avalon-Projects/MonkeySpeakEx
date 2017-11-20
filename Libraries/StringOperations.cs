@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Monkeyspeak.Libraries
+﻿namespace Monkeyspeak.Libraries
 {
     public class StringOperations : BaseLibrary
     {

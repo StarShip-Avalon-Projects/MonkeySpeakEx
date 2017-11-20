@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Monkeyspeak.Lexical.TokenDefinitions
+﻿namespace Monkeyspeak.Lexical.TokenDefinitions
 {
     internal class VariableDefinition : ITokenDefinition
     {
