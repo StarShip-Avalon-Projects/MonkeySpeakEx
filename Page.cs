@@ -1,9 +1,10 @@
 ﻿using Monkeyspeak.Extensions;
 using Monkeyspeak.Lexical;
 using Monkeyspeak.Libraries;
-using Monkeyspeak.Logging;
 using Monkeyspeak.Utils;
+using Monkeyspeak.Logging;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -11,6 +12,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Text;
 
 namespace Monkeyspeak
 {
@@ -758,7 +760,7 @@ namespace Monkeyspeak
             {
                 bool canContinue = handler != null ? handler(reader) : false;
                 if (AfterTriggerHandled != null && !AfterTriggerHandled(current)) return;
-                Logger.Debug<Page>($"{current.ToString(true, true)} returned {canContinue}");
+                Logger.Debug<Page>($"{current.ToString(true, true, this)} returned {canContinue}");
                 if (reader.CurrentBlockIndex != index)
                 {
                     index = reader.CurrentBlockIndex;

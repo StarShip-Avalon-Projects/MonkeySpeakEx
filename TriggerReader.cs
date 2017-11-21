@@ -4,8 +4,8 @@ using Monkeyspeak.Lexical.Expressions;
 using Monkeyspeak.Logging;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text.RegularExpressions;
+using System.Linq;
 
 namespace Monkeyspeak
 {
@@ -63,7 +63,7 @@ namespace Monkeyspeak
                 this.currentBlock = new TriggerBlock(currentBlock);
         }
 
-        public bool HasMore { get => contents.Count > 0; }
+        public bool HasMore { get => contents != null && contents.Count > 0; }
 
         /// <summary>
         /// Gets the trigger.
@@ -160,7 +160,6 @@ namespace Monkeyspeak
         /// <typeparam name="T"></typeparam>
         /// <param name="index">The index.</param>
         /// <param name="value">The value.</param>
-        /// <exception cref="NullReferenceException">Thrown when <typeparamref name="T"/> doesn't match</exception>
         /// <returns><c>true</c> on success; <c>false</c> otherwise</returns>
         public bool TryGetParameter<T>(int index, out T value)
         {
@@ -182,7 +181,6 @@ namespace Monkeyspeak
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="index">The index.</param>
-        /// <exception cref="NullReferenceException">Thrown when <typeparamref name="T"/> doesn't match</exception>
         /// <returns></returns>
         public T GetParameter<T>(int index = 0)
         {
@@ -386,7 +384,7 @@ namespace Monkeyspeak
                         if (addIfNotExist)
                         {
                             var = page.SetVariableTable(varRef, false);
-                            return var as VariableTable;
+                            return var as VariableTable ?? VariableTable.Empty;
                         }
                     return var.ConvertToTable(page);
                 }
@@ -409,7 +407,7 @@ namespace Monkeyspeak
                             var = page.SetVariableTable(varRef, false);
 
                     if (var is VariableTable && expr.HasIndex) ((VariableTable)var).ActiveIndexer = expr.Indexer;
-                    return var as VariableTable;
+                    return var as VariableTable ?? VariableTable.Empty;
                 }
                 catch (Exception ex)
                 {

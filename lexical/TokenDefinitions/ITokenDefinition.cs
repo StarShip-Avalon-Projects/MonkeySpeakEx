@@ -1,4 +1,10 @@
-﻿namespace Monkeyspeak.Lexical.TokenDefinitions
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Monkeyspeak.Lexical.TokenDefinitions
 {
     public interface ITokenDefinition
     {
