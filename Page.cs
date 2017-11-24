@@ -145,12 +145,14 @@ namespace Monkeyspeak
             {
                 var blocksArray = blocks.ToArray();
                 for (int i = blocksArray.Length - 1; i >= 0; i--)
+                {
                     Size += blocksArray[i].Count;
+                    if (Size > engine.Options.TriggerLimit)
+                    {
+                        throw new MonkeyspeakException("Trigger limit exceeded.");
+                    }
+                }
                 triggerBlocks.AddRange(blocksArray);
-            }
-            if (Size > engine.Options.TriggerLimit)
-            {
-                throw new MonkeyspeakException("Trigger limit exceeded.");
             }
         }
 
@@ -200,6 +202,20 @@ namespace Monkeyspeak
             }
         }
 
+        public void LoadCompiledFile(string filePath)
+        {
+            try
+            {
+                Compiler compiler = new Compiler(engine);
+                using (var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.None))
+                    AddBlocks(compiler.DecompileFromStream(fileStream));
+            }
+            catch (Exception ex)
+            {
+                throw new MonkeyspeakException("Error reading compiled file.", ex);
+            }
+        }
+
         public void CompileToStream(Stream stream)
         {
             try
@@ -218,7 +234,11 @@ namespace Monkeyspeak
         {
             try
             {
-                CompileToStream(new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.Read));
+                if (!Path.HasExtension(filePath)) filePath += ".msx";
+                using (var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None))
+                {
+                    CompileToStream(fileStream);
+                }
             }
             catch (IOException ioex)
             {
@@ -364,7 +384,7 @@ namespace Monkeyspeak
             {
                 foreach (var kv in lib.Handlers)
                 {
-                    SetTriggerHandler(kv.Key, kv.Value);
+                    AddTriggerHandler(kv.Key, kv.Value);
                 }
                 libraries.Add(lib);
             }
@@ -425,6 +445,11 @@ namespace Monkeyspeak
         {
             foreach (var lib in BaseLibrary.GetAllLibraries())
                 LoadLibrary(lib);
+        }
+
+        public bool RemoveLibrary(Type libraryType)
+        {
+            return RemoveAllTriggerHandlers(libraries.FirstOrDefault(lib => lib.GetType() == libraryType)) > 0;
         }
 
         public bool RemoveLibrary<T>() where T : BaseLibrary
@@ -647,9 +672,9 @@ namespace Monkeyspeak
         /// <param name="id"></param>
         /// <param name="handler"></param>
         /// <param name="description"></param>
-        public void SetTriggerHandler(TriggerCategory category, int id, TriggerHandler handler, string description = null)
+        public void AddTriggerHandler(TriggerCategory category, int id, TriggerHandler handler)
         {
-            SetTriggerHandler(new Trigger(category, id), handler, description);
+            AddTriggerHandler(new Trigger(category, id), handler);
         }
 
         /// <summary>
@@ -659,7 +684,7 @@ namespace Monkeyspeak
         /// <param name="handler"><see cref="Monkeyspeak.TriggerHandler"/></param>
         /// <param name="description">optional description of the trigger, normally the human readable form of the trigger
         /// <para>Example: "(0:1) when someone says something,"</para></param>
-        public void SetTriggerHandler(Trigger trigger, TriggerHandler handler, string description = null)
+        public void AddTriggerHandler(Trigger trigger, TriggerHandler handler)
         {
             lock (syncObj)
             {
