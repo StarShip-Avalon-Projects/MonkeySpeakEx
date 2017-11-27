@@ -274,7 +274,7 @@ namespace Monkeyspeak
 
     [Serializable]
     [CLSCompliant(false)]
-    public sealed class VariableTable : IVariable, IDictionary<string, object>
+    public class VariableTable : IVariable, IDictionary<string, object>
     {
         public static VariableTable Empty = new VariableTable("null", true, 0);
 
