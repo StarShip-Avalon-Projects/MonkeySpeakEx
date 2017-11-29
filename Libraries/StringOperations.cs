@@ -20,7 +20,10 @@ namespace Monkeyspeak.Libraries
         {
             var str = reader.ReadString();
             var start = reader.ReadNumber();
-            var end = reader.ReadNumber();
+            double end = str.Length;
+            if (reader.PeekNumber())
+                end = reader.ReadNumber();
+            end = end - start;
             var var = reader.ReadVariable(true);
             var subStr = str.Substring((int)start, (int)end);
             var.Value = subStr;
