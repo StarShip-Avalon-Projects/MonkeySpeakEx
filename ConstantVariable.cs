@@ -6,6 +6,10 @@ using System.Threading.Tasks;
 
 namespace Monkeyspeak
 {
+    /// <summary>
+    ///
+    /// </summary>
+    /// <seealso cref="Monkeyspeak.IVariable" />
     public sealed class ConstantVariable : IVariable
     {
         public string Name { get; private set; }
