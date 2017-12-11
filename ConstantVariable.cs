@@ -6,10 +6,6 @@ using System.Threading.Tasks;
 
 namespace Monkeyspeak
 {
-    /// <summary>
-    ///
-    /// </summary>
-    /// <seealso cref="Monkeyspeak.IVariable" />
     public sealed class ConstantVariable : IVariable
     {
         public string Name { get; private set; }
@@ -30,7 +26,7 @@ namespace Monkeyspeak
 
         public object Value
         {
-            get { return value ?? "null"; }
+            get { return value; }
             set
             {
                 throw new VariableIsConstantException($"Attempt to assign a value to constant '{Name}'");
