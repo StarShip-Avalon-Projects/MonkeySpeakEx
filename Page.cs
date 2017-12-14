@@ -1151,7 +1151,7 @@ namespace Monkeyspeak
         /// <returns></returns>
         public async Task ExecuteAsync(int[] ids, params object[] args)
         {
-            await Task.Run(() =>
+            await Task.Run(action: () =>
             {
                 for (int i = 0; i <= ids.Length - 1; i++)
                 {
