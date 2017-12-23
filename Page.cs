@@ -379,10 +379,11 @@ namespace Monkeyspeak
         }
 
         /// <summary>
-        /// Loads a <see cref="Libraries.BaseLibrary"/> into this Page
+        /// Loads a <see cref="BaseLibrary"/> into this Page
         /// </summary>
         /// <param name="lib"></param>
-        public void LoadLibrary(Libraries.BaseLibrary lib, params object[] args)
+        /// <param name="args">arguments to initialize the library with, if any</param>
+        public void LoadLibrary(BaseLibrary lib, params object[] args)
         {
             foreach (var existing in libraries)
                 if (existing.GetType().Equals(lib.GetType())) return;
@@ -1151,7 +1152,7 @@ namespace Monkeyspeak
         /// <returns></returns>
         public async Task ExecuteAsync(int[] ids, params object[] args)
         {
-            await Task.Run(action: () =>
+            await Task.Run(() =>
             {
                 for (int i = 0; i <= ids.Length - 1; i++)
                 {
