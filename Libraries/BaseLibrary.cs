@@ -1,4 +1,5 @@
-﻿using Monkeyspeak.Utils;
+﻿using Monkeyspeak.Logging;
+using Monkeyspeak.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -132,6 +133,13 @@ namespace Monkeyspeak.Libraries
         {
             if (Assembly.GetEntryAssembly() != null)
             {
+                // this detects the path from where the current EXE is being executed
+                foreach (string asmFile in Directory.EnumerateFiles(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "*.dll"))
+                {
+                    Logger.Debug<BaseLibrary>($"{asmFile}");
+                    if (ReflectionHelper.TryLoad(asmFile, out Assembly asm))
+                        foreach (var lib in GetLibrariesFromAssembly(asm)) yield return lib;
+                }
                 foreach (var asmName in Assembly.GetEntryAssembly().GetReferencedAssemblies())
                 {
                     var asm = Assembly.Load(asmName);
@@ -140,6 +148,13 @@ namespace Monkeyspeak.Libraries
             }
             else if (Assembly.GetExecutingAssembly() != null)
             {
+                // this detects the path from where the current CODE is being executed
+                foreach (string asmFile in Directory.EnumerateFiles(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "*.dll"))
+                {
+                    Logger.Debug<BaseLibrary>($"{asmFile}");
+                    if (ReflectionHelper.TryLoad(asmFile, out Assembly asm))
+                        foreach (var lib in GetLibrariesFromAssembly(asm)) yield return lib;
+                }
                 foreach (var asmName in Assembly.GetExecutingAssembly().GetReferencedAssemblies())
                 {
                     var asm = Assembly.Load(asmName);
